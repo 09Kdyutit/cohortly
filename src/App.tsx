@@ -1790,22 +1790,29 @@ function loadPfpLocal(email: string): string | undefined {
 }
 
 async function loadProfile(email: string): Promise<StudentProfile | null> {
+  const localRead = (): StudentProfile | null => {
+    try {
+      const raw = localStorage.getItem(`cohortly.profile.${email}`);
+      return raw ? (JSON.parse(raw) as StudentProfile) : null;
+    } catch { return null; }
+  };
+
   if (db) {
     try {
-      const snap = await getDoc(doc(db, 'profiles', email));
-      if (snap.exists()) {
-        const data = snap.data() as Omit<StudentProfile, 'pfpDataUrl'>;
+      const timeout = new Promise<null>((resolve) => setTimeout(() => resolve(null), 3000));
+      const snap = await Promise.race([
+        getDoc(doc(db, 'profiles', email)),
+        timeout,
+      ]);
+      if (snap && typeof (snap as { exists?: unknown }).exists === 'function' && (snap as { exists: () => boolean }).exists()) {
+        const data = (snap as { data: () => Omit<StudentProfile, 'pfpDataUrl'> }).data();
         return { ...data, pfpDataUrl: loadPfpLocal(email) };
       }
     } catch (e) {
       console.warn('[cohortly] Firestore read failed, falling back to localStorage', e);
     }
   }
-  // localStorage fallback (also covers migration from pre-Firebase builds)
-  try {
-    const raw = localStorage.getItem(`cohortly.profile.${email}`);
-    return raw ? (JSON.parse(raw) as StudentProfile) : null;
-  } catch { return null; }
+  return localRead();
 }
 
 async function saveProfile(email: string, profile: StudentProfile): Promise<void> {
@@ -1934,7 +1941,7 @@ function App() {
   const [session, setSession] = useState<VerifiedUser | null>(null);
   const [profile, setProfile] = useState<StudentProfile | null>(null);
   const [profileLoaded, setProfileLoaded] = useState(false);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // don't block render on server API
   const [institutions, setInstitutions] = useState<Institution[]>(fallbackInstitutions);
   const [preRole, setPreRole] = useState<UserRole | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
@@ -2002,23 +2009,37 @@ function App() {
     saveProfile(session.email, nextProfile); // async fire-and-forget
   };
 
-  const handleDemoLogin = async (role: UserRole) => {
-    try {
-      const payload = await postJson<{ user: VerifiedUser }>('/api/auth/demo', { role });
-      if (wasReset.current) {
-        // After a reset: set session only — no pre-loaded profile — so onboarding runs
-        wasReset.current = false;
-        setSession(payload.user);
-      } else {
-        const demoProfile = getDemoProfile(role);
-        setSession(payload.user);
-        setProfile(demoProfile);
-        setProfileLoaded(true);
-        saveProfile(payload.user.email, demoProfile); // async
-      }
-    } catch {
-      // demo endpoint unavailable — fall through to normal auth
-      setPreRole(role);
+  const handleDemoLogin = (role: UserRole) => {
+    const demoUsers: Record<UserRole, VerifiedUser> = {
+      student: {
+        name: 'Vanika Sharma',
+        email: 'demo.student@mymail.sutd.edu.sg',
+        studentId: 'DEMO0001',
+        institutionId: 'sutd',
+        institutionName: 'Singapore University of Technology and Design',
+        shortName: 'SUTD',
+        verifiedAt: new Date().toISOString(),
+      },
+      mentor: {
+        name: 'Aarav Menon',
+        email: 'demo.mentor@mymail.sutd.edu.sg',
+        studentId: 'DEMO0002',
+        institutionId: 'sutd',
+        institutionName: 'Singapore University of Technology and Design',
+        shortName: 'SUTD',
+        verifiedAt: new Date().toISOString(),
+      },
+    };
+    const user = demoUsers[role];
+    if (wasReset.current) {
+      wasReset.current = false;
+      setSession(user);
+    } else {
+      const demoProfile = getDemoProfile(role);
+      setSession(user);
+      setProfile(demoProfile);
+      setProfileLoaded(true);
+      saveProfile(user.email, demoProfile);
     }
   };
 
