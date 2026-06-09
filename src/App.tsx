@@ -420,7 +420,7 @@ const launchpadPhases: LaunchpadPhase[] = [
   {
     id: 'mentor-phase', label: 'Book my first senior session', icon: '🤝',
     tasks: [
-      { id: 'm-view', label: 'View a senior mentor\'s profile', desc: 'See their modules, availability, help style, and aura.', link: { label: 'Browse mentors', view: 'people' } },
+      { id: 'm-view', label: 'View a senior mentor\'s profile', desc: 'See their modules, availability, help style, and compatibility score.', link: { label: 'Browse mentors', view: 'people' } },
       { id: 'm-connect', label: 'Request an intro with a mentor', desc: 'Send your first connection request to a senior.', link: { label: 'Find mentors', view: 'people' } },
       { id: 'm-attend', label: 'Attend a prep session or office hours', desc: 'Aarav runs weekly 10.014 coding prep — check Events.', link: { label: 'Browse Events', view: 'events' } },
     ],
@@ -953,9 +953,9 @@ const COHORTLY_KB: AIEntry[] = [
   },
   {
     id: 'people-feature',
-    triggers: ['people tab', 'people feature', 'connect with people', 'aura', 'aura score', 'how to connect', 'request intro', 'find students', 'network', 'people section'],
-    response: `The **People tab** is where you build your network on Cohortly.\n\n- **Everyone**: all verified SUTD students\n- **Senior Mentors**: filtered to Year 2–4 mentors matched by module and interest\n- **My Modules**: people in your same modules\n- **New Students**: other incoming Freshmores\n- **Hostel**: your floor and nearby — with meal jio cards\n\n**The Aura system** replaces a plain match % with a tier: Legendary ✦, Rare ◆, High ◈, Good ●, or Rising ○ — based on shared interests, modules, and goals.\n\nClick any card to see their full profile. Hit "Request intro" to connect.`,
-    followUps: ['What is the Aura system?', 'How do I find a mentor?', 'What is the Hostel tab?'],
+    triggers: ['people tab', 'people feature', 'connect with people', 'compatibility', 'compatibility score', 'how to connect', 'request intro', 'find students', 'network', 'people section'],
+    response: `The **People tab** is where you build your network on Cohortly.\n\n- **Everyone**: all verified SUTD students\n- **Senior Mentors**: filtered to Year 2–4 mentors matched by module and interest\n- **My Modules**: people in your same modules\n- **New Students**: other incoming Freshmores\n- **Hostel**: your floor and nearby — with meal jio cards\n\nEach card shows a **% compatibility score** based on shared interests, modules, and goals — the higher the %, the more you have in common.\n\nClick any card to see their full profile. Hit "Request intro" to connect.`,
+    followUps: ['How is compatibility calculated?', 'How do I find a mentor?', 'What is the Hostel tab?'],
   },
   {
     id: 'mentors',
@@ -2472,13 +2472,12 @@ function markPulseShown() {
   try { localStorage.setItem('cohortly.pulse.lastShown', Date.now().toString()); } catch {}
 }
 
-function getAura(matchStr: string): { label: string; className: string; symbol: string } {
+function compatClass(matchStr: string): string {
   const num = parseInt(matchStr, 10);
-  if (num >= 92) return { label: 'Legendary', className: 'legendary', symbol: '✦' };
-  if (num >= 82) return { label: 'Rare', className: 'rare', symbol: '◆' };
-  if (num >= 72) return { label: 'High', className: 'high', symbol: '◈' };
-  if (num >= 55) return { label: 'Good', className: 'good', symbol: '●' };
-  return { label: 'Rising', className: 'rising', symbol: '○' };
+  if (num >= 90) return 'compat-high';
+  if (num >= 75) return 'compat-good';
+  if (num >= 55) return 'compat-ok';
+  return 'compat-low';
 }
 
 function PfpUpload({ pfpUrl, onChange }: { pfpUrl: string; onChange: (url: string) => void }) {
@@ -4675,7 +4674,6 @@ function EventsView({
 }
 
 function PersonProfileModal({ person, onClose }: { person: Person; onClose: () => void }) {
-  const aura = getAura(person.match);
   return (
     <div className="person-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="person-modal">
@@ -4685,7 +4683,7 @@ function PersonProfileModal({ person, onClose }: { person: Person; onClose: () =
           <div>
             <h2>{person.name}</h2>
             <span className="person-card-role-line" style={{ fontSize: '0.82rem' }}>{person.role}</span>
-            <span className={`aura-badge ${aura.className}`}>{aura.symbol} {aura.label} Aura</span>
+            <span className={`compat-badge ${compatClass(person.match)}`}>{person.match} compatibility</span>
           </div>
         </div>
         {person.bio && (
@@ -4794,7 +4792,7 @@ function PeopleView({ isMentor = false, userEmail }: { isMentor?: boolean; userE
         <div>
           <span className="eyebrow">{isMentor ? 'Your student matches' : 'Verified network'}</span>
           <h2 style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: 4 }}>
-            {filtered.length} {filtered.length === 1 ? 'person' : 'people'} · {isMentor ? 'sorted by module match' : 'sorted by aura'}
+            {filtered.length} {filtered.length === 1 ? 'person' : 'people'} · {isMentor ? 'sorted by module match' : 'sorted by compatibility'}
           </h2>
         </div>
         <div className="people-search-bar">
@@ -4882,7 +4880,6 @@ function PeopleView({ isMentor = false, userEmail }: { isMentor?: boolean; userE
       <div className="people-grid">
         {filtered.map((person) => {
           const isConnected = connected.has(person.name);
-          const aura = getAura(person.match);
           return (
             <article
               className="person-card"
@@ -4892,7 +4889,7 @@ function PeopleView({ isMentor = false, userEmail }: { isMentor?: boolean; userE
             >
               <div className="person-card-top">
                 <Avatar name={person.name} color={person.color} />
-                <span className={`aura-badge ${aura.className}`}>{aura.symbol} {aura.label}</span>
+                <span className={`compat-badge ${compatClass(person.match)}`}>{person.match}</span>
               </div>
               <h3>{person.name}</h3>
               <span className="person-card-role-line">{person.role}</span>

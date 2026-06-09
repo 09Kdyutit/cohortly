@@ -1865,13 +1865,12 @@ button.choice.selected { background: var(--accent-muted); border-color: var(--ac
 /* ─── EVENT going badge ─── */
 .event-going-badge { display: inline-flex; align-items: center; padding: 2px 8px; background: var(--success-light); color: #065f46; border-radius: 100px; font-size: 0.69rem; font-weight: 700; }
 
-/* ─── AURA badge ─── */
-.aura-badge { display: inline-flex; align-items: center; gap: 5px; padding: 3px 9px; border-radius: 100px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.01em; border: 1px solid transparent; white-space: nowrap; }
-.aura-badge.legendary { background: rgba(245,158,11,0.12); color: #b45309; border-color: rgba(245,158,11,0.28); }
-.aura-badge.rare      { background: rgba(139,92,246,0.12); color: #7c3aed; border-color: rgba(139,92,246,0.28); }
-.aura-badge.high      { background: rgba(99,102,241,0.12); color: #4f46e5; border-color: rgba(99,102,241,0.28); }
-.aura-badge.good      { background: rgba(16,185,129,0.12); color: #047857; border-color: rgba(16,185,129,0.28); }
-.aura-badge.rising    { background: rgba(148,163,184,0.1); color: #64748b; border-color: rgba(148,163,184,0.2); }
+/* ─── Compatibility badge ─── */
+.compat-badge { display: inline-flex; align-items: center; padding: 3px 9px; border-radius: 100px; font-size: 0.72rem; font-weight: 700; letter-spacing: 0.01em; border: 1px solid transparent; white-space: nowrap; }
+.compat-badge.compat-high { background: rgba(16,185,129,0.12); color: #047857; border-color: rgba(16,185,129,0.28); }
+.compat-badge.compat-good { background: rgba(99,102,241,0.12); color: #4f46e5; border-color: rgba(99,102,241,0.28); }
+.compat-badge.compat-ok   { background: rgba(245,158,11,0.12); color: #b45309; border-color: rgba(245,158,11,0.28); }
+.compat-badge.compat-low  { background: rgba(148,163,184,0.1); color: #64748b; border-color: rgba(148,163,184,0.2); }
 
 /* ─── PFP upload ─── */
 .pfp-upload { width: 72px; height: 72px; border-radius: 50%; border: 2px dashed var(--line-strong); display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; overflow: hidden; transition: border-color 0.15s, background 0.15s; flex-shrink: 0; }
