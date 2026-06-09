@@ -1298,7 +1298,7 @@ button.choice.selected { background: var(--accent-muted); border-color: var(--ac
 .thread-panel .eyebrow { margin-bottom: 10px; }
 .thread-row { display: block; width: 100%; padding: 9px 11px; border-radius: var(--radius-sm); text-align: left; font-size: 0.875rem; font-weight: 500; color: var(--ink-soft); transition: background 0.12s; }
 .thread-row:hover { background: var(--bg); }
-.thread-row:first-of-type { background: var(--accent-muted); color: var(--accent-dark); font-weight: 600; }
+.thread-row.active { background: var(--accent-muted); color: var(--accent-dark); font-weight: 600; }
 
 .chat-card { display: flex; flex-direction: column; overflow: hidden; }
 .chat-list { flex: 1; overflow-y: auto; padding: 12px 0; display: flex; flex-direction: column; gap: 14px; }

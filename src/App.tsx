@@ -3568,6 +3568,8 @@ function StudentApp({
 }) {
   const isMentor = profile.role === 'mentor';
   const [activeView, setActiveView] = useState<View>(isMentor ? 'mentor-home' : 'today');
+  const [dmTarget, setDmTarget] = useState<string | null>(null);
+  const openDm = (name: string) => { setDmTarget(name); setActiveView('messages'); };
   const [events, setEvents] = useState(starterEvents);
   const [joinedEvents, setJoinedEvents] = useState<Set<string>>(new Set());
   const joinEvent = (id: string) => setJoinedEvents((prev) => new Set([...prev, id]));
@@ -3861,9 +3863,9 @@ function StudentApp({
                 addEvent={addEvent}
               />
             )}
-            {activeView === 'people' && <PeopleView isMentor={isMentor} userEmail={user.email} />}
+            {activeView === 'people' && <PeopleView isMentor={isMentor} userEmail={user.email} onMessage={openDm} />}
             {activeView === 'classes' && <ClassesView isMentor={isMentor} mentorName={isMentor ? user.name : undefined} enrolledClasses={profile.classes} onEnroll={(updated) => onProfileUpdate({ ...profile, classes: updated })} />}
-            {activeView === 'messages' && <MessagesView isMentor={isMentor} />}
+            {activeView === 'messages' && <MessagesView isMentor={isMentor} openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
             {activeView === 'mentor-home' && <MentorDashboardView user={user} profile={profile} setActiveView={setActiveView} />}
             {activeView === 'mentor-help' && <MentorHelpView profile={profile} />}
             {activeView === 'privacy' && <PrivacySettingsView userEmail={user.email} userName={user.name} onBack={() => setActiveView('today')} onLogout={logout} />}
@@ -4673,7 +4675,7 @@ function EventsView({
   );
 }
 
-function PersonProfileModal({ person, onClose }: { person: Person; onClose: () => void }) {
+function PersonProfileModal({ person, onClose, onMessage }: { person: Person; onClose: () => void; onMessage?: (name: string) => void }) {
   return (
     <div className="person-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="person-modal">
@@ -4716,7 +4718,9 @@ function PersonProfileModal({ person, onClose }: { person: Person; onClose: () =
         </div>
         <div className="person-modal-actions">
           <button className="primary-button">Request intro</button>
-          <button className="secondary-button">Message</button>
+          <button className="secondary-button" onClick={() => { onMessage?.(person.name); onClose(); }}>
+            <MessageCircle size={15} /> Message
+          </button>
         </div>
       </div>
     </div>
@@ -4737,7 +4741,7 @@ const hostelFloorMates = [
   { name: 'Kai', room: '1N-11', pillar: 'ISTD', tags: ['hackathons', 'basketball'] },
 ];
 
-function PeopleView({ isMentor = false, userEmail }: { isMentor?: boolean; userEmail?: string }) {
+function PeopleView({ isMentor = false, userEmail, onMessage }: { isMentor?: boolean; userEmail?: string; onMessage?: (name: string) => void }) {
   const [connected, setConnected] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
   const [activeTab, setActiveTab] = useState<'all' | 'mentors' | 'modules' | 'new' | 'hostel'>('all');
@@ -4786,7 +4790,7 @@ function PeopleView({ isMentor = false, userEmail }: { isMentor?: boolean; userE
 
   return (
     <>
-    {selectedPerson && <PersonProfileModal person={selectedPerson} onClose={() => setSelectedPerson(null)} />}
+    {selectedPerson && <PersonProfileModal person={selectedPerson} onClose={() => setSelectedPerson(null)} onMessage={onMessage} />}
     <div className="screen-stack">
       <div className="people-header">
         <div>
@@ -5660,44 +5664,99 @@ function DesignAIRoomPanel({
   );
 }
 
-function MessagesView({ isMentor = false }: { isMentor?: boolean }) {
-  const threads = isMentor
+function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?: boolean; openWith?: string | null; onClearTarget?: () => void }) {
+  const defaultThreads = isMentor
     ? ['Vanika · 10.014 help request', 'Kai · CTD prep session', '10.014 study group', 'ISTD freshmores circle']
     : ['Aarav · 10.014 prep', 'Food crawl group', 'SUTD exchange arrivals', 'ASD design studio warmup'];
+
+  const [threads, setThreads] = useState(defaultThreads);
+  const [activeThread, setActiveThread] = useState(defaultThreads[0]);
+  const [input, setInput] = useState('');
+  const [localMessages, setLocalMessages] = useState<{ author: string; text: string; tone: 'student' | 'mentor' | 'system' }[]>([]);
+
+  // When navigated here from People tab, inject or select the thread
+  useEffect(() => {
+    if (!openWith) return;
+    const matchingThread = threads.find((t) => t.toLowerCase().startsWith(openWith.toLowerCase().split(' ')[0]));
+    if (matchingThread) {
+      setActiveThread(matchingThread);
+    } else {
+      const newThread = `${openWith} · new conversation`;
+      setThreads((prev) => [newThread, ...prev]);
+      setActiveThread(newThread);
+      setLocalMessages([]);
+    }
+    onClearTarget?.();
+  }, [openWith]);
+
+  const isNewConv = activeThread.endsWith('· new conversation');
+  const threadName = activeThread.split(' · ')[0];
+
+  const send = () => {
+    if (!input.trim()) return;
+    setLocalMessages((prev) => [...prev, { author: 'You', text: input.trim(), tone: 'student' }]);
+    setInput('');
+  };
+
+  const defaultMessages = isMentor ? (
+    <>
+      <Message tone="student" author="Vanika" text="Hi, I'm struggling with the recursion exercises in 10.014 lab 2. The tree traversal part is confusing me." />
+      <Message tone="mentor" author="Aarav" text="No worries — this trips most people up. I'll run a walkthrough session tonight in Building 5, Room 3. Come at 8:30 PM." />
+      <Message tone="system" author="Cohortly" text="Matched via 10.014 Computational Thinking · Weekday evenings · SUTD verified" />
+    </>
+  ) : (
+    <>
+      <Message tone="student" author="Vanika" text="I am nervous about coding because everyone sounds ahead already." />
+      <Message tone="mentor" author="Aarav" text="That is exactly why the prep room exists. Come tonight and we will start with tracing code by hand — Building 5, Room 3." />
+      <Message tone="system" author="Cohortly" text="Matched on 10.014, Startups & iCube, Badminton, and weekday evening availability." />
+    </>
+  );
 
   return (
     <div className="messages-layout">
       <aside className="panel thread-panel">
         <span className="eyebrow">{isMentor ? 'Student threads' : 'Circles'}</span>
         {threads.map((thread) => (
-          <button className="thread-row" key={thread}>{thread}</button>
+          <button
+            className={`thread-row${activeThread === thread ? ' active' : ''}`}
+            key={thread}
+            onClick={() => { setActiveThread(thread); setLocalMessages([]); }}
+          >
+            {thread}
+          </button>
         ))}
       </aside>
       <section className="panel chat-card">
         <div className="section-heading">
           <div>
-            <span className="eyebrow">{isMentor ? 'Student help request' : 'Mentor thread'}</span>
-            <h2>{isMentor ? 'Vanika · 10.014 Computational Thinking' : 'Aarav · Computational Thinking'}</h2>
+            <span className="eyebrow">{isNewConv ? 'New conversation' : (isMentor ? 'Student thread' : 'Direct message')}</span>
+            <h2>{activeThread.replace(' · new conversation', '')}</h2>
           </div>
         </div>
         <div className="chat-list">
-          {isMentor ? (
-            <>
-              <Message tone="student" author="Vanika" text="Hi Aarav, I'm struggling with the recursion exercises in 10.014 lab 2. The tree traversal part is confusing me." />
-              <Message tone="mentor" author="Aarav" text="No worries — this trips most people up. I'll run a walkthrough session tonight in Building 5, Room 3. Come at 8:30 PM." />
-              <Message tone="system" author="Cohortly" text="Matched via 10.014 Computational Thinking · Weekday evenings · SUTD verified" />
-            </>
+          {isNewConv ? (
+            localMessages.length === 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '40px 20px', color: 'var(--muted)', textAlign: 'center' }}>
+                <MessageCircle size={28} style={{ opacity: 0.25 }} />
+                <strong style={{ fontSize: '0.9rem', color: 'var(--ink-soft)' }}>Start a conversation with {threadName}</strong>
+                <span style={{ fontSize: '0.8rem' }}>Send a message below to connect.</span>
+              </div>
+            ) : localMessages.map((m, i) => <Message key={i} tone={m.tone} author={m.author} text={m.text} />)
           ) : (
             <>
-              <Message tone="student" author="Vanika" text="I am nervous about coding because everyone sounds ahead already." />
-              <Message tone="mentor" author="Aarav" text="That is exactly why the prep room exists. Come tonight and we will start with tracing code by hand — Building 5, Room 3." />
-              <Message tone="system" author="Cohortly" text="Matched on 10.014, Startups & iCube, Badminton, and weekday evening availability." />
+              {defaultMessages}
+              {localMessages.map((m, i) => <Message key={i} tone={m.tone} author={m.author} text={m.text} />)}
             </>
           )}
         </div>
         <div className="message-composer">
-          <input placeholder={isMentor ? 'Reply to Vanika...' : 'Ask a question or suggest a meetup'} />
-          <button className="primary-button icon-only" aria-label="Send"><Send size={18} /></button>
+          <input
+            placeholder={isNewConv ? `Message ${threadName}…` : (isMentor ? `Reply to ${threadName}…` : 'Ask a question or suggest a meetup')}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && send()}
+          />
+          <button className="primary-button icon-only" aria-label="Send" onClick={send}><Send size={18} /></button>
         </div>
       </section>
     </div>
