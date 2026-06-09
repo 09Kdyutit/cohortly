@@ -1,0 +1,24 @@
+{
+  "name": "Cohortly",
+  "short_name": "Cohortly",
+  "description": "SUTD verified student-led campus network — events, mentorship, module help, and belonging.",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f8f9ff",
+  "theme_color": "#6366f1",
+  "orientation": "portrait-primary",
+  "categories": ["education", "social"],
+  "icons": [
+    {
+      "src": "favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    { "name": "Launchpad", "url": "./#launchpad", "description": "Your Freshmore journey checklist" },
+    { "name": "People",    "url": "./#people",    "description": "Connect with students and mentors" },
+    { "name": "Events",    "url": "./#events",    "description": "Browse and RSVP to campus events" }
+  ]
+}
