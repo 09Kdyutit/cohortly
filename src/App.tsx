@@ -83,7 +83,7 @@ type LucideIcon = ForwardRefExoticComponent<
 >;
 
 type UserRole = 'student' | 'mentor';
-type View = 'today' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'mentor-home' | 'mentor-help' | 'privacy' | 'notifications';
+type View = 'today' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'hostel' | 'mentor-home' | 'mentor-help' | 'privacy' | 'notifications';
 type InstitutionId = 'sutd';
 type BelongingEntry = { week: string; score: number; at: number };
 type InterventionStage = 'flagged' | 'contacted' | 're-measured' | 'resolved' | 'escalated';
@@ -163,6 +163,9 @@ type StudentProfile = {
   mentorPillar?: string;
   mentorModules?: string[];
   mentorHelpStyle?: string[];
+  hostelBlock?: string;
+  hostelFloor?: number;
+  hostelRoom?: string;
 };
 
 const navItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
@@ -171,6 +174,7 @@ const navItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
   { id: 'people', label: 'People', icon: Users },
   { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
   { id: 'classes', label: 'Classes', icon: BookOpen },
+  { id: 'hostel', label: 'Hostel', icon: Building2 },
   { id: 'kb', label: 'Knowledge Base', icon: BookMarked },
   { id: 'messages', label: 'Messages', icon: MessageCircle },
 ];
@@ -3870,6 +3874,7 @@ function StudentApp({
             {activeView === 'people' && <PeopleView isMentor={isMentor} userEmail={user.email} onMessage={openDm} />}
             {activeView === 'classes' && <ClassesView isMentor={isMentor} mentorName={isMentor ? user.name : undefined} enrolledClasses={profile.classes} onEnroll={(updated) => onProfileUpdate({ ...profile, classes: updated })} />}
             {activeView === 'messages' && <MessagesView isMentor={isMentor} openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
+            {activeView === 'hostel' && <HostelView profile={profile} onProfileUpdate={onProfileUpdate} />}
             {activeView === 'mentor-home' && <MentorDashboardView user={user} profile={profile} setActiveView={setActiveView} />}
             {activeView === 'mentor-help' && <MentorHelpView profile={profile} />}
             {activeView === 'privacy' && <PrivacySettingsView userEmail={user.email} userName={user.name} onBack={() => setActiveView('today')} onLogout={logout} />}
@@ -4744,6 +4749,90 @@ const hostelFloorMates = [
   { name: 'Sofia', room: '1N-09', pillar: 'DAI', tags: ['ML', 'music', 'bouldering'] },
   { name: 'Kai', room: '1N-11', pillar: 'ISTD', tags: ['hackathons', 'basketball'] },
 ];
+
+// ─── Campus map + hostel directory data ──────────────────────────────────────
+
+type CampusBuilding = {
+  id: string; name: string; sub: string;
+  vibe: 'academic' | 'social' | 'study' | 'makers' | 'sports' | 'wellness';
+  activity: number;
+  present: string[];
+  x: number; y: number; w: number; h: number;
+};
+
+const campusBuildings: CampusBuilding[] = [
+  { id: 'b1', name: 'Building 1', sub: 'Student Hub · LTs', vibe: 'academic', activity: 45, present: ['Wei Jian', 'Priya', '+23'], x: 18, y: 38, w: 115, h: 80 },
+  { id: 'b2', name: 'Building 2', sub: 'FabLab', vibe: 'makers', activity: 31, present: ['Aarav', '+12'], x: 148, y: 38, w: 90, h: 80 },
+  { id: 'b3', name: 'Building 3', sub: 'Campus Bistro', vibe: 'social', activity: 72, present: ['Mei Lin', 'Noah', '+43'], x: 253, y: 38, w: 95, h: 80 },
+  { id: 'bsports', name: 'Sports Hall', sub: 'Courts · MPSH', vibe: 'sports', activity: 26, present: ['+26'], x: 380, y: 38, w: 105, h: 175 },
+  { id: 'b4', name: 'Building 4', sub: 'Admin · Research', vibe: 'academic', activity: 14, present: ['+14'], x: 18, y: 135, w: 85, h: 65 },
+  { id: 'b5', name: 'Building 5', sub: 'Library · Computer Labs', vibe: 'study', activity: 81, present: ['Sara', 'Fabian', '+56'], x: 118, y: 135, w: 215, h: 65 },
+  { id: 'b54', name: 'Building 54', sub: 'Student Wellbeing', vibe: 'wellness', activity: 9, present: ['+9'], x: 348, y: 135, w: 105, h: 65 },
+];
+
+type HostelResident = {
+  block: string; floor: number; room: string;
+  name: string; pillar: string; year: string; online: boolean;
+};
+
+const hostelResidents: HostelResident[] = [
+  // Block 1N — Freshmore North
+  { block: '1N', floor: 1, room: '01', name: 'Mei Lin', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '1N', floor: 1, room: '03', name: 'Jerome', pillar: 'ESD', year: 'Y1', online: true },
+  { block: '1N', floor: 1, room: '06', name: 'Sofia', pillar: 'DAI', year: 'Y1', online: false },
+  { block: '1N', floor: 1, room: '09', name: 'Kai', pillar: 'ISTD', year: 'Y1', online: true },
+  { block: '1N', floor: 1, room: '11', name: 'Rui', pillar: 'EPD', year: 'Y1', online: false },
+  { block: '1N', floor: 2, room: '02', name: 'Layla', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '1N', floor: 2, room: '04', name: 'Marcus', pillar: 'EPD', year: 'Y1', online: false },
+  { block: '1N', floor: 2, room: '07', name: 'Aisha', pillar: 'ISTD', year: 'Y1', online: true },
+  { block: '1N', floor: 2, room: '10', name: 'Jin', pillar: 'ESD', year: 'Y1', online: true },
+  { block: '1N', floor: 3, room: '01', name: 'Fabian', pillar: 'ESD', year: 'Y1', online: false },
+  { block: '1N', floor: 3, room: '05', name: 'Riana', pillar: 'DAI', year: 'Y1', online: true },
+  { block: '1N', floor: 3, room: '08', name: 'Soren', pillar: 'ASD', year: 'Y1', online: false },
+  { block: '1N', floor: 4, room: '03', name: 'Hana', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '1N', floor: 4, room: '07', name: 'Leon', pillar: 'ISTD', year: 'Y1', online: false },
+  { block: '1N', floor: 5, room: '02', name: 'Yuki', pillar: 'DAI', year: 'Y1', online: true },
+  { block: '1N', floor: 5, room: '09', name: 'Andre', pillar: 'EPD', year: 'Y1', online: true },
+  // Block 1S — Freshmore South
+  { block: '1S', floor: 1, room: '02', name: 'Priya', pillar: 'ESD', year: 'Y1', online: true },
+  { block: '1S', floor: 1, room: '05', name: 'Noah', pillar: 'EPD', year: 'Y1', online: true },
+  { block: '1S', floor: 1, room: '08', name: 'Zara', pillar: 'ISTD', year: 'Y1', online: false },
+  { block: '1S', floor: 1, room: '10', name: 'Ben', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '1S', floor: 2, room: '03', name: 'Daniel', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '1S', floor: 2, room: '06', name: 'Leila', pillar: 'DAI', year: 'Y1', online: true },
+  { block: '1S', floor: 2, room: '09', name: 'Tariq', pillar: 'ESD', year: 'Y1', online: false },
+  { block: '1S', floor: 3, room: '01', name: 'Tommy', pillar: 'ESD', year: 'Y1', online: false },
+  { block: '1S', floor: 3, room: '07', name: 'Min', pillar: 'ISTD', year: 'Y1', online: true },
+  { block: '1S', floor: 4, room: '04', name: 'Lena', pillar: 'ASD', year: 'Y1', online: false },
+  { block: '1S', floor: 4, room: '11', name: 'Aryan', pillar: 'EPD', year: 'Y1', online: true },
+  // Block 2N — Year 2+ North
+  { block: '2N', floor: 1, room: '03', name: 'Aarav Menon', pillar: 'ISTD', year: 'Y3', online: true },
+  { block: '2N', floor: 2, room: '07', name: 'Sara Binte Halim', pillar: 'DAI', year: 'Y2', online: false },
+  { block: '2N', floor: 4, room: '09', name: 'Wei Jian Lim', pillar: 'ISTD', year: 'Y3', online: true },
+  { block: '2N', floor: 3, room: '05', name: 'Kevin', pillar: 'ISTD', year: 'Y4', online: true },
+  { block: '2N', floor: 5, room: '11', name: 'Daryl', pillar: 'EPD', year: 'Y3', online: false },
+  { block: '2N', floor: 6, room: '02', name: 'Cass', pillar: 'ASD', year: 'Y2', online: true },
+  // Block 2S — Year 2+ South
+  { block: '2S', floor: 1, room: '04', name: 'Priscilla', pillar: 'ASD', year: 'Y2', online: true },
+  { block: '2S', floor: 2, room: '08', name: 'Haruto', pillar: 'EPD', year: 'Y2', online: false },
+  { block: '2S', floor: 3, room: '06', name: 'Aanya', pillar: 'DAI', year: 'Y2', online: true },
+  { block: '2S', floor: 4, room: '03', name: 'Felix', pillar: 'ISTD', year: 'Y2', online: true },
+  { block: '2S', floor: 5, room: '09', name: 'Nadia', pillar: 'ESD', year: 'Y3', online: false },
+];
+
+const PILLAR_COLOR: Record<string, string> = {
+  ASD: '#f472b6', ESD: '#34d399', EPD: '#fbbf24', ISTD: '#38bdf8', DAI: '#a78bfa',
+};
+const VIBE_STROKE: Record<string, string> = {
+  academic: 'rgba(56,189,248,0.35)', social: 'rgba(245,158,11,0.4)',
+  study: 'rgba(56,189,248,0.5)', makers: 'rgba(52,211,153,0.4)',
+  sports: 'rgba(239,68,68,0.4)', wellness: 'rgba(167,139,250,0.4)',
+};
+function activityDot(n: number) {
+  if (n >= 60) return '#34d399';
+  if (n >= 30) return '#fbbf24';
+  return '#6b7280';
+}
 
 function PeopleView({ isMentor = false, userEmail, onMessage }: { isMentor?: boolean; userEmail?: string; onMessage?: (name: string) => void }) {
   const [connected, setConnected] = useState<Set<string>>(new Set());
@@ -7620,6 +7709,365 @@ function AdminRosterView() {
         </div>
       )}
     </div>
+  );
+}
+
+// ─── Hostel Setup Modal ───────────────────────────────────────────────────────
+
+function HostelSetupModal({ onSave, onSkip }: { onSave: (block: string, floor: string, room: string) => void; onSkip: () => void }) {
+  const [step, setStep] = useState(0);
+  const [block, setBlock] = useState('');
+  const [floor, setFloor] = useState('');
+  const [room, setRoom] = useState('');
+  const blockInfo: Record<string, { label: string; desc: string; color: string }> = {
+    '1N': { label: 'Block 1N', desc: 'Freshmore North · Floors 1–8', color: '#38bdf8' },
+    '1S': { label: 'Block 1S', desc: 'Freshmore South · Floors 1–8', color: '#34d399' },
+    '2N': { label: 'Block 2N', desc: 'Year 2+ North · Floors 1–10', color: '#a78bfa' },
+    '2S': { label: 'Block 2S', desc: 'Year 2+ South · Floors 1–10', color: '#fbbf24' },
+  };
+  const roomCode = block && floor && room ? `${block}-${floor.padStart(2,'0')}${room.padStart(2,'0')}` : null;
+
+  return (
+    <div className="hostel-setup-overlay">
+      <div className="hostel-setup-modal">
+        <div className="hostel-setup-progress">
+          {[0,1,2].map(i => <div key={i} className={`setup-step-dot ${i <= step ? 'active' : ''}`} />)}
+        </div>
+
+        {step === 0 && (
+          <>
+            <div className="hostel-setup-icon"><Building2 size={28} /></div>
+            <h2>Set up your room</h2>
+            <p>Pin yourself to the campus map so floor mates can find you</p>
+            <div className="hostel-block-picker">
+              {Object.entries(blockInfo).map(([b, info]) => (
+                <button
+                  key={b}
+                  className={`block-pick-card ${block === b ? 'selected' : ''}`}
+                  onClick={() => setBlock(b)}
+                  style={{ '--block-color': info.color } as React.CSSProperties}
+                >
+                  <span className="block-pick-label">{info.label}</span>
+                  <span className="block-pick-desc">{info.desc}</span>
+                </button>
+              ))}
+            </div>
+            <button className="primary-button wide" disabled={!block} onClick={() => setStep(1)}>
+              Continue <ArrowRight size={14} />
+            </button>
+            <button className="hostel-setup-skip" onClick={onSkip}>Skip for now</button>
+          </>
+        )}
+
+        {step === 1 && (
+          <>
+            <div className="hostel-setup-icon" style={{ background: `${blockInfo[block]?.color}22`, color: blockInfo[block]?.color }}>
+              <Home size={24} />
+            </div>
+            <h2>Your floor & room</h2>
+            <p>Block <strong>{block}</strong> · enter your exact floor and room number</p>
+            <div className="hostel-room-inputs">
+              <div className="hostel-input-group">
+                <label>Floor</label>
+                <select value={floor} onChange={e => setFloor(e.target.value)}>
+                  <option value="">Select</option>
+                  {Array.from({ length: block.startsWith('2') ? 10 : 8 }, (_, i) => i + 1).map(n => (
+                    <option key={n} value={String(n)}>Floor {n}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="hostel-input-group">
+                <label>Room number</label>
+                <select value={room} onChange={e => setRoom(e.target.value)}>
+                  <option value="">Select</option>
+                  {Array.from({ length: 14 }, (_, i) => String(i + 1).padStart(2, '0')).map(r => (
+                    <option key={r} value={r}>Room {r}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+            {roomCode && (
+              <div className="room-code-preview">
+                <Home size={13} />
+                <strong>{roomCode}</strong>
+                <span>· that's your room code</span>
+              </div>
+            )}
+            <div className="hostel-setup-actions">
+              <button className="secondary-button" onClick={() => setStep(0)}>Back</button>
+              <button className="primary-button" disabled={!floor || !room} onClick={() => setStep(2)}>
+                Confirm room
+              </button>
+            </div>
+          </>
+        )}
+
+        {step === 2 && (
+          <>
+            <div className="hostel-setup-done-icon">
+              <CheckCircle2 size={36} style={{ color: '#34d399' }} />
+            </div>
+            <h2>You're on the map!</h2>
+            <p>
+              <strong>{blockInfo[block]?.label}</strong> · Floor {floor} · Room {room}
+            </p>
+            <div className="room-code-preview large">
+              <Home size={14} />
+              <strong>{roomCode}</strong>
+            </div>
+            <button className="primary-button wide" onClick={() => onSave(block, floor, room)}>
+              View my floor
+            </button>
+          </>
+        )}
+      </div>
+    </div>
+  );
+}
+
+// ─── Hostel View ──────────────────────────────────────────────────────────────
+
+function HostelView({ profile, onProfileUpdate }: { profile: StudentProfile; onProfileUpdate: (p: StudentProfile) => void }) {
+  const [showSetup, setShowSetup] = useState(!profile.hostelBlock);
+  const [selectedBuilding, setSelectedBuilding] = useState<string | null>(null);
+  const [activeBlock, setActiveBlock] = useState(profile.hostelBlock ?? '1N');
+  const [expandedFloor, setExpandedFloor] = useState<number | null>(null);
+
+  const myBlock = profile.hostelBlock;
+  const myFloor = profile.hostelFloor;
+  const myRoom = profile.hostelRoom;
+
+  const saveRoom = (block: string, floor: string, room: string) => {
+    onProfileUpdate({ ...profile, hostelBlock: block, hostelFloor: parseInt(floor), hostelRoom: room.padStart(2,'0') });
+    setActiveBlock(block);
+    setShowSetup(false);
+  };
+
+  const selectedBldg = campusBuildings.find(b => b.id === selectedBuilding);
+  const blockResidents = hostelResidents.filter(r => r.block === activeBlock);
+  const allFloors = [...new Set(hostelResidents.filter(r => r.block === activeBlock).map(r => r.floor))].sort((a,b)=>a-b);
+  const maxFloor = activeBlock.startsWith('2') ? 10 : 8;
+  const floors = Array.from({ length: maxFloor }, (_, i) => i + 1);
+  const totalOnline = hostelResidents.filter(r => r.online).length;
+
+  return (
+    <>
+      {showSetup && <HostelSetupModal onSave={saveRoom} onSkip={() => setShowSetup(false)} />}
+      <div className="screen-stack">
+
+        {/* Header */}
+        <div className="hostel-page-header">
+          <div>
+            <span className="eyebrow">On-Campus Housing · SUTD Changi</span>
+            <h2 style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: 4 }}>Campus Map & Hostel Directory</h2>
+          </div>
+          <div className="hostel-header-right">
+            {myBlock ? (
+              <div className="hostel-my-room-chip">
+                <Home size={13} />
+                <span>Block <strong>{myBlock}</strong> · Floor {myFloor} · Room {myRoom}</span>
+                <button onClick={() => setShowSetup(true)}>Edit</button>
+              </div>
+            ) : (
+              <button className="primary-button" onClick={() => setShowSetup(true)}>
+                <Home size={14} /> Set up your room
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Campus Map */}
+        <div className="panel campus-map-panel">
+          <div className="campus-map-topbar">
+            <div>
+              <span className="eyebrow">Live activity</span>
+              <strong style={{ fontSize: '0.85rem', display: 'block', marginTop: 2 }}>SUTD Campus · Changi</strong>
+            </div>
+            <div className="campus-live-pill">
+              <span className="live-dot" />
+              {campusBuildings.reduce((s, b) => s + b.activity, 0) + totalOnline} on campus
+            </div>
+          </div>
+
+          <div className="campus-map-wrap">
+            <svg viewBox="0 0 500 360" className="campus-svg" xmlns="http://www.w3.org/2000/svg">
+              {/* Background */}
+              <rect x="0" y="0" width="500" height="360" rx="10" fill="rgba(17,24,39,0.6)" />
+
+              {/* Zone labels */}
+              <text x="250" y="22" textAnchor="middle" fill="rgba(229,231,235,0.3)" fontSize="9" fontWeight="700" letterSpacing="2">ACADEMIC ZONE</text>
+              <line x1="18" y1="218" x2="482" y2="218" stroke="rgba(229,231,235,0.08)" strokeWidth="1" strokeDasharray="5,4" />
+              <text x="250" y="235" textAnchor="middle" fill="rgba(56,189,248,0.4)" fontSize="9" fontWeight="700" letterSpacing="2">HOSTEL ZONE</text>
+
+              {/* Walkway paths */}
+              <line x1="75" y1="118" x2="455" y2="118" stroke="rgba(229,231,235,0.06)" strokeWidth="8" strokeLinecap="round" />
+              <line x1="250" y1="38" x2="250" y2="210" stroke="rgba(229,231,235,0.05)" strokeWidth="6" strokeLinecap="round" />
+
+              {/* Academic buildings */}
+              {campusBuildings.map(b => {
+                const isSelected = selectedBuilding === b.id;
+                return (
+                  <g key={b.id} onClick={() => setSelectedBuilding(isSelected ? null : b.id)} style={{ cursor: 'pointer' }}>
+                    {isSelected && <rect x={b.x-3} y={b.y-3} width={b.w+6} height={b.h+6} rx="11" fill="rgba(56,189,248,0.08)" />}
+                    <rect
+                      x={b.x} y={b.y} width={b.w} height={b.h} rx="8"
+                      fill={isSelected ? 'rgba(56,189,248,0.18)' : 'rgba(31,41,55,0.9)'}
+                      stroke={isSelected ? 'rgba(56,189,248,0.7)' : VIBE_STROKE[b.vibe]}
+                      strokeWidth={isSelected ? 1.5 : 1}
+                    />
+                    <text x={b.x + b.w/2} y={b.y + b.h/2 - 7} textAnchor="middle" fill="#e5e7eb" fontSize="9.5" fontWeight="700">{b.name}</text>
+                    <text x={b.x + b.w/2} y={b.y + b.h/2 + 8} textAnchor="middle" fill="rgba(229,231,235,0.5)" fontSize="7.5">{b.sub}</text>
+                    {/* Activity dot */}
+                    <circle cx={b.x + b.w - 10} cy={b.y + 10} r={4.5} fill={activityDot(b.activity)} />
+                    <circle cx={b.x + b.w - 10} cy={b.y + 10} r={b.activity >= 60 ? 8 : 0} fill={activityDot(b.activity)} opacity={0.2} />
+                  </g>
+                );
+              })}
+
+              {/* Hostel blocks */}
+              {(['1N','1S','2N','2S'] as const).map((blk, i) => {
+                const hx = 18 + i * 118;
+                const hy = 248;
+                const hw = 100; const hh = 90;
+                const isActive = blk === activeBlock;
+                const isMine = blk === myBlock;
+                const onlineCount = hostelResidents.filter(r => r.block === blk && r.online).length;
+                const totalCount = hostelResidents.filter(r => r.block === blk).length;
+                return (
+                  <g key={blk} onClick={() => { setActiveBlock(blk); setExpandedFloor(null); }} style={{ cursor: 'pointer' }}>
+                    {isActive && <rect x={hx-3} y={hy-3} width={hw+6} height={hh+6} rx="11" fill="rgba(56,189,248,0.1)" />}
+                    <rect
+                      x={hx} y={hy} width={hw} height={hh} rx="8"
+                      fill={isActive ? 'rgba(56,189,248,0.2)' : 'rgba(31,41,55,0.88)'}
+                      stroke={isActive ? 'rgba(56,189,248,0.7)' : 'rgba(56,189,248,0.22)'}
+                      strokeWidth={isActive ? 1.5 : 1}
+                    />
+                    <text x={hx + hw/2} y={hy + 32} textAnchor="middle" fill="#e5e7eb" fontSize="11" fontWeight="800">Block {blk}</text>
+                    <text x={hx + hw/2} y={hy + 48} textAnchor="middle" fill="rgba(229,231,235,0.5)" fontSize="7.5">
+                      {blk.startsWith('1') ? 'Freshmore' : 'Year 2+'}
+                    </text>
+                    <text x={hx + hw/2} y={hy + 63} textAnchor="middle" fill="rgba(56,189,248,0.9)" fontSize="7.5" fontWeight="600">
+                      {onlineCount}/{totalCount} online
+                    </text>
+                    {/* Floor pip strip */}
+                    {hostelResidents.filter(r=>r.block===blk&&r.floor<=3).slice(0,6).map((r,ri) => (
+                      <circle key={ri} cx={hx+14+ri*13} cy={hy+79} r={3.5} fill={PILLAR_COLOR[r.pillar] ?? '#6b7280'} opacity={r.online ? 0.9 : 0.35} />
+                    ))}
+                    {isMine && <circle cx={hx+hw-10} cy={hy+10} r={5} fill="#34d399" />}
+                  </g>
+                );
+              })}
+
+              {/* Compass rose */}
+              <text x="475" y="22" textAnchor="middle" fill="rgba(229,231,235,0.25)" fontSize="10" fontWeight="700">N</text>
+              <line x1="475" y1="25" x2="475" y2="33" stroke="rgba(229,231,235,0.2)" strokeWidth="1.5" />
+            </svg>
+          </div>
+
+          {/* Building detail panel */}
+          {selectedBldg && (
+            <div className="campus-building-detail">
+              <div className="cbd-head">
+                <div>
+                  <strong>{selectedBldg.name}</strong>
+                  <span>{selectedBldg.sub}</span>
+                </div>
+                <button className="icon-button" onClick={() => setSelectedBuilding(null)}><X size={14} /></button>
+              </div>
+              <div className="cbd-activity-bar">
+                <div className="cbd-fill" style={{ width: `${selectedBldg.activity}%`, background: `linear-gradient(90deg, ${activityDot(selectedBldg.activity)}, ${activityDot(selectedBldg.activity)}aa)` }} />
+              </div>
+              <div className="cbd-chips">
+                {selectedBldg.present.map(name => (
+                  <span key={name} className="cbd-chip">{name}</span>
+                ))}
+                <span className="cbd-total">{selectedBldg.activity} active</span>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Hostel Directory */}
+        <div className="panel hostel-directory-panel">
+          <div className="hostel-dir-head">
+            <div>
+              <span className="eyebrow">Floor directory</span>
+              <strong style={{ display: 'block', marginTop: 2, fontSize: '0.85rem' }}>Who's in each room</strong>
+            </div>
+            <div className="hostel-block-tabs">
+              {(['1N','1S','2N','2S'] as const).map(blk => (
+                <button
+                  key={blk}
+                  className={`hostel-block-tab ${blk === activeBlock ? 'active' : ''}`}
+                  onClick={() => { setActiveBlock(blk); setExpandedFloor(null); }}
+                >
+                  {blk === myBlock && <span className="my-block-dot" />}
+                  Block {blk}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="hostel-floor-list">
+            {floors.map(fl => {
+              const flRes = hostelResidents.filter(r => r.block === activeBlock && r.floor === fl);
+              const isMyFloor = activeBlock === myBlock && fl === myFloor;
+              const isExpanded = expandedFloor === fl;
+              return (
+                <div key={fl} className={`hostel-floor-row${isMyFloor ? ' my-floor' : ''}${isExpanded ? ' expanded' : ''}`}>
+                  <button className="hostel-floor-header" onClick={() => setExpandedFloor(isExpanded ? null : fl)}>
+                    <span className="floor-num">F{fl}</span>
+                    <span className="floor-label">{isMyFloor ? 'Your floor' : `Floor ${fl}`}</span>
+                    <div className="floor-pips">
+                      {flRes.map(r => (
+                        <span key={r.name} className={`floor-pip${r.online ? ' online' : ''}`} style={{ background: PILLAR_COLOR[r.pillar] ?? '#6b7280' }} title={`${r.name} · ${r.room}`} />
+                      ))}
+                      {flRes.length === 0 && <span className="floor-empty">no data</span>}
+                    </div>
+                    <span className="floor-count">{flRes.length} resident{flRes.length !== 1 ? 's' : ''}</span>
+                    <ChevronDown size={13} style={{ color: 'var(--muted)', transition: 'transform 0.2s', transform: isExpanded ? 'rotate(180deg)' : 'none', flexShrink: 0 }} />
+                  </button>
+
+                  {isExpanded && (
+                    <div className="hostel-floor-rooms">
+                      <div className="room-grid">
+                        {Array.from({ length: 14 }, (_, i) => String(i+1).padStart(2,'0')).map(rm => {
+                          const res = flRes.find(r => r.room === rm);
+                          const isMyRoom = isMyFloor && myRoom === rm;
+                          return (
+                            <div key={rm} className={`room-slot${res ? ' occupied' : ''}${isMyRoom ? ' my-room' : ''}`}>
+                              <span className="room-slot-num">{rm}</span>
+                              {res && (
+                                <div className="room-slot-resident">
+                                  <span className="room-pip" style={{ background: PILLAR_COLOR[res.pillar] }} />
+                                  <span className="room-slot-name">{res.name.split(' ')[0]}</span>
+                                  {res.online && <span className="room-online-dot" />}
+                                </div>
+                              )}
+                              {isMyRoom && <span className="room-you-badge">You</span>}
+                            </div>
+                          );
+                        })}
+                      </div>
+                      <div className="pillar-legend">
+                        {Object.entries(PILLAR_COLOR).map(([p, col]) => (
+                          <span key={p} className="legend-item" style={{ '--leg-color': col } as React.CSSProperties}>
+                            <span className="legend-dot" style={{ background: col }} />
+                            {p}
+                          </span>
+                        ))}
+                        <span className="legend-item"><span className="legend-dot online" />Online</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        </div>
+
+      </div>
+    </>
   );
 }
 
