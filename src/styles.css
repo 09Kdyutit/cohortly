@@ -3360,3 +3360,227 @@ code {
   to   { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
 }
 .view-wrapper { animation: view-depth-in 0.3s cubic-bezier(0.16, 1, 0.3, 1); }
+
+/* ════════════════════════════════════════════════════════════════════════════
+   ADVANCED VISUAL SYSTEM v2 — contrast, depth, futuristic polish
+   ════════════════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Readability: boost muted text contrast everywhere ─────────────────── */
+:root {
+  --muted:       rgba(255,255,255,0.54);
+  --ink-soft:    rgba(255,255,255,0.78);
+  --muted-light: rgba(255,255,255,0.35);
+  --surface:     rgba(255,255,255,0.062);
+}
+
+/* ── 2. Font smoothing ────────────────────────────────────────────────────── */
+* { -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale; }
+
+/* ── 3. Topbar: gradient accent underline ─────────────────────────────────── */
+.app-topbar { position: relative; }
+.app-topbar::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(99,102,241,0.55) 30%, rgba(167,139,250,0.55) 70%, transparent 100%);
+  pointer-events: none;
+}
+
+/* ── 4. Richer background orbs — more saturation ──────────────────────────── */
+.student-shell::before {
+  background: radial-gradient(ellipse, rgba(99,102,241,0.30) 0%, transparent 60%) !important;
+}
+.student-shell::after {
+  background: radial-gradient(ellipse, rgba(139,92,246,0.24) 0%, transparent 58%) !important;
+}
+.admin-shell::before {
+  background: radial-gradient(ellipse, rgba(99,102,241,0.25) 0%, transparent 60%) !important;
+}
+.admin-shell::after {
+  background: radial-gradient(ellipse, rgba(139,92,246,0.20) 0%, transparent 58%) !important;
+}
+
+/* ── 5. Glass panels: stronger blur + depth ───────────────────────────────── */
+.panel,
+.launchpad-sidebar, .launchpad-main,
+.kb-sidebar, .kb-main {
+  backdrop-filter: blur(28px) saturate(1.7) !important;
+  -webkit-backdrop-filter: blur(28px) saturate(1.7) !important;
+}
+
+/* ── 6. Today greeting heading: gradient text ─────────────────────────────── */
+.today-greeting h2 {
+  background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 55%, #818cf8 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+/* ── 7. Person card: deeper 3D on hover ───────────────────────────────────── */
+.person-card { perspective: 700px; transform-style: preserve-3d; }
+.person-card:hover {
+  transform: translateY(-6px) rotateX(2.5deg) scale(1.02) !important;
+  box-shadow: 0 22px 52px rgba(99,102,241,0.28), 0 6px 16px rgba(0,0,0,0.6) !important;
+  border-color: rgba(99,102,241,0.45) !important;
+}
+.person-card:hover .avatar {
+  box-shadow: 0 0 0 2px rgba(99,102,241,0.6), 0 0 20px rgba(99,102,241,0.4) !important;
+}
+
+/* ── 8. Card shimmer overlay on hover (::after) ───────────────────────────── */
+.person-card,
+.event-card,
+.club-card,
+.kb-article { position: relative; }
+
+.person-card::after,
+.event-card::after,
+.club-card::after,
+.kb-article::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background: linear-gradient(135deg, rgba(255,255,255,0.06) 0%, transparent 55%);
+  opacity: 0;
+  transition: opacity 0.28s;
+  pointer-events: none;
+}
+.person-card:hover::after,
+.event-card:hover::after,
+.club-card:hover::after,
+.kb-article:hover::after { opacity: 1; }
+
+/* ── 9. Club card: violet glow on hover ───────────────────────────────────── */
+.club-card:hover {
+  border-color: rgba(139,92,246,0.4) !important;
+  box-shadow: 0 14px 44px rgba(139,92,246,0.22), 0 0 0 1px rgba(139,92,246,0.18) !important;
+  transform: translateY(-4px) !important;
+}
+
+/* ── 10. Event card: deeper shadow on hover ───────────────────────────────── */
+.event-card:hover {
+  box-shadow: 0 10px 36px rgba(0,0,0,0.45), 0 0 0 1px rgba(255,255,255,0.12) !important;
+  transform: translateY(-3px) !important;
+}
+
+/* ── 11. Active nav: gradient background ──────────────────────────────────── */
+.rail-nav button.active {
+  background: linear-gradient(90deg, rgba(99,102,241,0.22) 0%, rgba(99,102,241,0.04) 100%) !important;
+  box-shadow: inset 0 0 0 1px rgba(99,102,241,0.22);
+}
+.rail-nav button.active::before {
+  box-shadow: 0 0 14px rgba(129,140,248,1) !important;
+}
+
+/* ── 12. Primary button: richer multi-stop gradient ───────────────────────── */
+.primary-button {
+  background: linear-gradient(135deg, #5b5ef0 0%, #7c3aed 55%, #9333ea 100%) !important;
+  box-shadow: 0 4px 22px rgba(99,102,241,0.5), inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+.primary-button:hover:not(:disabled) {
+  box-shadow: 0 8px 36px rgba(99,102,241,0.68), inset 0 1px 0 rgba(255,255,255,0.22) !important;
+  filter: brightness(1.06);
+}
+
+/* ── 13. Launchpad active phase: stronger accent ──────────────────────────── */
+.launchpad-phase-btn.active {
+  background: linear-gradient(90deg, rgba(99,102,241,0.22) 0%, rgba(99,102,241,0.04) 100%) !important;
+  border-left-width: 3px !important;
+  border-left-color: rgba(99,102,241,0.9) !important;
+  color: #a5b4fc !important;
+}
+
+/* ── 14. Launchpad task: slide + glow on hover ────────────────────────────── */
+.launchpad-task {
+  transition: transform 0.18s, border-color 0.18s, background 0.18s, box-shadow 0.18s;
+}
+.launchpad-task:hover {
+  transform: translateX(4px) !important;
+  border-color: rgba(99,102,241,0.32) !important;
+  background: rgba(99,102,241,0.07) !important;
+  box-shadow: 0 4px 18px rgba(99,102,241,0.12) !important;
+}
+
+/* ── 15. KB category active: left glow bar ────────────────────────────────── */
+.kb-cat-btn.active {
+  background: rgba(99,102,241,0.16) !important;
+  color: #a5b4fc !important;
+  box-shadow: inset 3px 0 0 rgba(99,102,241,0.8), inset 0 0 0 1px rgba(99,102,241,0.14);
+}
+
+/* ── 16. Inputs: glow on focus ────────────────────────────────────────────── */
+.message-composer input:focus,
+.ai-compose input:focus,
+.people-search-bar input:focus,
+.field input:focus,
+.field select:focus,
+.field textarea:focus,
+.kb-search:focus {
+  border-color: rgba(99,102,241,0.6) !important;
+  box-shadow: 0 0 0 3px rgba(99,102,241,0.16), 0 0 18px rgba(99,102,241,0.1) !important;
+  outline: none;
+}
+
+/* ── 17. Scrollbar: gradient ──────────────────────────────────────────────── */
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(99,102,241,0.55), rgba(139,92,246,0.55)) !important;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, rgba(99,102,241,0.82), rgba(167,139,250,0.82)) !important;
+}
+
+/* ── 18. AI FAB: stronger glow pulse ─────────────────────────────────────── */
+@keyframes fab-glow-pulse {
+  0%  { box-shadow: 0 4px 24px rgba(99,102,241,0.6); }
+  50% { box-shadow: 0 6px 40px rgba(99,102,241,0.85), 0 0 60px rgba(139,92,246,0.3); }
+  100%{ box-shadow: 0 4px 24px rgba(99,102,241,0.6); }
+}
+.ai-fab { animation: fab-glow-pulse 3s ease-in-out infinite !important; }
+
+/* ── 19. Metric icon: bigger glow ─────────────────────────────────────────── */
+.pulse-metric > span[style] {
+  filter: drop-shadow(0 0 10px rgba(99,102,241,0.75)) !important;
+}
+
+/* ── 20. Progress fills: stronger glow ───────────────────────────────────── */
+.checklist-bar-fill {
+  box-shadow: 0 0 10px rgba(16,185,129,0.65), 0 0 20px rgba(16,185,129,0.25) !important;
+}
+.launchpad-overall-fill {
+  box-shadow: 0 0 10px rgba(99,102,241,0.65), 0 0 20px rgba(99,102,241,0.2) !important;
+}
+.rail-completion-fill {
+  box-shadow: 0 0 8px rgba(99,102,241,0.65) !important;
+}
+
+/* ── 21. Thread row active: vivid glow ────────────────────────────────────── */
+.thread-row.active {
+  box-shadow: inset 0 0 0 1px rgba(99,102,241,0.35), 0 0 20px rgba(99,102,241,0.1) !important;
+  background: rgba(99,102,241,0.18) !important;
+  color: #c4b5fd !important;
+}
+
+/* ── 22. Message bubble: richer glow ─────────────────────────────────────── */
+.message.mentor p {
+  box-shadow: 0 6px 28px rgba(99,102,241,0.45), 0 0 0 1px rgba(129,140,248,0.25), inset 0 1px 0 rgba(255,255,255,0.12) !important;
+}
+
+/* ── 23. Auth card: deep shadow ───────────────────────────────────────────── */
+.auth-card {
+  box-shadow: 0 12px 70px rgba(0,0,0,0.6), 0 0 0 1px rgba(255,255,255,0.07) !important;
+}
+
+/* ── 24. Admin metrics on hover ───────────────────────────────────────────── */
+.admin-metric:hover {
+  border-color: rgba(99,102,241,0.35) !important;
+  box-shadow: 0 10px 34px rgba(99,102,241,0.16) !important;
+}
+
+/* ── 25. Brand mark: pulsing glow ─────────────────────────────────────────── */
+@keyframes brand-glow-v2 {
+  0%  { box-shadow: 0 2px 14px rgba(99,102,241,0.5); }
+  50% { box-shadow: 0 2px 32px rgba(139,92,246,0.85), 0 0 48px rgba(99,102,241,0.25); }
+  100%{ box-shadow: 0 2px 14px rgba(99,102,241,0.5); }
+}
+.brand-mark { animation: brand-glow-v2 3.5s ease-in-out infinite !important; }
