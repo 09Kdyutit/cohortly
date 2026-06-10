@@ -348,7 +348,7 @@ type LaunchpadPhase = { id: string; label: string; icon: string; tasks: Launchpa
 
 const launchpadPhases: LaunchpadPhase[] = [
   {
-    id: 'pre-arrival', label: 'Before I arrive', icon: '✈️',
+    id: 'pre-arrival', label: 'Before I arrive', icon: 'arrival',
     tasks: [
       { id: 'offer', label: 'Accept your offer letter', desc: 'Via SUTD portal — confirm your place before the deadline.' },
       { id: 'cohortly', label: 'Join Cohortly', desc: "You're here — SUTD email verified." },
@@ -360,7 +360,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     ],
   },
   {
-    id: 'hostel', label: 'Move into hostel', icon: '🏠',
+    id: 'hostel', label: 'Move into hostel', icon: 'hostel',
     tasks: [
       { id: 'move-in', label: 'Move into your room', desc: 'Collect keys from Housing. Bring your student ID photo printout.' },
       { id: 'wifi', label: 'Connect to campus Wi-Fi', desc: 'eduroam or SUTD-Student using your student account credentials.' },
@@ -371,7 +371,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     ],
   },
   {
-    id: 'week0', label: 'Week 0 orientation', icon: '🎉',
+    id: 'week0', label: 'Week 0 orientation', icon: 'orientation',
     tasks: [
       { id: 'camp', label: 'Attend Freshmore Orientation Camp', desc: 'SUTD\'s intro event — ice breakers, campus tour, team building.' },
       { id: 'campus-tour', label: 'Get a campus tour from a senior', desc: 'FabLab, library, Level 3 hangout spots, best food nearby.' },
@@ -381,7 +381,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     ],
   },
   {
-    id: 'week1', label: 'Week 1 academic setup', icon: '📚',
+    id: 'week1', label: 'Week 1 academic setup', icon: 'academic',
     tasks: [
       { id: 'first-class', label: 'Attend your first class', desc: 'Check Canvas for room allocation and pre-read materials.' },
       { id: 'module-room', label: 'Join your module rooms on Cohortly', desc: 'Seniors are already answering in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
@@ -391,7 +391,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     ],
   },
   {
-    id: 'people5', label: 'Find my first 5 people', icon: '👥',
+    id: 'people5', label: 'Find my first 5 people', icon: 'people',
     tasks: [
       { id: 'p1', label: 'Connect with someone in your module', desc: 'Find a 10.014 or 10.009 coursemate.', link: { label: 'Find people', view: 'people' } },
       { id: 'p2', label: 'Connect with a senior mentor', desc: 'Someone who has done your exact modules already.', link: { label: 'Find mentors', view: 'people' } },
@@ -401,7 +401,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     ],
   },
   {
-    id: 'fifth-row-phase', label: 'Join one Fifth Row', icon: '🏆',
+    id: 'fifth-row-phase', label: 'Join one Fifth Row', icon: 'clubs',
     tasks: [
       { id: 'fr-quiz', label: 'Take the Fifth Row quiz', desc: 'Find out which cluster fits — Arts, Sports, Makers, Community, Culture.', link: { label: 'Take quiz', view: 'fifth-row' } },
       { id: 'fr-browse', label: 'Browse 3 clubs you\'re curious about', desc: 'Go deep on one before committing.', link: { label: 'Browse clubs', view: 'fifth-row' } },
@@ -410,7 +410,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     ],
   },
   {
-    id: 'qa-phase', label: 'Ask my first module question', icon: '💬',
+    id: 'qa-phase', label: 'Ask my first module question', icon: 'qa',
     tasks: [
       { id: 'q-read', label: 'Read existing Q&A threads in your module', desc: 'See what seniors have already answered in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
       { id: 'q-post', label: 'Post your first question', desc: 'Any confusion in any module — ask it. No question is too small.', link: { label: 'Post a question', view: 'classes' } },
@@ -418,7 +418,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     ],
   },
   {
-    id: 'mentor-phase', label: 'Book my first senior session', icon: '🤝',
+    id: 'mentor-phase', label: 'Book my first senior session', icon: 'mentor',
     tasks: [
       { id: 'm-view', label: 'View a senior mentor\'s profile', desc: 'See their modules, availability, help style, and compatibility score.', link: { label: 'Browse mentors', view: 'people' } },
       { id: 'm-connect', label: 'Request an intro with a mentor', desc: 'Send your first connection request to a senior.', link: { label: 'Find mentors', view: 'people' } },
@@ -1223,7 +1223,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'chitchat-thanks',
     triggers: ['thank you', 'thanks', 'thank u', 'tq', 'ty', 'thx', 'appreciate it', 'helpful', 'that helps'],
-    response: `Anytime! That's what I'm here for.\n\nIf you think of anything else — modules, hostel, social stuff, admin — just ask. Good luck with your Freshmore journey! 🎓`,
+    response: `Anytime! That's what I'm here for.\n\nIf you think of anything else — modules, hostel, social stuff, admin — just ask. Good luck with your Freshmore journey.`,
     followUps: ['What is the Launchpad?', 'How do I find my mentor?', 'What is Fifth Row?'],
   },
   {
@@ -3168,7 +3168,7 @@ function PrivacyConsentModal({ onAccept, onDecline }: { onAccept: () => void; on
     <div className="consent-overlay">
       <div className="consent-modal">
         <div className="consent-modal-head">
-          <strong>Before you continue 🔒</strong>
+          <strong>Before you continue</strong>
           <p>Cohortly collects and processes your data to connect you with the right people, events, and mentors at SUTD. Under the Singapore Personal Data Protection Act (PDPA), you have the right to know what we collect and why.</p>
         </div>
         <div className="consent-points">
@@ -3585,6 +3585,10 @@ function StudentApp({
   const [showNotifBanner, setShowNotifBanner] = useState(false);
   const deferredInstallRef = useRef<Event | null>(null);
   const profileRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    window.scrollTo({ top: 0, behavior: 'instant' });
+  }, [activeView]);
 
   useEffect(() => {
     if (!isMentor && shouldShowPulse()) {
@@ -4108,7 +4112,7 @@ function LaunchpadView({
               className={`launchpad-phase-btn${activePhase === phase.id ? ' active' : ''}`}
               onClick={() => setActivePhase(phase.id)}
             >
-              <span style={{ fontSize: '1rem', flexShrink: 0 }}>{phase.icon}</span>
+              <span className={`phase-icon-dot phase-icon-${phase.icon}`} />
               <div>
                 <strong>{phase.label}</strong>
                 <small>{pct === 100 ? 'Complete ✓' : `${pct}% done`}</small>
@@ -4122,7 +4126,7 @@ function LaunchpadView({
       <div className="launchpad-main">
         <BelongingScoreBanner userEmail={userEmail} />
         <div className="launchpad-phase-head">
-          <h2>{currentPhase.icon} {currentPhase.label}</h2>
+          <h2>{currentPhase.label}</h2>
           <p>{phaseDesc[currentPhase.id]}</p>
         </div>
         <div className="launchpad-tasks-list">
@@ -4306,7 +4310,7 @@ function FifthRowView() {
                 <div className="modal-head"><strong>Your Match</strong></div>
                 <div style={{ textAlign: 'center', padding: '8px 0 16px' }}>
                   <div style={{ fontSize: '2.5rem', marginBottom: 8 }}>
-                    {{ Arts: '🎨', Sports: '⚽', Community: '🤝', Culture: '🎵', Makers: '🔧' }[quizResult]}
+                    <span className={`quiz-result-dot quiz-result-${quizResult?.toLowerCase()}`} />
                   </div>
                   <div style={{ fontSize: '1.1rem', fontWeight: 700, marginBottom: 4 }}>{quizResult} Cluster</div>
                   <p style={{ color: 'var(--muted)', fontSize: '0.85rem' }}>
@@ -4874,7 +4878,7 @@ function PeopleView({ isMentor = false, userEmail, onMessage }: { isMentor?: boo
                   disabled={connected.has(mate.name)}
                   style={{ flexShrink: 0 }}
                 >
-                  {connected.has(mate.name) ? <><Check size={14} /> Hi 👋</> : 'Say hi'}
+                  {connected.has(mate.name) ? <><Check size={14} /> Connected</> : 'Say hi'}
                 </button>
               </div>
             ))}
@@ -5712,31 +5716,49 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
     </>
   );
 
+  const chatListRef = useRef<HTMLDivElement>(null);
+  useEffect(() => {
+    if (chatListRef.current) chatListRef.current.scrollTop = chatListRef.current.scrollHeight;
+  }, [localMessages, activeThread]);
+
+  const headerAv = (s: string) => s.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
+
   return (
     <div className="messages-layout">
       <aside className="panel thread-panel">
         <span className="eyebrow">{isMentor ? 'Student threads' : 'Circles'}</span>
-        {threads.map((thread) => (
-          <button
-            className={`thread-row${activeThread === thread ? ' active' : ''}`}
-            key={thread}
-            onClick={() => { setActiveThread(thread); setLocalMessages([]); }}
-          >
-            {thread}
-          </button>
-        ))}
+        {threads.map((thread) => {
+          const parts = thread.split(' · ');
+          const displayName = parts[0];
+          const subtitle = parts[1] || 'Group conversation';
+          const av = headerAv(displayName);
+          return (
+            <button
+              className={`thread-row${activeThread === thread ? ' active' : ''}`}
+              key={thread}
+              onClick={() => { setActiveThread(thread); setLocalMessages([]); }}
+            >
+              <span className="thread-avatar">{av}</span>
+              <span className="thread-info">
+                <span className="thread-name">{displayName}</span>
+                <span className="thread-sub">{subtitle}</span>
+              </span>
+            </button>
+          );
+        })}
       </aside>
       <section className="panel chat-card">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">{isNewConv ? 'New conversation' : (isMentor ? 'Student thread' : 'Direct message')}</span>
+        <div className="chat-header">
+          <div className="chat-header-avatar">{headerAv(threadName)}</div>
+          <div className="chat-header-info">
             <h2>{activeThread.replace(' · new conversation', '')}</h2>
+            <span className="eyebrow">{isNewConv ? 'New conversation' : (isMentor ? 'Student thread' : 'Direct message')}</span>
           </div>
         </div>
-        <div className="chat-list">
+        <div className="chat-list" ref={chatListRef}>
           {isNewConv ? (
             localMessages.length === 0 ? (
-              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '40px 20px', color: 'var(--muted)', textAlign: 'center' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, padding: '32px 20px', color: 'var(--muted)', textAlign: 'center', marginTop: 'auto' }}>
                 <MessageCircle size={28} style={{ opacity: 0.25 }} />
                 <strong style={{ fontSize: '0.9rem', color: 'var(--ink-soft)' }}>Start a conversation with {threadName}</strong>
                 <span style={{ fontSize: '0.8rem' }}>Send a message below to connect.</span>
@@ -5988,10 +6010,21 @@ function ActionItem({ icon: Icon, title, body }: { icon: LucideIcon; title: stri
 }
 
 function Message({ tone, author, text }: { tone: 'student' | 'mentor' | 'system'; author: string; text: string }) {
+  if (tone === 'system') {
+    return (
+      <div className="message system">
+        <p>{text}</p>
+      </div>
+    );
+  }
+  const av = author.split(' ').map((w) => w[0]).join('').slice(0, 2).toUpperCase();
   return (
     <div className={`message ${tone}`}>
-      <strong>{author}</strong>
-      <p>{text}</p>
+      <span className="msg-avatar">{av}</span>
+      <div className="msg-bubble-wrap">
+        <strong>{author}</strong>
+        <p>{text}</p>
+      </div>
     </div>
   );
 }
@@ -6825,13 +6858,13 @@ function PrivacySettingsView({
   const [exported, setExported] = useState(false);
 
   const activityLog = [
-    { action: 'Signed in', time: 'Just now', icon: '🔑' },
-    { action: 'Profile updated', time: '2 days ago', icon: '✏️' },
-    { action: 'Completed Weekly Pulse', time: '4 days ago', icon: '💚' },
-    { action: 'RSVP\'d to First Friday food crawl', time: '5 days ago', icon: '📅' },
-    { action: 'Connected with Aarav Menon', time: '6 days ago', icon: '🤝' },
-    { action: 'Asked a question in 10.014 room', time: '1 week ago', icon: '💬' },
-    { action: 'Joined Cohortly', time: '1 week ago', icon: '🎉' },
+    { action: 'Signed in', time: 'Just now', icon: 'key' },
+    { action: 'Profile updated', time: '2 days ago', icon: 'edit' },
+    { action: 'Completed Weekly Pulse', time: '4 days ago', icon: 'pulse' },
+    { action: 'RSVP\'d to First Friday food crawl', time: '5 days ago', icon: 'event' },
+    { action: 'Connected with Aarav Menon', time: '6 days ago', icon: 'connect' },
+    { action: 'Asked a question in 10.014 room', time: '1 week ago', icon: 'qa' },
+    { action: 'Joined Cohortly', time: '1 week ago', icon: 'join' },
   ];
 
   const dataInventory = [
@@ -6957,7 +6990,7 @@ function PrivacySettingsView({
           <div className="privacy-activity-log">
             {activityLog.map((entry, i) => (
               <div key={i} className="privacy-log-row">
-                <span className="privacy-log-icon">{entry.icon}</span>
+                <span className={`privacy-log-icon privacy-log-icon--${entry.icon}`} />
                 <div>
                   <strong>{entry.action}</strong>
                   <span>{entry.time}</span>
@@ -7053,107 +7086,229 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
   const [prefs, setPrefs] = useState<NotifPrefs>(() => loadNotifPrefs(userEmail));
   const [telegramInput, setTelegramInput] = useState(prefs.telegramHandle);
   const [whatsappInput, setWhatsappInput] = useState(prefs.whatsappNumber);
-  const [saved, setSaved] = useState(false);
+  const [tgVerifying, setTgVerifying] = useState(false);
+  const [waVerifying, setWaVerifying] = useState(false);
+  const [prefSaved, setPrefSaved] = useState(false);
 
-  const save = () => {
-    const updated: NotifPrefs = { ...prefs, telegramHandle: telegramInput.trim(), whatsappNumber: whatsappInput.trim() };
+  const tgConnected = prefs.botConnected && !!prefs.telegramHandle;
+  const waConnected = !!prefs.whatsappNumber && prefs.whatsappNumber.length >= 6;
+
+  const connectTelegram = async () => {
+    const handle = telegramInput.trim().replace(/^@/, '');
+    if (!handle) return;
+    setTgVerifying(true);
+    await new Promise<void>((r) => setTimeout(r, 1800));
+    const updated: NotifPrefs = { ...prefs, telegramHandle: '@' + handle, botConnected: true };
     setPrefs(updated);
     saveNotifPrefs(userEmail, updated);
-    setSaved(true);
-    setTimeout(() => setSaved(false), 2000);
+    setTgVerifying(false);
+  };
+
+  const connectWhatsApp = async () => {
+    const num = whatsappInput.trim();
+    if (!num || num.length < 6) return;
+    setWaVerifying(true);
+    await new Promise<void>((r) => setTimeout(r, 1400));
+    const updated: NotifPrefs = { ...prefs, whatsappNumber: num };
+    setPrefs(updated);
+    saveNotifPrefs(userEmail, updated);
+    setWaVerifying(false);
+  };
+
+  const disconnectTelegram = () => {
+    const updated: NotifPrefs = { ...prefs, telegramHandle: '', botConnected: false };
+    setPrefs(updated);
+    setTelegramInput('');
+    saveNotifPrefs(userEmail, updated);
+  };
+
+  const disconnectWhatsApp = () => {
+    const updated: NotifPrefs = { ...prefs, whatsappNumber: '' };
+    setPrefs(updated);
+    setWhatsappInput('');
+    saveNotifPrefs(userEmail, updated);
   };
 
   const togglePref = (key: keyof NotifPrefs) => {
     const updated = { ...prefs, [key]: !prefs[key as keyof typeof prefs] } as NotifPrefs;
     setPrefs(updated);
     saveNotifPrefs(userEmail, updated);
+    setPrefSaved(true);
+    setTimeout(() => setPrefSaved(false), 1800);
   };
+
+  const tgDeepLink = `https://t.me/CohortlyBot?start=${btoa(userEmail).replace(/[+=\/]/g, '')}`;
+  const waOptInLink = `https://wa.me/6591234567?text=${encodeURIComponent('start')}`;
 
   return (
     <div className="privacy-view">
       <div className="privacy-sections">
-        <div className="privacy-card">
-          <div className="privacy-card-head">
-            <Bell size={18} style={{ color: 'var(--accent)' }} />
-            <h2>Telegram Bot</h2>
-          </div>
-          <p style={{ color: 'var(--muted)', fontSize: '0.875rem', marginBottom: 16 }}>
-            Get instant DMs when your Q&amp;A question is answered, an event starts in 1 hour, or a new connection request arrives — right in Telegram where you already are.
-          </p>
-          <div className="notif-bot-steps">
-            <div className="notif-step">
-              <span className="notif-step-num">1</span>
-              <div>
-                <strong>Start the bot</strong>
-                <p>Open Telegram and search <code>@CohortlyBot</code> or tap the link below, then press Start.</p>
-                <a className="notif-bot-link" href="https://t.me/CohortlyBot" target="_blank" rel="noopener noreferrer">
-                  <ExternalLink size={13} /> Open @CohortlyBot
-                </a>
-              </div>
+
+        {/* ── Telegram ── */}
+        <div className="privacy-card notif-channel-card">
+          <div className="notif-channel-header">
+            <div className="notif-channel-icon notif-channel-telegram">
+              <Send size={17} />
             </div>
-            <div className="notif-step">
-              <span className="notif-step-num">2</span>
-              <div>
-                <strong>Enter your Telegram username</strong>
-                <input
-                  className="notif-input"
-                  placeholder="@yourusername"
-                  value={telegramInput}
-                  onChange={(e) => setTelegramInput(e.target.value)}
-                />
+            <div className="notif-channel-title">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <strong>Telegram Bot</strong>
+                {tgConnected && <span className="notif-connected-chip">Connected</span>}
               </div>
-            </div>
-            <div className="notif-step">
-              <span className="notif-step-num">3</span>
-              <div>
-                <strong>Save and verify</strong>
-                <p>We'll send a test message to confirm the link.</p>
-              </div>
+              <span>Instant DMs when your Q&A is answered, an event starts, or someone connects.</span>
             </div>
           </div>
+
+          {tgConnected ? (
+            <div className="notif-connected-state">
+              <div className="notif-connected-detail">
+                <div className="notif-connected-avatar notif-connected-avatar--tg">
+                  <Send size={13} />
+                </div>
+                <div>
+                  <strong>{prefs.telegramHandle}</strong>
+                  <span>Receiving alerts via Telegram</span>
+                </div>
+              </div>
+              <button className="secondary-button" style={{ padding: '6px 14px', fontSize: '0.8rem' }} onClick={disconnectTelegram}>
+                Disconnect
+              </button>
+            </div>
+          ) : (
+            <div className="notif-bot-steps">
+              <div className="notif-step">
+                <span className="notif-step-num">1</span>
+                <div>
+                  <strong>Start the bot</strong>
+                  <p>Open Telegram and search <code>@CohortlyBot</code>, then press Start.</p>
+                  <a className="notif-bot-link" href={tgDeepLink} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink size={13} /> Open @CohortlyBot
+                  </a>
+                </div>
+              </div>
+              <div className="notif-step">
+                <span className="notif-step-num">2</span>
+                <div>
+                  <strong>Enter your Telegram username</strong>
+                  <input
+                    className="notif-input"
+                    placeholder="@yourusername"
+                    value={telegramInput}
+                    onChange={(e) => setTelegramInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && connectTelegram()}
+                  />
+                </div>
+              </div>
+              <div className="notif-step">
+                <span className="notif-step-num">3</span>
+                <div>
+                  <strong>Verify connection</strong>
+                  <p>We confirm you've started the bot before sending alerts.</p>
+                  <button
+                    className="primary-button"
+                    style={{ marginTop: 8, padding: '7px 20px', fontSize: '0.84rem' }}
+                    onClick={connectTelegram}
+                    disabled={!telegramInput.trim() || tgVerifying}
+                  >
+                    {tgVerifying
+                      ? <><span className="notif-spinner" /> Verifying…</>
+                      : <><Check size={14} /> Connect Telegram</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
-        <div className="privacy-card">
-          <div className="privacy-card-head">
-            <MessageCircle size={18} style={{ color: '#25D366' }} />
-            <h2>WhatsApp Alerts</h2>
-          </div>
-          <p style={{ color: 'var(--muted)', fontSize: '0.875rem', marginBottom: 16 }}>
-            Receive WhatsApp messages for the same alerts as Telegram. Enter your number in international format.
-          </p>
-          <div className="notif-step">
-            <span className="notif-step-num">1</span>
-            <div>
-              <strong>Your WhatsApp number</strong>
-              <input
-                className="notif-input"
-                placeholder="+65 9123 4567"
-                value={whatsappInput}
-                onChange={(e) => setWhatsappInput(e.target.value)}
-              />
+        {/* ── WhatsApp ── */}
+        <div className="privacy-card notif-channel-card">
+          <div className="notif-channel-header">
+            <div className="notif-channel-icon notif-channel-whatsapp">
+              <MessageCircle size={17} />
+            </div>
+            <div className="notif-channel-title">
+              <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                <strong>WhatsApp Alerts</strong>
+                {waConnected && <span className="notif-connected-chip notif-connected-chip--wa">Connected</span>}
+              </div>
+              <span>Same alerts as Telegram, delivered directly to your WhatsApp.</span>
             </div>
           </div>
-          <div className="notif-step" style={{ marginTop: 12 }}>
-            <span className="notif-step-num">2</span>
-            <div>
-              <strong>Send a message to opt in</strong>
-              <p>WhatsApp requires you to initiate the conversation. Send "start" to our number:</p>
-              <a className="notif-bot-link" href="https://wa.me/6591234567?text=start" target="_blank" rel="noopener noreferrer">
-                <ExternalLink size={13} /> Open in WhatsApp
-              </a>
+
+          {waConnected ? (
+            <div className="notif-connected-state notif-connected-state--wa">
+              <div className="notif-connected-detail">
+                <div className="notif-connected-avatar notif-connected-avatar--wa">
+                  <MessageCircle size={13} />
+                </div>
+                <div>
+                  <strong>{prefs.whatsappNumber}</strong>
+                  <span>Receiving alerts via WhatsApp</span>
+                </div>
+              </div>
+              <button className="secondary-button" style={{ padding: '6px 14px', fontSize: '0.8rem' }} onClick={disconnectWhatsApp}>
+                Disconnect
+              </button>
             </div>
-          </div>
+          ) : (
+            <div className="notif-bot-steps">
+              <div className="notif-step">
+                <span className="notif-step-num">1</span>
+                <div>
+                  <strong>Your WhatsApp number</strong>
+                  <input
+                    className="notif-input"
+                    placeholder="+65 9123 4567"
+                    type="tel"
+                    value={whatsappInput}
+                    onChange={(e) => setWhatsappInput(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && connectWhatsApp()}
+                  />
+                </div>
+              </div>
+              <div className="notif-step">
+                <span className="notif-step-num">2</span>
+                <div>
+                  <strong>Send a message to opt in</strong>
+                  <p>WhatsApp requires you to initiate the conversation. Send "start" to our number.</p>
+                  <a className="notif-bot-link notif-bot-link--wa" href={waOptInLink} target="_blank" rel="noopener noreferrer">
+                    <ExternalLink size={13} /> Open in WhatsApp
+                  </a>
+                </div>
+              </div>
+              <div className="notif-step">
+                <span className="notif-step-num">3</span>
+                <div>
+                  <strong>Save and confirm your number</strong>
+                  <button
+                    className="primary-button"
+                    style={{ marginTop: 8, padding: '7px 20px', fontSize: '0.84rem', background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', boxShadow: '0 4px 16px rgba(37,211,102,0.35)' }}
+                    onClick={connectWhatsApp}
+                    disabled={!whatsappInput.trim() || whatsappInput.trim().length < 6 || waVerifying}
+                  >
+                    {waVerifying
+                      ? <><span className="notif-spinner" /> Connecting…</>
+                      : <><Check size={14} /> Connect WhatsApp</>}
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
 
+        {/* ── Alert preferences ── */}
         <div className="privacy-card">
           <div className="privacy-card-head">
             <BellRing size={18} style={{ color: 'var(--accent)' }} />
-            <h2>What to notify me about</h2>
+            <div>
+              <strong style={{ display: 'block', fontSize: '0.95rem', fontWeight: 700 }}>Alert preferences</strong>
+              {prefSaved && <span style={{ fontSize: '0.72rem', color: '#34d399', fontWeight: 600 }}>Saved</span>}
+            </div>
           </div>
           <div className="notif-pref-list">
             {([
-              { key: 'onAnswer', label: 'My Q&A question gets answered', desc: 'When a senior mentor posts an answer in your module room' },
-              { key: 'onEvent', label: 'Event starting in 1 hour', desc: 'For events you\'ve RSVPd to' },
+              { key: 'onAnswer', label: 'My Q&A question gets answered', desc: 'When a mentor posts an answer in your module room' },
+              { key: 'onEvent', label: 'Event starting in 1 hour', desc: "For events you've RSVPd to" },
               { key: 'onConnection', label: 'New connection request', desc: 'When someone connects with you on Cohortly' },
             ] as Array<{ key: keyof NotifPrefs; label: string; desc: string }>).map(({ key, label, desc }) => (
               <div key={key} className="notif-pref-row">
@@ -7171,10 +7326,8 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
               </div>
             ))}
           </div>
-          <button className="primary-button" style={{ marginTop: 16 }} onClick={save}>
-            {saved ? <><Check size={14} /> Saved</> : 'Save preferences'}
-          </button>
         </div>
+
       </div>
     </div>
   );
