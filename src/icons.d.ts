@@ -24,6 +24,7 @@ export const GraduationCap: LucideIcon;
 export const Handshake: LucideIcon;
 export const HeartHandshake: LucideIcon;
 export const LayoutDashboard: LucideIcon;
+export const LifeBuoy: LucideIcon;
 export const LineChart: LucideIcon;
 export const LockKeyhole: LucideIcon;
 export const MailCheck: LucideIcon;

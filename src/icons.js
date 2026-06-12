@@ -17,6 +17,7 @@ export { default as GraduationCap } from 'lucide-react/dist/esm/icons/graduation
 export { default as Handshake } from 'lucide-react/dist/esm/icons/handshake.js';
 export { default as HeartHandshake } from 'lucide-react/dist/esm/icons/heart-handshake.js';
 export { default as LayoutDashboard } from 'lucide-react/dist/esm/icons/layout-dashboard.js';
+export { default as LifeBuoy } from 'lucide-react/dist/esm/icons/life-buoy.js';
 export { default as LineChart } from 'lucide-react/dist/esm/icons/line-chart.js';
 export { default as LockKeyhole } from 'lucide-react/dist/esm/icons/lock-keyhole.js';
 export { default as MailCheck } from 'lucide-react/dist/esm/icons/mail-check.js';

@@ -46,6 +46,7 @@ import {
   Key,
   LayoutDashboard,
   Leaf,
+  LifeBuoy,
   ListChecks,
   Lock,
   MailCheck,
@@ -82,8 +83,8 @@ type LucideIcon = ForwardRefExoticComponent<
     RefAttributes<SVGSVGElement>
 >;
 
-type UserRole = 'student' | 'mentor';
-type View = 'today' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'hostel' | 'mentor-home' | 'mentor-help' | 'privacy' | 'notifications';
+type UserRole = 'student';
+type View = 'today' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'hostel' | 'privacy' | 'notifications';
 type InstitutionId = 'sutd';
 type BelongingEntry = { week: string; score: number; at: number };
 type InterventionStage = 'flagged' | 'contacted' | 're-measured' | 'resolved' | 'escalated';
@@ -126,7 +127,6 @@ type Person = {
   match: string;
   tags: string[];
   color: string;
-  isMentor?: boolean;
   bio?: string;
   modules?: string[];
   availability?: string;
@@ -159,14 +159,37 @@ type StudentProfile = {
   pfpDataUrl?: string;
   pillar?: string;
   term?: string;
-  mentorYear?: string;
-  mentorPillar?: string;
-  mentorModules?: string[];
-  mentorHelpStyle?: string[];
+  year?: string;
   hostelBlock?: string;
   hostelFloor?: number;
   hostelRoom?: string;
 };
+
+// ─── Notification model ───────────────────────────────────────────────────────
+
+type NotifType = 'connection' | 'qa_answer' | 'event' | 'system' | 'mentor';
+type NotifItem = {
+  id: string; type: NotifType;
+  title: string; body: string;
+  read: boolean; time: string;
+  action?: { label: string; view: View };
+};
+
+const seedNotifs: NotifItem[] = [
+  { id: 'n1', type: 'qa_answer',  title: 'Question answered',    body: 'Aarav answered your recursion question in 10.014', read: false, time: '8m ago',  action: { label: 'View answer', view: 'classes' } },
+  { id: 'n2', type: 'connection', title: 'New connection',        body: 'Mei Lin accepted your intro request',             read: false, time: '45m ago', action: { label: 'View profile', view: 'people' } },
+  { id: 'n3', type: 'event',      title: 'Event reminder',        body: 'First Friday food crawl starts in 2 hours',       read: false, time: '1h ago',  action: { label: 'View event', view: 'events' } },
+  { id: 'n4', type: 'system',     title: 'Welcome to Cohortly',   body: 'Your SUTD student profile is now verified.',       read: true,  time: '2h ago' },
+  { id: 'n5', type: 'mentor',     title: 'Office hour available', body: 'Aarav posted a study session slot for 10.014',    read: true,  time: '3h ago',  action: { label: 'View slot', view: 'classes' } },
+];
+
+function loadNotifs(email: string): NotifItem[] {
+  try { return JSON.parse(localStorage.getItem(`notifs_${email}`) ?? 'null') ?? seedNotifs; }
+  catch { return seedNotifs; }
+}
+function saveNotifs(email: string, items: NotifItem[]) {
+  try { localStorage.setItem(`notifs_${email}`, JSON.stringify(items)); } catch {}
+}
 
 const navItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
   { id: 'today', label: 'Launchpad', icon: Rocket },
@@ -275,13 +298,12 @@ const starterEvents: EventItem[] = [
 const people: Person[] = [
   {
     name: 'Aarav Menon',
-    role: 'Year 3 ISTD · Senior mentor',
+    role: 'Year 3 · ISTD',
     detail: 'Runs weekly 10.014 coding prep for freshmores. Reach him through the cohort drop.',
     match: '94%',
     tags: ['10.014', '50.007 ML', 'Badminton'],
     color: 'teal',
-    isMentor: true,
-    pillar: 'ISTD',
+      pillar: 'ISTD',
     year: 'Year 3',
     bio: "Hey! I'm a Y3 ISTD student who loves helping freshmores crack computational thinking. I run weekly coding prep sessions for 10.014 and I'm always down to chat about anything SUTD — modules, hostels, or which hawker to hit before 8 AM.",
     modules: ['10.014 Computational Thinking', '50.007 Machine Learning', '10.009 The Digital World'],
@@ -290,13 +312,12 @@ const people: Person[] = [
   },
   {
     name: 'Sara Binte Halim',
-    role: 'Year 2 DAI · Senior mentor',
+    role: 'Year 2 · DAI',
     detail: 'Python specialist and data viz enthusiast. Helped 30+ students through 10.014 last term.',
     match: '88%',
     tags: ['10.014', 'Python', 'Data viz'],
     color: 'coral',
-    isMentor: true,
-    pillar: 'DAI',
+      pillar: 'DAI',
     year: 'Year 2',
     bio: "Second-year DAI student with a passion for making data make sense. If you're stuck on lab code or confused about pandas, hit me up — I answer fast.",
     modules: ['10.014 Computational Thinking', '10.009 The Digital World'],
@@ -329,13 +350,12 @@ const people: Person[] = [
   },
   {
     name: 'Wei Jian Lim',
-    role: 'Year 3 ISTD · Senior mentor',
+    role: 'Year 3 · ISTD',
     detail: 'Covers 10.009 Digital World and loves systems design. Runs the Sunday study cram.',
     match: '82%',
     tags: ['10.009', 'Systems design', 'Gaming'],
     color: 'coral',
-    isMentor: true,
-    pillar: 'ISTD',
+      pillar: 'ISTD',
     year: 'Year 3',
     bio: "Y3 ISTD here. I mentor 10.009 and enjoy thinking about how large systems talk to each other. Sunday crammer — building 1.401, every week.",
     modules: ['10.009 The Digital World', '30.007 Engineering Design Innovation'],
@@ -2177,6 +2197,12 @@ function LandingScreen({
             all before orientation week starts.
           </p>
 
+          <div className="landing-trust-row">
+            <span className="landing-trust-chip"><ShieldCheck size={13} /> Verified SUTD network</span>
+            <span className="landing-trust-chip"><Lock size={13} /> Private cohort</span>
+            <span className="landing-trust-chip"><GraduationCap size={13} /> Built for Freshmores</span>
+          </div>
+
           <div className="landing-stat-row">
             <div className="landing-stat-block">
               <strong>812</strong>
@@ -2212,11 +2238,11 @@ function LandingScreen({
               <span className="path-card-arrow"><ArrowRight size={18} /></span>
             </button>
 
-            <button className="path-card mentor-path" onClick={() => onSelectRole('mentor')}>
+            <button className="path-card mentor-path" onClick={() => onSelectRole('student')}>
               <div className="path-card-icon"><HeartHandshake size={20} /></div>
               <div className="path-card-text">
                 <strong>I'm a returning student</strong>
-                <span>Year 2 · Year 3 · Year 4 · Senior mentor</span>
+                <span>Year 2 · Year 3 · Year 4</span>
               </div>
               <span className="path-card-arrow"><ArrowRight size={18} /></span>
             </button>
@@ -2243,7 +2269,7 @@ function LandingScreen({
                   <span className="preview-match-badge">94%</span>
                 </div>
                 <span className="preview-person-name">Aarav Menon</span>
-                <span className="preview-person-role">Year 3 · ISTD mentor</span>
+                <span className="preview-person-role">Year 3 · ISTD</span>
               </div>
               <div className="preview-person-card">
                 <div className="preview-person-top">
@@ -2276,7 +2302,7 @@ function LandingScreen({
               <div className="preview-msg-row sent">
                 <Avatar name="Aarav" color="teal" />
                 <div className="preview-msg-bubble sent">
-                  Come tonight — Building 5 Room 3. I'll walk you through it.
+                  Drop by Building 5 Level 3 study area this week — happy to walk through it together.
                 </div>
               </div>
               <span className="preview-msg-meta">Matched on 10.014 · SUTD verified</span>
@@ -2285,16 +2311,40 @@ function LandingScreen({
         </div>
       </div>
 
+      <section className="landing-value-section">
+        <h2>Built for the people running orientation</h2>
+        <p>Cohortly turns scattered onboarding into a measurable, supportive launch — for students and the staff who guide them.</p>
+        <div className="landing-value-cards">
+          <div className="landing-value-card">
+            <div className="landing-value-card-icon" style={{ background: 'rgba(56,189,248,0.12)', color: '#38bdf8' }}><Rocket size={20} /></div>
+            <h3>Freshmore Launchpad</h3>
+            <p>Track who's ready before Day 1, and surface students who quietly fall behind.</p>
+          </div>
+          <div className="landing-value-card">
+            <div className="landing-value-card-icon" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399' }}><GraduationCap size={20} /></div>
+            <h3>Senior Mentor Q&amp;A</h3>
+            <p>Academic help that scales — verified seniors answer module questions in shared rooms.</p>
+          </div>
+          <div className="landing-value-card">
+            <div className="landing-value-card-icon" style={{ background: 'rgba(168,85,247,0.12)', color: '#c084fc' }}><Sparkles size={20} /></div>
+            <h3>Fifth Row Discovery</h3>
+            <p>Clubs find their members before orientation — interest signals match students to CCAs.</p>
+          </div>
+          <div className="landing-value-card">
+            <div className="landing-value-card-icon" style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24' }}><HeartHandshake size={20} /></div>
+            <h3>Admin Intervention</h3>
+            <p>Privacy-safe support signals so advisors can reach out before a student disengages.</p>
+          </div>
+        </div>
+      </section>
+
       <div className="landing-footer-area">
         <div className="landing-demo">
           <span>Try without verifying:</span>
           <button className="demo-btn student-demo" onClick={() => onDemoLogin('student')}>
             <GraduationCap size={14} /> Student
           </button>
-          <button className="demo-btn mentor-demo" onClick={() => onDemoLogin('mentor')}>
-            <HeartHandshake size={14} /> Mentor
-          </button>
-          <button className="demo-btn admin-demo" onClick={onAdminDemo}>
+<button className="demo-btn admin-demo" onClick={onAdminDemo}>
             <Building2 size={14} /> Admin view
           </button>
         </div>
@@ -2327,7 +2377,7 @@ function AuthScreen({
   const [step, setStep] = useState<'identity' | 'code'>('identity');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const isMentor = role === 'mentor';
+
 
   const requestCode = async () => {
     setBusy(true);
@@ -2373,9 +2423,9 @@ function AuthScreen({
           </span>
         </div>
 
-        <div className={`auth-role-hint${isMentor ? ' mentor-hint' : ''}`}>
-          {isMentor ? <HeartHandshake size={16} /> : <GraduationCap size={16} />}
-          {isMentor ? 'Signing up as a Senior Mentor (Year 2–4)' : 'Signing up as an Incoming Student'}
+        <div className="auth-role-hint">
+          <GraduationCap size={16} />
+          Joining as a SUTD student
         </div>
 
         {step === 'identity' && (
@@ -2465,6 +2515,92 @@ function saveLaunchpadStatuses(email: string, s: Record<string, TaskStatus>) {
   try { localStorage.setItem(`cohortly.launchpad.${email}`, JSON.stringify(s)); } catch {}
 }
 
+type InterventionCase = {
+  id: string;
+  studentId: string;
+  studentName: string;
+  reason: string;
+  severity: 'info' | 'warning' | 'urgent';
+  suggestedAction: string;
+  status: 'new' | 'contacted' | 'monitoring' | 'resolved' | 'escalated';
+  notes: string;
+  createdAt: string;
+  updatedAt: string;
+  source: string;
+};
+
+function loadInterventionCases(): InterventionCase[] {
+  try { return JSON.parse(localStorage.getItem('intervention_cases') ?? '[]'); } catch { return []; }
+}
+function saveInterventionCases(cases: InterventionCase[]) {
+  try { localStorage.setItem('intervention_cases', JSON.stringify(cases)); } catch {}
+}
+function addInterventionCase(studentId: string, studentName: string, reason: string, source: string) {
+  const cases = loadInterventionCases();
+  const existing = cases.find(c => c.studentId === studentId && c.source === source && c.status === 'new');
+  if (existing) return;
+  const newCase: InterventionCase = {
+    id: `case-${Date.now()}`,
+    studentId, studentName, reason,
+    severity: 'info',
+    suggestedAction: 'Send a check-in message',
+    status: 'new',
+    notes: '',
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+    source,
+  };
+  saveInterventionCases([newCase, ...cases]);
+}
+
+type InviteRecord = {
+  id: string;
+  name: string;
+  email: string;
+  role: 'Freshmore' | 'Exchange' | 'Senior Mentor' | 'Staff';
+  pillar: string;
+  cohort: string;
+  status: 'not_sent' | 'sent' | 'opened' | 'verified' | 'onboarded';
+  createdAt: string;
+};
+
+const inviteDemoCsv = `Aarav Menon,aarav_menon@mymail.sutd.edu.sg,Freshmore,Freshmore
+Lim Jia En,jiaen_lim@mymail.sutd.edu.sg,Freshmore,DAI
+Nur Aisyah,aisyah_nur@mymail.sutd.edu.sg,Exchange,Exchange
+Tan Wei Ming,weiming_tan@mymail.sutd.edu.sg,Senior Mentor,ISTD
+Sarah Chen,sarah_chen@mymail.sutd.edu.sg,Freshmore,ASD
+Nikhil Kumar,nikhil_kumar@mymail.sutd.edu.sg,Freshmore,EPD`;
+
+function loadInviteRecords(): InviteRecord[] {
+  try { return JSON.parse(localStorage.getItem('admin_invites') ?? '[]'); } catch { return []; }
+}
+function saveInviteRecords(records: InviteRecord[]) {
+  try { localStorage.setItem('admin_invites', JSON.stringify(records)); } catch {}
+}
+function parseInviteCsv(text: string, cohort: string): InviteRecord[] {
+  const validRoles = ['Freshmore', 'Exchange', 'Senior Mentor', 'Staff'];
+  return text.split('\n').map((l) => l.trim()).filter(Boolean).map((line, i) => {
+    const [name = '', email = '', role = 'Freshmore', pillar = ''] = line.split(',').map((s) => s.trim());
+    const safeRole = (validRoles.includes(role) ? role : 'Freshmore') as InviteRecord['role'];
+    return {
+      id: `inv-${Date.now()}-${i}`,
+      name, email, role: safeRole,
+      pillar: pillar || safeRole,
+      cohort,
+      status: 'not_sent' as const,
+      createdAt: new Date().toISOString(),
+    };
+  }).filter((r) => r.name && r.email);
+}
+function seedInviteRecords(): InviteRecord[] {
+  const existing = loadInviteRecords();
+  if (existing.length > 0) return existing;
+  const statuses: InviteRecord['status'][] = ['onboarded', 'verified', 'opened', 'sent', 'not_sent', 'verified'];
+  const seeded = parseInviteCsv(inviteDemoCsv, 'Freshmore AY2026').map((r, i) => ({ ...r, status: statuses[i % statuses.length] }));
+  saveInviteRecords(seeded);
+  return seeded;
+}
+
 function shouldShowPulse(): boolean {
   try {
     const last = localStorage.getItem('cohortly.pulse.lastShown');
@@ -2537,7 +2673,7 @@ function ProfileOnboarding({
 }) {
   const institution = institutionFor(user.institutionId, institutions);
   const [onboardStep, setOnboardStep] = useState<'role' | 'major' | 'profile'>(
-    initialRole === 'mentor' ? 'profile' : initialRole === 'student' ? 'major' : 'role',
+    initialRole === 'student' ? 'major' : 'role',
   );
   const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole ?? 'student');
   const [pillar, setPillar] = useState('');
@@ -2646,18 +2782,18 @@ function ProfileOnboarding({
             </button>
             <button
               className="role-card mentor-role-card"
-              onClick={() => { setSelectedRole('mentor'); setOnboardStep('profile'); }}
+              onClick={() => { setSelectedRole('student'); setOnboardStep('major'); }}
             >
-              <div className="role-card-icon mentor"><HeartHandshake size={28} /></div>
-              <strong>Senior Mentor</strong>
-              <em>Year 2, 3 or 4 SUTD student</em>
+              <div className="role-card-icon mentor"><Users size={28} /></div>
+              <strong>Returning Student</strong>
+              <em>Year 2, 3 or 4 · Already enrolled</em>
               <ul>
-                <li><Check size={14} /> Answer module questions once, for everyone</li>
-                <li><Check size={14} /> Host study sessions and office hours</li>
-                <li><Check size={14} /> Get matched to freshmores in your modules</li>
-                <li><Check size={14} /> Build a verified mentoring profile</li>
+                <li><Check size={14} /> Connect with your year group and pillar</li>
+                <li><Check size={14} /> Find people in your modules</li>
+                <li><Check size={14} /> Join events and hostel jios</li>
+                <li><Check size={14} /> Help newer students in the module rooms</li>
               </ul>
-              <span className="role-card-cta">Set up mentor profile <ArrowRight size={15} /></span>
+              <span className="role-card-cta">Set up your profile <ArrowRight size={15} /></span>
             </button>
           </div>
         </div>
@@ -3555,6 +3691,209 @@ function WeeklyPulseModal({ onClose, userEmail }: { onClose: () => void; userEma
   );
 }
 
+// ─── Global Search ────────────────────────────────────────────────────────────
+
+function GlobalSearch({ onClose, onNavigate }: { onClose: () => void; onNavigate: (v: View) => void }) {
+  const [q, setQ] = useState('');
+  const [focused, setFocused] = useState(0);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => { inputRef.current?.focus(); }, []);
+
+  type SearchResult = { id: string; title: string; sub: string; tag: string; view: View; icon: LucideIcon };
+
+  const results = useMemo((): SearchResult[] => {
+    if (q.trim().length < 1) return [];
+    const ql = q.toLowerCase();
+    const out: SearchResult[] = [];
+
+    people.filter(p => p.name.toLowerCase().includes(ql) || p.role.toLowerCase().includes(ql) || p.tags.some(t => t.toLowerCase().includes(ql)))
+      .slice(0, 3).forEach(p => out.push({ id: 'p-'+p.name, title: p.name, sub: p.role, tag: 'People', view: 'people', icon: Users }));
+
+    starterEvents.filter(e => e.title.toLowerCase().includes(ql) || e.location.toLowerCase().includes(ql))
+      .slice(0, 2).forEach(e => out.push({ id: 'ev-'+e.id, title: e.title, sub: `${e.date} · ${e.location}`, tag: 'Events', view: 'events', icon: CalendarCheck }));
+
+    classOptions.filter(c => c.toLowerCase().includes(ql))
+      .slice(0, 2).forEach(c => out.push({ id: 'cl-'+c, title: c, sub: 'Module room', tag: 'Classes', view: 'classes', icon: BookOpen }));
+
+    fifthRowClubs.filter(c => c.name.toLowerCase().includes(ql) || c.cluster.toLowerCase().includes(ql))
+      .slice(0, 2).forEach(c => out.push({ id: 'fr-'+c.id, title: c.name, sub: `${c.cluster} · ${c.commitment}`, tag: 'Fifth Row', view: 'fifth-row', icon: Trophy }));
+
+    kbArticles.filter(a => a.title.toLowerCase().includes(ql) || a.category.toLowerCase().includes(ql))
+      .slice(0, 2).forEach(a => out.push({ id: 'kb-'+a.id, title: a.title, sub: a.category, tag: 'Knowledge Base', view: 'kb', icon: BookMarked }));
+
+    return out;
+  }, [q]);
+
+  const handleKey = (e: React.KeyboardEvent) => {
+    if (e.key === 'Escape') { onClose(); return; }
+    if (e.key === 'ArrowDown') { e.preventDefault(); setFocused(f => Math.min(f + 1, results.length - 1)); }
+    if (e.key === 'ArrowUp')   { e.preventDefault(); setFocused(f => Math.max(f - 1, 0)); }
+    if (e.key === 'Enter' && results[focused]) { onNavigate(results[focused].view); onClose(); }
+  };
+
+  const groups = Array.from(new Set(results.map(r => r.tag)));
+
+  return (
+    <div className="search-overlay" onClick={onClose}>
+      <div className="search-modal" onClick={e => e.stopPropagation()}>
+        <div className="search-input-row">
+          <Search size={17} />
+          <input
+            ref={inputRef}
+            placeholder="Search people, events, modules, Fifth Row…"
+            value={q}
+            onChange={e => { setQ(e.target.value); setFocused(0); }}
+            onKeyDown={handleKey}
+          />
+          <span className="search-kbd">Esc</span>
+        </div>
+        <div className="search-results">
+          {q.trim().length === 0 && (
+            <div className="search-empty">
+              <strong>Start typing to search</strong>
+              <span>People, events, modules, Fifth Row clubs, knowledge base</span>
+            </div>
+          )}
+          {q.trim().length > 0 && results.length === 0 && (
+            <div className="search-empty">
+              <strong>No results for "{q}"</strong>
+              <span>Try a name, module code, club, or topic</span>
+            </div>
+          )}
+          {groups.map(tag => (
+            <div key={tag}>
+              <div className="search-group-label">{tag}</div>
+              {results.filter(r => r.tag === tag).map((r, i) => {
+                const globalIdx = results.indexOf(r);
+                const Icon = r.icon;
+                return (
+                  <button key={r.id}
+                    className={`search-result-row${focused === globalIdx ? ' focused' : ''}`}
+                    onClick={() => { onNavigate(r.view); onClose(); }}
+                    onMouseEnter={() => setFocused(globalIdx)}
+                  >
+                    <div className="search-result-icon"><Icon size={14} /></div>
+                    <div style={{ flex: 1, minWidth: 0 }}>
+                      <div className="search-result-title">{r.title}</div>
+                      <div className="search-result-sub">{r.sub}</div>
+                    </div>
+                    <span className="search-result-tag">{r.tag}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ))}
+        </div>
+        <div className="search-footer">
+          <span><kbd>↑↓</kbd> navigate</span>
+          <span><kbd>↵</kbd> open</span>
+          <span><kbd>Esc</kbd> close</span>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Notification Panel ───────────────────────────────────────────────────────
+
+function NotificationPanel({
+  notifs, onClose, onMarkAll, onMarkRead, onNavigate,
+}: {
+  notifs: NotifItem[];
+  onClose: () => void;
+  onMarkAll: () => void;
+  onMarkRead: (id: string) => void;
+  onNavigate: (v: View) => void;
+}) {
+  const unread = notifs.filter(n => !n.read).length;
+  return (
+    <div className="notif-panel-overlay" onClick={onClose}>
+      <div className="notif-panel" onClick={e => e.stopPropagation()}>
+        <div className="notif-panel-head">
+          <strong>Notifications {unread > 0 ? `· ${unread} new` : ''}</strong>
+          {unread > 0 && <button className="notif-mark-all" onClick={onMarkAll}>Mark all read</button>}
+        </div>
+        <div className="notif-list">
+          {notifs.length === 0 && <div className="notif-empty">All caught up — no new notifications.</div>}
+          {notifs.map(n => (
+            <button key={n.id} className={`notif-item${n.read ? '' : ' unread'}`}
+              onClick={() => {
+                onMarkRead(n.id);
+                if (n.action) { onNavigate(n.action.view); onClose(); }
+              }}>
+              <div className="notif-item-body">
+                <div className="notif-item-title">{n.title}</div>
+                <div className="notif-item-text">{n.body}</div>
+                <div className="notif-item-time">{n.time}</div>
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Mobile Bottom Nav ────────────────────────────────────────────────────────
+
+function MobileBottomNav({ active, setActive }: { active: View; setActive: (v: View) => void }) {
+  const [moreOpen, setMoreOpen] = useState(false);
+  const primaryItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
+    { id: 'today',    label: 'Home',    icon: Rocket },
+    { id: 'events',   label: 'Events',  icon: CalendarCheck },
+    { id: 'people',   label: 'People',  icon: Users },
+    { id: 'classes',  label: 'Classes', icon: BookOpen },
+    { id: 'messages', label: 'Chats',   icon: MessageCircle },
+  ];
+  const moreItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
+    { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
+    { id: 'hostel',    label: 'Hostel',    icon: Building2 },
+    { id: 'kb',        label: 'Knowledge', icon: BookMarked },
+  ];
+  return (
+    <>
+      {moreOpen && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 150 }} onClick={() => setMoreOpen(false)}>
+          <div className="mobile-more-sheet" onClick={e => e.stopPropagation()}>
+            <div className="mobile-more-handle" />
+            <div className="mobile-more-grid">
+              {moreItems.map(item => {
+                const Icon = item.icon;
+                return (
+                  <button key={item.id} className={`mobile-more-item${active === item.id ? ' active' : ''}`}
+                    onClick={() => { setActive(item.id); setMoreOpen(false); }}>
+                    <Icon size={20} />
+                    <span>{item.label}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+      <nav className="mobile-bottom-nav">
+        <div className="mobile-nav-items">
+          {primaryItems.map(item => {
+            const Icon = item.icon;
+            const isActive = active === item.id;
+            return (
+              <button key={item.id} className={`mobile-nav-btn${isActive ? ' active' : ''}`}
+                onClick={() => setActive(item.id)}>
+                <Icon size={20} />
+                <span>{item.label}</span>
+                <div className="mobile-nav-dot" />
+              </button>
+            );
+          })}
+        </div>
+      </nav>
+    </>
+  );
+}
+
+// ─── Student App ──────────────────────────────────────────────────────────────
+
 function StudentApp({
   user,
   profile,
@@ -3570,10 +3909,15 @@ function StudentApp({
   onProfileUpdate: (p: StudentProfile) => void;
   onResetDemo: () => void;
 }) {
-  const isMentor = profile.role === 'mentor';
-  const [activeView, setActiveView] = useState<View>(isMentor ? 'mentor-home' : 'today');
+  const [activeView, setActiveView] = useState<View>('today');
   const [dmTarget, setDmTarget] = useState<string | null>(null);
   const openDm = (name: string) => { setDmTarget(name); setActiveView('messages'); };
+  const [showSearch, setShowSearch] = useState(false);
+  const [showNotifPanel, setShowNotifPanel] = useState(false);
+  const [notifs, setNotifs] = useState<NotifItem[]>(() => loadNotifs(user.email));
+  const unreadCount = notifs.filter(n => !n.read).length;
+  const markAllRead = () => { const updated = notifs.map(n => ({ ...n, read: true })); setNotifs(updated); saveNotifs(user.email, updated); };
+  const markRead = (id: string) => { const updated = notifs.map(n => n.id === id ? { ...n, read: true } : n); setNotifs(updated); saveNotifs(user.email, updated); };
   const [events, setEvents] = useState(starterEvents);
   const [joinedEvents, setJoinedEvents] = useState<Set<string>>(new Set());
   const joinEvent = (id: string) => setJoinedEvents((prev) => new Set([...prev, id]));
@@ -3595,11 +3939,11 @@ function StudentApp({
   }, [activeView]);
 
   useEffect(() => {
-    if (!isMentor && shouldShowPulse()) {
+    if (shouldShowPulse()) {
       const timer = setTimeout(() => setShowPulse(true), 3000);
       return () => clearTimeout(timer);
     }
-  }, [isMentor]);
+  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => { e.preventDefault(); deferredInstallRef.current = e; setShowPwaBanner(true); };
@@ -3608,11 +3952,27 @@ function StudentApp({
   }, []);
 
   useEffect(() => {
-    if ('Notification' in window && Notification.permission === 'default' && !isMentor) {
+    if ('Notification' in window && Notification.permission === 'default') {
       const timer = setTimeout(() => setShowNotifBanner(true), 8000);
       return () => clearTimeout(timer);
     }
-  }, [isMentor]);
+  }, []);
+
+  // CMD+K / Ctrl+K global search shortcut
+  useEffect(() => {
+    const handler = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
+        e.preventDefault();
+        setShowSearch(s => !s);
+      }
+      if (e.key === 'Escape') {
+        setShowSearch(false);
+        setShowNotifPanel(false);
+      }
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, []);
 
   const handleInstall = () => {
     const prompt = deferredInstallRef.current as (Event & { prompt?: () => void }) | null;
@@ -3692,6 +4052,9 @@ function StudentApp({
 
   return (
     <>
+    {showSearch && <GlobalSearch onClose={() => setShowSearch(false)} onNavigate={(v) => { setActiveView(v); setShowSearch(false); }} />}
+    {showNotifPanel && <NotificationPanel notifs={notifs} onClose={() => setShowNotifPanel(false)} onMarkAll={markAllRead} onMarkRead={markRead} onNavigate={(v) => { setActiveView(v); setShowNotifPanel(false); }} />}
+    <MobileBottomNav active={activeView} setActive={setActiveView} />
     {showPulse && <WeeklyPulseModal onClose={() => setShowPulse(false)} userEmail={user.email} />}
     {showEditProfile && (
       <EditProfileSheet
@@ -3716,16 +4079,16 @@ function StudentApp({
     )}
     <div className="student-shell">
       <aside className="app-rail">
-        <button className="brand-button" onClick={() => setActiveView(isMentor ? 'mentor-home' : 'today')}>
+        <button className="brand-button" onClick={() => setActiveView('today')}>
           <span className="brand-mark">C</span>
           <span>
             <strong>Cohortly</strong>
-            <small>{institution.shortName} · {isMentor ? 'Mentor' : 'Student'}</small>
+            <small>{institution.shortName} · Student</small>
           </span>
         </button>
 
         <nav className="rail-nav">
-          {(isMentor ? mentorNavItems : navItems).map((item) => {
+          {navItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
@@ -3763,7 +4126,7 @@ function StudentApp({
         <div className="rail-proof">
           <ShieldCheck size={18} />
           <div>
-            <strong>{isMentor ? 'Senior Mentor' : 'Verified student'}</strong>
+            <strong>Verified student</strong>
             <span>{user.email}</span>
           </div>
         </div>
@@ -3772,18 +4135,21 @@ function StudentApp({
       <div className="student-main">
         <header className="app-topbar">
           <div>
-            <span className="eyebrow">{isMentor ? 'SUTD Mentor Network' : 'Student-led campus network'}</span>
-            <h1>{activeView === 'privacy' ? 'Privacy & Data' : activeView === 'notifications' ? 'Notifications & Bots' : ([...navItems, ...mentorNavItems].find((item) => item.id === activeView)?.label ?? 'Cohortly')}</h1>
+            <span className="eyebrow">Student-led campus network</span>
+            <h1>{activeView === 'privacy' ? 'Privacy & Data' : activeView === 'notifications' ? 'Notifications & Bots' : (navItems.find((item) => item.id === activeView)?.label ?? 'Cohortly')}</h1>
           </div>
           <div className="topbar-actions">
-            <button className="icon-button" aria-label="Search">
-              <Search size={18} />
+            <button className="topbar-search-btn" aria-label="Search (⌘K)" onClick={() => setShowSearch(true)}>
+              <Search size={16} />
+              <span className="topbar-search-label">Search or jump to…</span>
+              <kbd className="topbar-search-kbd">⌘K</kbd>
             </button>
-            <div className="notif-wrap">
-              <button className="icon-button" aria-label="Notifications" onClick={() => setActiveView('notifications')}>
+            <span className="topbar-divider" aria-hidden="true" />
+            <div className="notif-wrap" style={{ position: 'relative' }}>
+              <button className="icon-button" aria-label="Notifications" onClick={() => setShowNotifPanel(p => !p)}>
                 <BellRing size={18} />
               </button>
-              <span className="notif-badge">3</span>
+              {unreadCount > 0 && <span className="notif-badge">{unreadCount > 9 ? '9+' : unreadCount}</span>}
             </div>
             <div className="profile-wrap" ref={profileRef}>
               <button className="profile-chip" onClick={() => setProfileOpen((o) => !o)}>
@@ -3848,6 +4214,7 @@ function StudentApp({
             {activeView === 'today' && (
               <LaunchpadView
                 userEmail={user.email}
+                userName={user.name}
                 setActiveView={setActiveView}
               />
             )}
@@ -3871,12 +4238,10 @@ function StudentApp({
                 addEvent={addEvent}
               />
             )}
-            {activeView === 'people' && <PeopleView isMentor={isMentor} userEmail={user.email} onMessage={openDm} />}
-            {activeView === 'classes' && <ClassesView isMentor={isMentor} mentorName={isMentor ? user.name : undefined} enrolledClasses={profile.classes} onEnroll={(updated) => onProfileUpdate({ ...profile, classes: updated })} />}
-            {activeView === 'messages' && <MessagesView isMentor={isMentor} openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
-            {activeView === 'hostel' && <HostelView profile={profile} onProfileUpdate={onProfileUpdate} />}
-            {activeView === 'mentor-home' && <MentorDashboardView user={user} profile={profile} setActiveView={setActiveView} />}
-            {activeView === 'mentor-help' && <MentorHelpView profile={profile} />}
+            {activeView === 'people' && <PeopleView userEmail={user.email} onMessage={openDm} />}
+            {activeView === 'classes' && <ClassesView enrolledClasses={profile.classes} onEnroll={(updated) => onProfileUpdate({ ...profile, classes: updated })} />}
+            {activeView === 'messages' && <MessagesView openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
+            {activeView === 'hostel' && <HostelView profile={profile} onProfileUpdate={onProfileUpdate} userEmail={user.email} userName={user.name} />}
             {activeView === 'privacy' && <PrivacySettingsView userEmail={user.email} userName={user.name} onBack={() => setActiveView('today')} onLogout={logout} />}
             {activeView === 'notifications' && <NotificationsView userEmail={user.email} />}
           </div>
@@ -4055,9 +4420,11 @@ function BelongingScoreBanner({ userEmail }: { userEmail: string }) {
 
 function LaunchpadView({
   userEmail,
+  userName = 'Student',
   setActiveView,
 }: {
   userEmail: string;
+  userName?: string;
   setActiveView: (v: View) => void;
 }) {
   const [statuses, setStatuses] = useState<Record<string, TaskStatus>>(() => loadLaunchpadStatuses(userEmail));
@@ -4077,9 +4444,28 @@ function LaunchpadView({
     });
   };
 
+  const requestHelp = (task: LaunchpadTask) => {
+    setStatuses((prev) => {
+      const updated = { ...prev, [task.id]: 'need-help' as TaskStatus };
+      saveLaunchpadStatuses(userEmail, updated);
+      return updated;
+    });
+    addInterventionCase(userEmail, userName, `Needs help with: ${task.label}`, 'launchpad');
+  };
+
   const totalTasks = launchpadPhases.reduce((a, p) => a + p.tasks.length, 0);
   const doneTasks = Object.values(statuses).filter((s) => s === 'done').length;
   const overallPct = Math.round((doneTasks / totalTasks) * 100);
+
+  // Next best action: first task across all phases that isn't done
+  const nextAction = (() => {
+    for (const phase of launchpadPhases) {
+      for (const task of phase.tasks) {
+        if ((statuses[task.id] ?? 'not-started') !== 'done') return { phase, task };
+      }
+    }
+    return null;
+  })();
 
   const currentPhase = launchpadPhases.find((p) => p.id === activePhase) ?? launchpadPhases[0];
 
@@ -4130,6 +4516,31 @@ function LaunchpadView({
 
       <div className="launchpad-main">
         <BelongingScoreBanner userEmail={userEmail} />
+        {nextAction && (
+          <div className="launchpad-next-action">
+            <div className="launchpad-next-action-label">
+              <Sparkles size={13} /> Next best action
+            </div>
+            <strong>{nextAction.task.label}</strong>
+            <p>{nextAction.task.desc}</p>
+            <div className="launchpad-next-action-cta">
+              {nextAction.task.link && (
+                <button
+                  className="launchpad-next-go"
+                  onClick={() => { setActivePhase(nextAction.phase.id); setActiveView(nextAction.task.link!.view); }}
+                >
+                  {nextAction.task.link.label} <ArrowRight size={12} />
+                </button>
+              )}
+              <button
+                className="launchpad-next-jump"
+                onClick={() => setActivePhase(nextAction.phase.id)}
+              >
+                Go to step
+              </button>
+            </div>
+          </div>
+        )}
         <div className="launchpad-phase-head">
           <h2>{currentPhase.label}</h2>
           <p>{phaseDesc[currentPhase.id]}</p>
@@ -4159,10 +4570,22 @@ function LaunchpadView({
                 <div className="launchpad-task-info">
                   <strong>{task.label}</strong>
                   <p>{task.desc}</p>
-                  {task.link && (
-                    <button className="launchpad-task-link" onClick={() => setActiveView(task.link!.view)}>
-                      {task.link.label} <ArrowRight size={11} />
-                    </button>
+                  <div className="launchpad-task-actions">
+                    {task.link && (
+                      <button className="launchpad-task-link" onClick={() => setActiveView(task.link!.view)}>
+                        {task.link.label} <ArrowRight size={11} />
+                      </button>
+                    )}
+                    {status !== 'need-help' && status !== 'done' && (
+                      <button className="launchpad-task-help" onClick={() => requestHelp(task)}>
+                        <LifeBuoy size={11} /> Need help
+                      </button>
+                    )}
+                  </div>
+                  {status === 'need-help' && (
+                    <div className="launchpad-task-help-msg">
+                      <HeartHandshake size={12} /> A student support advisor will check in with you soon.
+                    </div>
                   )}
                 </div>
               </div>
@@ -4236,7 +4659,10 @@ const frQuizQuestions = [
 
 function FifthRowView() {
   const [activeCluster, setActiveCluster] = useState<FifthRowCluster | 'All'>('All');
-  const [interested, setInterested] = useState<Set<string>>(new Set());
+  const [interested, setInterested] = useState<Set<string>>(() => {
+    try { return new Set(JSON.parse(localStorage.getItem('fifth_row_interests') ?? '[]')); }
+    catch { return new Set(); }
+  });
   const [quizOpen, setQuizOpen] = useState(false);
   const [quizStep, setQuizStep] = useState(0);
   const [quizAnswers, setQuizAnswers] = useState<Record<string, string | null>>({});
@@ -4249,6 +4675,7 @@ function FifthRowView() {
     setInterested((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
+      try { localStorage.setItem('fifth_row_interests', JSON.stringify([...next])); } catch {}
       return next;
     });
   };
@@ -4514,10 +4941,8 @@ function EventsView({
           </div>
         </div>
 
-        <div className="calendar-weekdays">
-          {weekdayLabels.map((day) => <span key={day}>{day}</span>)}
-        </div>
         <div className="calendar-grid">
+          {weekdayLabels.map((day) => <span key={day} className="cal-header-cell">{day}</span>)}
           {calendarDays.map((day) => {
             const dayEvents = eventsByDate[day.key] ?? [];
             const selected = selectedDate === day.key;
@@ -4834,10 +5259,10 @@ function activityDot(n: number) {
   return '#6b7280';
 }
 
-function PeopleView({ isMentor = false, userEmail, onMessage }: { isMentor?: boolean; userEmail?: string; onMessage?: (name: string) => void }) {
+function PeopleView({ userEmail, onMessage }: { userEmail?: string; onMessage?: (name: string) => void }) {
   const [connected, setConnected] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'mentors' | 'modules' | 'new'>('all');
+  const [activeTab, setActiveTab] = useState<'all' | 'y1' | 'y2' | 'y3plus' | 'modules'>('all');
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
 
   // Firestore connections listener
@@ -4861,15 +5286,17 @@ function PeopleView({ isMentor = false, userEmail, onMessage }: { isMentor?: boo
 
   const tabs: Array<{ id: typeof activeTab; label: string }> = [
     { id: 'all', label: 'Everyone' },
-    { id: 'mentors', label: 'Senior Mentors' },
+    { id: 'y1', label: 'Year 1' },
+    { id: 'y2', label: 'Year 2' },
+    { id: 'y3plus', label: 'Year 3+' },
     { id: 'modules', label: 'My Modules' },
-    { id: 'new', label: 'New Students' },
   ];
 
   const filtered = useMemo(() => {
     let result = people;
-    if (activeTab === 'mentors') result = result.filter((p) => p.role.toLowerCase().includes('mentor'));
-    if (activeTab === 'new') result = result.filter((p) => p.role.toLowerCase().includes('incoming') || p.role.toLowerCase().includes('exchange'));
+    if (activeTab === 'y1') result = result.filter((p) => /freshmore|year 1|incoming|exchange/i.test(p.role));
+    if (activeTab === 'y2') result = result.filter((p) => /year 2/i.test(p.role));
+    if (activeTab === 'y3plus') result = result.filter((p) => /year [34]/i.test(p.role));
     if (searchQuery.trim()) {
       const q = searchQuery.toLowerCase();
       result = result.filter(
@@ -4885,9 +5312,9 @@ function PeopleView({ isMentor = false, userEmail, onMessage }: { isMentor?: boo
     <div className="screen-stack">
       <div className="people-header">
         <div>
-          <span className="eyebrow">{isMentor ? 'Your student matches' : 'Verified network'}</span>
+          <span className="eyebrow">Verified network</span>
           <h2 style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: 4 }}>
-            {filtered.length} {filtered.length === 1 ? 'person' : 'people'} · {isMentor ? 'sorted by module match' : 'sorted by compatibility'}
+            {filtered.length} {filtered.length === 1 ? 'person' : 'people'} · sorted by compatibility
           </h2>
         </div>
         <div className="people-search-bar">
@@ -4938,7 +5365,7 @@ function PeopleView({ isMentor = false, userEmail, onMessage }: { isMentor?: boo
                 onClick={(e) => { e.stopPropagation(); connect(person.name); }}
                 disabled={isConnected}
               >
-                {isConnected ? <><Check size={14} /> {isMentor ? 'Session started' : 'Connected'}</> : (isMentor ? 'Start session' : 'Request intro')}
+                {isConnected ? <><Check size={14} /> Connected</> : 'Request intro'}
               </button>
             </article>
           );
@@ -4960,7 +5387,7 @@ type QAThread = { id: string; text: string; author: string; time: string; answer
 
 const seedQA: Record<string, QAThread[]> = {
   '10.014': [
-    { id: 'q1', text: 'Do we need to know recursion before Lab 2?', author: 'Vanika', time: '2h ago', answered: true, answer: 'Yes — trace through the factorial example in the notes first. Come tonight at 8:30 to Building 5, Room 3 if you want to walk through it live.', answerer: 'Aarav (Y3 ISTD)' },
+    { id: 'q1', text: 'Do we need to know recursion before Lab 2?', author: 'Vanika', time: '2h ago', answered: true, answer: 'Yes — trace through the factorial example in the notes first. Head to Building 5 Level 3 study area this week if you want to walk through it live.', answerer: 'Aarav (Y3 ISTD)' },
     { id: 'q2', text: 'Is Python or Java used in this module?', author: 'Jerome', time: '4h ago', answered: true, answer: 'Python throughout. The first lab uses Jupyter notebooks — install Anaconda or use the lab machines.', answerer: 'Sara (Y2 DAI)' },
     { id: 'q3', text: 'Where do we submit Lab 1?', author: 'Sofia', time: '6h ago', answered: false },
   ],
@@ -5009,10 +5436,11 @@ const seedShowcase: ShowcasePost[] = [
 ];
 
 function ClassesView({
-  isMentor = false, mentorName, enrolledClasses = [], onEnroll,
+  enrolledClasses = [], onEnroll,
 }: {
-  isMentor?: boolean; mentorName?: string; enrolledClasses?: string[]; onEnroll?: (c: string[]) => void;
+  enrolledClasses?: string[]; onEnroll?: (c: string[]) => void;
 }) {
+  const isMentor = false;
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [questionText, setQuestionText] = useState('');
   const [askAnonymous, setAskAnonymous] = useState(false);
@@ -5125,7 +5553,7 @@ function ClassesView({
   const submitAnswer = (threadId: string) => {
     const text = answerText.trim();
     if (!text || !selectedCode) return;
-    const displayName = mentorName ? `${mentorName.split(' ')[0]} (Senior)` : 'Senior Mentor';
+    const displayName = 'Senior Student';
     const updated = (localQA[selectedCode] ?? []).map((q) =>
       q.id === threadId ? { ...q, answered: true, answer: text, answerer: displayName } : q,
     );
@@ -5699,22 +6127,33 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
     ? ['Vanika · 10.014 help request', 'Kai · CTD prep session', '10.014 study group', 'ISTD freshmores circle']
     : ['Aarav · 10.014 prep', 'Food crawl group', 'SUTD exchange arrivals', 'ASD design studio warmup'];
 
+  type ChatMsg = { author: string; text: string; tone: 'student' | 'mentor' | 'system' };
+  const threadKey = (thread: string) => `messages_${thread.replace(/\s+/g, '_').toLowerCase()}`;
+  const loadThreadMessages = (thread: string): ChatMsg[] => {
+    try { return JSON.parse(localStorage.getItem(threadKey(thread)) ?? '[]'); } catch { return []; }
+  };
+
   const [threads, setThreads] = useState(defaultThreads);
   const [activeThread, setActiveThread] = useState(defaultThreads[0]);
   const [input, setInput] = useState('');
-  const [localMessages, setLocalMessages] = useState<{ author: string; text: string; tone: 'student' | 'mentor' | 'system' }[]>([]);
+  const [localMessages, setLocalMessages] = useState<ChatMsg[]>(() => loadThreadMessages(defaultThreads[0]));
+
+  const selectThread = (thread: string) => {
+    setActiveThread(thread);
+    setLocalMessages(loadThreadMessages(thread));
+  };
 
   // When navigated here from People tab, inject or select the thread
   useEffect(() => {
     if (!openWith) return;
     const matchingThread = threads.find((t) => t.toLowerCase().startsWith(openWith.toLowerCase().split(' ')[0]));
     if (matchingThread) {
-      setActiveThread(matchingThread);
+      selectThread(matchingThread);
     } else {
       const newThread = `${openWith} · new conversation`;
       setThreads((prev) => [newThread, ...prev]);
       setActiveThread(newThread);
-      setLocalMessages([]);
+      setLocalMessages(loadThreadMessages(newThread));
     }
     onClearTarget?.();
   }, [openWith]);
@@ -5724,7 +6163,9 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
 
   const send = () => {
     if (!input.trim()) return;
-    setLocalMessages((prev) => [...prev, { author: 'You', text: input.trim(), tone: 'student' }]);
+    const next: ChatMsg[] = [...localMessages, { author: 'You', text: input.trim(), tone: 'student' }];
+    setLocalMessages(next);
+    try { localStorage.setItem(threadKey(activeThread), JSON.stringify(next)); } catch {}
     setInput('');
   };
 
@@ -5737,7 +6178,7 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
   ) : (
     <>
       <Message tone="student" author="Vanika" text="I am nervous about coding because everyone sounds ahead already." />
-      <Message tone="mentor" author="Aarav" text="That is exactly why the prep room exists. Come tonight and we will start with tracing code by hand — Building 5, Room 3." />
+      <Message tone="mentor" author="Aarav" text="That is exactly why the prep room exists. Drop by Building 5 Level 3 this week and we will start with tracing code by hand." />
       <Message tone="system" author="Cohortly" text="Matched on 10.014, Startups & iCube, Badminton, and weekday evening availability." />
     </>
   );
@@ -5762,7 +6203,7 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
             <button
               className={`thread-row${activeThread === thread ? ' active' : ''}`}
               key={thread}
-              onClick={() => { setActiveThread(thread); setLocalMessages([]); }}
+              onClick={() => selectThread(thread)}
             >
               <span className="thread-avatar">{av}</span>
               <span className="thread-info">
@@ -5804,7 +6245,7 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && send()}
           />
-          <button className="primary-button icon-only" aria-label="Send" onClick={send}><Send size={18} /></button>
+          <button className="primary-button icon-only" aria-label="Send" onClick={send} disabled={!input.trim()}><Send size={18} /></button>
         </div>
       </section>
     </div>
@@ -6519,6 +6960,46 @@ function AdminInvitesView() {
   const [emailDomain, setEmailDomain] = useState('@mymail.sutd.edu.sg');
   const [copied, setCopied] = useState<string | null>(null);
 
+  // Roster invite manager (named recipients, CSV import, status tracking)
+  const [records, setRecords] = useState<InviteRecord[]>(() => seedInviteRecords());
+  const [csvText, setCsvText] = useState(inviteDemoCsv);
+  const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [recFilter, setRecFilter] = useState<'all' | InviteRecord['status']>('all');
+  const [linkCopied, setLinkCopied] = useState<string | null>(null);
+
+  const persistRecords = (next: InviteRecord[]) => { setRecords(next); saveInviteRecords(next); };
+  const importCsv = () => {
+    const parsed = parseInviteCsv(csvText, cohort);
+    if (parsed.length === 0) return;
+    const existingEmails = new Set(records.map((r) => r.email.toLowerCase()));
+    const fresh = parsed.filter((r) => !existingEmails.has(r.email.toLowerCase()));
+    persistRecords([...fresh, ...records]);
+  };
+  const toggleSelect = (id: string) => {
+    setSelected((prev) => { const n = new Set(prev); n.has(id) ? n.delete(id) : n.add(id); return n; });
+  };
+  const markSelectedSent = () => {
+    if (selected.size === 0) return;
+    persistRecords(records.map((r) => selected.has(r.id) && r.status === 'not_sent' ? { ...r, status: 'sent' as const } : r));
+    setSelected(new Set());
+  };
+  const copyInviteLink = (rec: InviteRecord) => {
+    const link = `https://cohortly.app/join?email=${encodeURIComponent(rec.email)}&cohort=${encodeURIComponent(rec.cohort)}`;
+    navigator.clipboard.writeText(link).catch(() => {});
+    setLinkCopied(rec.id);
+    setTimeout(() => setLinkCopied(null), 2000);
+  };
+  const filteredRecords = recFilter === 'all' ? records : records.filter((r) => r.status === recFilter);
+  const recStats = {
+    total: records.length,
+    verified: records.filter((r) => r.status === 'verified' || r.status === 'onboarded').length,
+    onboarded: records.filter((r) => r.status === 'onboarded').length,
+    needsReminder: records.filter((r) => r.status === 'sent' || r.status === 'opened').length,
+  };
+  const recStatusLabel: Record<InviteRecord['status'], string> = {
+    not_sent: 'Not sent', sent: 'Sent', opened: 'Opened', verified: 'Verified', onboarded: 'Onboarded',
+  };
+
   const generateCode = () => {
     const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     const part = (n: number) => Array.from({ length: n }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
@@ -6545,6 +7026,91 @@ function AdminInvitesView() {
 
   return (
     <div className="admin-overview">
+      <div className="admin-metrics" style={{ gridTemplateColumns: 'repeat(4, 1fr)' }}>
+        <div className="admin-metric">
+          <span className="admin-metric-value">{recStats.total}</span>
+          <span className="admin-metric-label">Total invited</span>
+          <span className="admin-metric-change">Named recipients</span>
+        </div>
+        <div className="admin-metric">
+          <span className="admin-metric-value" style={{ color: '#059669' }}>{recStats.verified}</span>
+          <span className="admin-metric-label">Verified</span>
+          <span className="admin-metric-change">Account confirmed</span>
+        </div>
+        <div className="admin-metric">
+          <span className="admin-metric-value" style={{ color: 'var(--accent)' }}>{recStats.onboarded}</span>
+          <span className="admin-metric-label">Onboarded</span>
+          <span className="admin-metric-change">Completed setup</span>
+        </div>
+        <div className="admin-metric">
+          <span className="admin-metric-value" style={{ color: '#d97706' }}>{recStats.needsReminder}</span>
+          <span className="admin-metric-label">Needs reminder</span>
+          <span className="admin-metric-change neutral">Sent, not verified</span>
+        </div>
+      </div>
+
+      <div className="admin-panel">
+        <div className="admin-panel-head">
+          <div>
+            <span className="eyebrow">Roster import</span>
+            <h2>Invite recipients by CSV</h2>
+          </div>
+        </div>
+        <div className="invite-gen-card">
+          <p style={{ fontSize: '0.78rem', color: 'var(--muted)', margin: '0 0 8px' }}>Paste one per line: <code>name,email,role,pillar</code></p>
+          <textarea
+            className="class-import-textarea"
+            style={{ width: '100%', minHeight: 120 }}
+            value={csvText}
+            onChange={(e) => setCsvText(e.target.value)}
+          />
+          <div style={{ display: 'flex', gap: 8, marginTop: 10, flexWrap: 'wrap' }}>
+            <button className="primary-button" onClick={importCsv}><Upload size={15} /> Import {parseInviteCsv(csvText, cohort).length || ''} rows</button>
+            <button className="secondary-button" onClick={markSelectedSent} disabled={selected.size === 0}><MailCheck size={14} /> Mark selected as sent ({selected.size})</button>
+          </div>
+        </div>
+      </div>
+
+      <div className="admin-panel">
+        <div className="admin-panel-head" style={{ marginBottom: 14 }}>
+          <div>
+            <span className="eyebrow">Recipients</span>
+            <h2>{records.length} invited</h2>
+          </div>
+          <div className="risk-filter-tabs">
+            {(['all', 'not_sent', 'sent', 'opened', 'verified', 'onboarded'] as const).map((f) => (
+              <button key={f} className={`risk-filter-tab${recFilter === f ? ' active-all' : ''}`} onClick={() => setRecFilter(f)}>
+                {f === 'all' ? `All (${records.length})` : `${recStatusLabel[f]} (${records.filter((r) => r.status === f).length})`}
+              </button>
+            ))}
+          </div>
+        </div>
+        <div className="invite-table-wrap">
+          <table className="invite-table">
+            <thead>
+              <tr><th></th><th>Name</th><th>Email</th><th>Role</th><th>Pillar</th><th>Status</th><th>Actions</th></tr>
+            </thead>
+            <tbody>
+              {filteredRecords.map((rec) => (
+                <tr key={rec.id}>
+                  <td><input type="checkbox" checked={selected.has(rec.id)} onChange={() => toggleSelect(rec.id)} /></td>
+                  <td><strong style={{ fontSize: '0.82rem' }}>{rec.name}</strong></td>
+                  <td style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>{rec.email}</td>
+                  <td style={{ fontSize: '0.76rem' }}>{rec.role}</td>
+                  <td style={{ fontSize: '0.76rem', color: 'var(--muted)' }}>{rec.pillar}</td>
+                  <td><span className={`invite-status-badge ${rec.status === 'not_sent' ? 'unused' : rec.status === 'verified' || rec.status === 'onboarded' ? 'used' : 'unused'}`}>{recStatusLabel[rec.status]}</span></td>
+                  <td>
+                    <button className="secondary-button" onClick={() => copyInviteLink(rec)}>
+                      {linkCopied === rec.id ? <><Check size={12} /> Copied</> : <><Copy size={12} /> Copy invite link</>}
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <div className="admin-metrics" style={{ gridTemplateColumns: 'repeat(3, 1fr)' }}>
         <div className="admin-metric">
           <span className="admin-metric-value">{stats.unused}</span>
@@ -6665,6 +7231,20 @@ function AdminIsolationView() {
   const [noteInput, setNoteInput] = useState<Record<string, string>>({});
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
+  // Student self-reported cases (from Launchpad "Need help", Hostel "settling in", etc.)
+  const [cases, setCases] = useState<InterventionCase[]>(() => loadInterventionCases());
+  const [caseFilter, setCaseFilter] = useState<'all' | 'new' | 'contacted' | 'resolved'>('all');
+
+  const updateCase = (id: string, updates: Partial<InterventionCase>) => {
+    const updated = cases.map((c) => c.id === id ? { ...c, ...updates, updatedAt: new Date().toISOString() } : c);
+    setCases(updated);
+    saveInterventionCases(updated);
+  };
+  const filteredCases = caseFilter === 'all' ? cases : cases.filter((c) => c.status === caseFilter);
+  const caseStatusColor: Record<InterventionCase['status'], string> = {
+    new: '#ef4444', contacted: '#d97706', monitoring: '#6366f1', resolved: '#059669', escalated: '#dc2626',
+  };
+
   const filtered = filterLevel === 'all' ? riskStudents : riskStudents.filter((s) => s.riskLevel === filterLevel);
 
   const stageOrder: InterventionStage[] = ['flagged', 'contacted', 're-measured', 'resolved', 'escalated'];
@@ -6726,6 +7306,53 @@ function AdminIsolationView() {
           <span className="admin-metric-label">Clear — healthy</span>
           <span className="admin-metric-change">Active &amp; connected</span>
         </div>
+      </div>
+
+      <div className="admin-panel">
+        <div className="admin-panel-head" style={{ marginBottom: 16 }}>
+          <div>
+            <span className="eyebrow">Student-reported</span>
+            <h2>Help requests · {cases.length} case{cases.length !== 1 ? 's' : ''}</h2>
+          </div>
+          <div className="risk-filter-tabs">
+            {(['all', 'new', 'contacted', 'resolved'] as const).map((f) => (
+              <button
+                key={f}
+                className={`risk-filter-tab${caseFilter === f ? ' active-all' : ''}`}
+                onClick={() => setCaseFilter(f)}
+              >
+                {f === 'all' ? `All (${cases.length})` : `${f.charAt(0).toUpperCase() + f.slice(1)} (${cases.filter((c) => c.status === f).length})`}
+              </button>
+            ))}
+          </div>
+        </div>
+        {filteredCases.length === 0 ? (
+          <div className="empty-state-wrapper">
+            <div className="empty-state-icon"><HeartHandshake size={22} /></div>
+            <div className="empty-state-title">No open help requests</div>
+            <p className="empty-state-body">When a student taps "Need help" on their Launchpad or asks for settling-in support, a privacy-safe case appears here.</p>
+          </div>
+        ) : (
+          <div className="case-list">
+            {filteredCases.map((c) => (
+              <div key={c.id} className="case-row">
+                <div className="case-row-main">
+                  <span className="intervention-stage-badge" style={{ background: caseStatusColor[c.status] }}>{c.status}</span>
+                  <div className="case-row-body">
+                    <strong>{c.studentName}</strong>
+                    <span>{c.reason}</span>
+                    <small>Source: {c.source} · {new Date(c.createdAt).toLocaleDateString()} · Suggested: {c.suggestedAction}</small>
+                  </div>
+                </div>
+                <div className="case-row-actions">
+                  <button className="risk-action-btn" disabled={c.status === 'contacted'} onClick={() => updateCase(c.id, { status: 'contacted' })}>Mark contacted</button>
+                  <button className="risk-action-btn" disabled={c.status === 'monitoring'} onClick={() => updateCase(c.id, { status: 'monitoring' })}>Monitoring</button>
+                  <button className="risk-action-btn" disabled={c.status === 'resolved'} onClick={() => updateCase(c.id, { status: 'resolved' })}>Resolve</button>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="admin-panel">
@@ -7952,12 +8579,18 @@ function Building3DSVG({
 
 // ─── Hostel View ──────────────────────────────────────────────────────────────
 
-function HostelView({ profile, onProfileUpdate }: { profile: StudentProfile; onProfileUpdate: (p: StudentProfile) => void }) {
+function HostelView({ profile, onProfileUpdate, userEmail = '', userName = 'Student' }: { profile: StudentProfile; onProfileUpdate: (p: StudentProfile) => void; userEmail?: string; userName?: string }) {
   const [showSetup, setShowSetup]     = useState(!profile.hostelBlock);
   const [activeBlock, setActiveBlock] = useState(profile.hostelBlock ?? '1N');
   const [selectedRoom, setSelectedRoom] = useState<HostelResident | null>(null);
   const [activeTab, setActiveTab]     = useState<'building'|'campus'|'jios'>('building');
   const [joinedJios, setJoinedJios]   = useState<Set<string>>(new Set());
+  const [settlingHelpRequested, setSettlingHelpRequested] = useState(false);
+
+  const requestSettlingHelp = () => {
+    addInterventionCase(userEmail || 'self', userName, 'Requested help settling into hostel', 'hostel');
+    setSettlingHelpRequested(true);
+  };
 
   const myBlock = profile.hostelBlock;
   const myFloor = profile.hostelFloor;
@@ -8171,6 +8804,25 @@ function HostelView({ profile, onProfileUpdate }: { profile: StudentProfile; onP
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Settling-in support */}
+          <div className="hostel-panel-card">
+            <span className="eyebrow" style={{display:'block',marginBottom:8}}>New here?</span>
+            {settlingHelpRequested ? (
+              <div className="launchpad-task-help-msg" style={{ marginTop: 0 }}>
+                <HeartHandshake size={12}/> A student support advisor will check in with you soon.
+              </div>
+            ) : (
+              <>
+                <p style={{ fontSize:'0.79rem', color:'var(--muted)', margin:'0 0 10px', lineHeight:1.5 }}>
+                  Moving in can feel overwhelming. If you'd like a hand settling in, we'll connect you with someone.
+                </p>
+                <button className="secondary-button wide" onClick={requestSettlingHelp}>
+                  <LifeBuoy size={13}/> I need help settling in
+                </button>
+              </>
+            )}
           </div>
 
           {/* Legend */}
