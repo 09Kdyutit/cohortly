@@ -1946,9 +1946,33 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
 }
 
 const SUTD_DOMAINS = ['sutd.edu.sg', 'mymail.sutd.edu.sg'];
+const STATIC_DEMO_CODE = '123456';
+
+function isStaticHostedDemo(): boolean {
+  return typeof window !== 'undefined' && window.location.hostname.endsWith('github.io');
+}
 
 function emailIsSUTD(email: string): boolean {
   return SUTD_DOMAINS.some((d) => email.toLowerCase().endsWith(`@${d}`));
+}
+
+function validateManualIdentity(name: string, email: string, studentId: string): string | null {
+  if (!name.trim()) return 'Enter your full name.';
+  if (!emailIsSUTD(email.trim())) return 'Use a verified SUTD email: sutd.edu.sg or mymail.sutd.edu.sg.';
+  if (!/^[0-9]{7,9}$/i.test(studentId.trim())) return 'Use your numeric SUTD student ID, for example 1001234.';
+  return null;
+}
+
+function createVerifiedManualUser(name: string, email: string, studentId: string): VerifiedUser {
+  return {
+    name: name.trim(),
+    email: email.trim().toLowerCase(),
+    studentId: studentId.trim().toUpperCase(),
+    institutionId: 'sutd',
+    institutionName: 'Singapore University of Technology and Design',
+    shortName: 'SUTD',
+    verifiedAt: new Date().toISOString(),
+  };
 }
 
 function verifiedUserFromSSO(firebaseUser: { displayName: string | null; email: string | null }): VerifiedUser | null {
@@ -1991,6 +2015,14 @@ function App() {
 
   useEffect(() => {
     let active = true;
+
+    if (isStaticHostedDemo()) {
+      setInstitutions(fallbackInstitutions);
+      setLoading(false);
+      return () => {
+        active = false;
+      };
+    }
 
     Promise.all([
       fetch('/api/auth/institutions').then((response) => response.json()).catch(() => ({ institutions: fallbackInstitutions })),
@@ -2393,6 +2425,15 @@ function AuthScreen({
     setBusy(true);
     setError('');
     try {
+      if (isStaticHostedDemo()) {
+        const validationError = validateManualIdentity(name, email, studentId);
+        if (validationError) throw new Error(validationError);
+        setDevCode(STATIC_DEMO_CODE);
+        setCode(STATIC_DEMO_CODE);
+        setStep('code');
+        return;
+      }
+
       const payload = await postJson<{ devCode?: string }>('/api/auth/start', {
         institutionId: 'sutd',
         name,
@@ -2413,6 +2454,12 @@ function AuthScreen({
     setBusy(true);
     setError('');
     try {
+      if (isStaticHostedDemo()) {
+        if (code.trim() !== STATIC_DEMO_CODE) throw new Error('Enter the 6-digit verification code shown above.');
+        onVerified(createVerifiedManualUser(name, email, studentId));
+        return;
+      }
+
       const payload = await postJson<{ user: VerifiedUser }>('/api/auth/verify', { email, code });
       onVerified(payload.user);
     } catch (requestError) {
@@ -3446,16 +3493,20 @@ function AICompanion() {
 
     let result: { response: string; followUps: string[]; entryId: string };
     try {
-      const res = await fetch('/api/ai/chat', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: text, last_entry_id: lastEntryId }),
-        signal: AbortSignal.timeout(4000),
-      });
-      if (res.ok) {
-        const data = await res.json();
-        result = { response: data.response, followUps: data.followUps ?? [], entryId: data.entryId };
-      } else throw new Error('server');
+      if (isStaticHostedDemo()) {
+        result = findAIResponse(text, lastEntryId);
+      } else {
+        const res = await fetch('/api/ai/chat', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ message: text, last_entry_id: lastEntryId }),
+          signal: AbortSignal.timeout(4000),
+        });
+        if (res.ok) {
+          const data = await res.json();
+          result = { response: data.response, followUps: data.followUps ?? [], entryId: data.entryId };
+        } else throw new Error('server');
+      }
     } catch {
       // FastAPI not running — fall back to local engine
       result = findAIResponse(text, lastEntryId);
@@ -4051,7 +4102,9 @@ function StudentApp({
   };
 
   const logout = async () => {
-    await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => undefined);
+    if (!isStaticHostedDemo()) {
+      await fetch('/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(() => undefined);
+    }
     onLogout();
   };
 
