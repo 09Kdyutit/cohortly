@@ -84,7 +84,7 @@ type LucideIcon = ForwardRefExoticComponent<
 >;
 
 type UserRole = 'student';
-type View = 'today' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'hostel' | 'privacy' | 'notifications';
+type View = 'today' | 'launchpad' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'hostel' | 'privacy' | 'notifications';
 type InstitutionId = 'sutd';
 type BelongingEntry = { week: string; score: number; at: number };
 type InterventionStage = 'flagged' | 'contacted' | 're-measured' | 'resolved' | 'escalated';
@@ -192,7 +192,8 @@ function saveNotifs(email: string, items: NotifItem[]) {
 }
 
 const navItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
-  { id: 'today', label: 'Launchpad', icon: Rocket },
+  { id: 'today', label: 'Today', icon: Home },
+  { id: 'launchpad', label: 'Launchpad', icon: Rocket },
   { id: 'events', label: 'Events', icon: CalendarCheck },
   { id: 'people', label: 'People', icon: Users },
   { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
@@ -1756,6 +1757,9 @@ function getDemoProfile(role: UserRole): StudentProfile {
     availability: 'Weekday evenings',
     homeBase: 'Freshmore housing / East Coast',
     intro: 'New to SUTD — looking for low-pressure events, coding help, and startup friends.',
+    hostelBlock: '1N',
+    hostelFloor: 4,
+    hostelRoom: '12',
   };
 }
 
@@ -2251,6 +2255,12 @@ function LandingScreen({
 
         <div className="landing-hero-right">
           <div className="preview-bento">
+            <div className="preview-chrome">
+              <span className="preview-chrome-dots"><i /><i /><i /></span>
+              <span className="preview-chrome-tab ct-active">Messages</span>
+              <span className="preview-chrome-tab">Events</span>
+              <span className="preview-chrome-tab">People</span>
+            </div>
             <div className="preview-card">
               <div className="preview-event">
                 <span className="preview-tone-dot social" />
@@ -2315,7 +2325,7 @@ function LandingScreen({
         <h2>Built for the people running orientation</h2>
         <p>Cohortly turns scattered onboarding into a measurable, supportive launch — for students and the staff who guide them.</p>
         <div className="landing-value-cards">
-          <div className="landing-value-card">
+          <div className="landing-value-card landing-value-card--lead">
             <div className="landing-value-card-icon" style={{ background: 'rgba(56,189,248,0.12)', color: '#38bdf8' }}><Rocket size={20} /></div>
             <h3>Freshmore Launchpad</h3>
             <p>Track who's ready before Day 1, and surface students who quietly fall behind.</p>
@@ -2330,7 +2340,7 @@ function LandingScreen({
             <h3>Fifth Row Discovery</h3>
             <p>Clubs find their members before orientation — interest signals match students to CCAs.</p>
           </div>
-          <div className="landing-value-card">
+          <div className="landing-value-card landing-value-card--wide">
             <div className="landing-value-card-icon" style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24' }}><HeartHandshake size={20} /></div>
             <h3>Admin Intervention</h3>
             <p>Privacy-safe support signals so advisors can reach out before a student disengages.</p>
@@ -2601,13 +2611,6 @@ function seedInviteRecords(): InviteRecord[] {
   return seeded;
 }
 
-function shouldShowPulse(): boolean {
-  try {
-    const last = localStorage.getItem('cohortly.pulse.lastShown');
-    if (!last) return true;
-    return Date.now() - parseInt(last, 10) > 7 * 24 * 60 * 60 * 1000;
-  } catch { return false; }
-}
 function markPulseShown() {
   try { localStorage.setItem('cohortly.pulse.lastShown', Date.now().toString()); } catch {}
 }
@@ -3657,9 +3660,17 @@ function WeeklyPulseModal({ onClose, userEmail }: { onClose: () => void; userEma
     onClose();
   };
 
+  const skip = () => { markPulseShown(); onClose(); };
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') skip(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
   return (
-    <div className="pulse-overlay">
-      <div className="pulse-modal">
+    <div className="pulse-overlay" onClick={skip}>
+      <div className="pulse-modal" onClick={(e) => e.stopPropagation()}>
         <div className="pulse-modal-head">
           <strong>Weekly Belonging Pulse ✦</strong>
           <p>10 seconds · anonymous · helps SUTD support you better</p>
@@ -3683,7 +3694,7 @@ function WeeklyPulseModal({ onClose, userEmail }: { onClose: () => void; userEma
           ))}
         </div>
         <div className="pulse-modal-actions">
-          <button className="secondary-button" onClick={() => { markPulseShown(); onClose(); }}>Skip this week</button>
+          <button className="secondary-button" onClick={skip}>Skip this week</button>
           <button className="primary-button" onClick={submit} disabled={!canSubmit}>Submit pulse</button>
         </div>
       </div>
@@ -3840,13 +3851,14 @@ function NotificationPanel({
 function MobileBottomNav({ active, setActive }: { active: View; setActive: (v: View) => void }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const primaryItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
-    { id: 'today',    label: 'Home',    icon: Rocket },
+    { id: 'today',    label: 'Today',   icon: Home },
     { id: 'events',   label: 'Events',  icon: CalendarCheck },
     { id: 'people',   label: 'People',  icon: Users },
     { id: 'classes',  label: 'Classes', icon: BookOpen },
     { id: 'messages', label: 'Chats',   icon: MessageCircle },
   ];
   const moreItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
+    { id: 'launchpad', label: 'Launchpad', icon: Rocket },
     { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
     { id: 'hostel',    label: 'Hostel',    icon: Building2 },
     { id: 'kb',        label: 'Knowledge', icon: BookMarked },
@@ -3937,13 +3949,6 @@ function StudentApp({
   useEffect(() => {
     window.scrollTo({ top: 0, behavior: 'instant' });
   }, [activeView]);
-
-  useEffect(() => {
-    if (shouldShowPulse()) {
-      const timer = setTimeout(() => setShowPulse(true), 3000);
-      return () => clearTimeout(timer);
-    }
-  }, []);
 
   useEffect(() => {
     const handler = (e: Event) => { e.preventDefault(); deferredInstallRef.current = e; setShowPwaBanner(true); };
@@ -4212,6 +4217,16 @@ function StudentApp({
           )}
           <div key={activeView} className="view-wrapper">
             {activeView === 'today' && (
+              <TodayView
+                user={user}
+                profile={profile}
+                institution={institution}
+                events={events}
+                setActiveView={setActiveView}
+                onOpenPulse={() => setShowPulse(true)}
+              />
+            )}
+            {activeView === 'launchpad' && (
               <LaunchpadView
                 userEmail={user.email}
                 userName={user.name}
@@ -4258,25 +4273,29 @@ function TodayView({
   institution,
   events,
   setActiveView,
+  onOpenPulse,
 }: {
   user: VerifiedUser;
   profile: StudentProfile;
   institution: Institution;
   events: EventItem[];
   setActiveView: (view: View) => void;
+  onOpenPulse: () => void;
 }) {
   const topEvents = events.slice(0, 3);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
 
   const checklistItems = [
-    { label: 'Verify your SUTD identity', done: true },
-    { label: 'Complete your profile', done: true },
-    { label: 'Join your first module room', done: false },
-    { label: 'RSVP to one event', done: false },
-    { label: 'Connect with 3 people', done: false },
+    { label: 'Verify your SUTD identity', done: true, view: null as View | null },
+    { label: 'Complete your profile', done: true, view: null as View | null },
+    { label: 'Join your first module room', done: false, view: 'classes' as View | null },
+    { label: 'RSVP to one event', done: false, view: 'events' as View | null },
+    { label: 'Connect with 3 people', done: false, view: 'people' as View | null },
   ];
   const doneCount = checklistItems.filter((t) => t.done).length;
+  const nextTask = checklistItems.find((t) => !t.done);
+  const history = useMemo(() => loadBelongingHistory(user.email), [user.email]);
 
   return (
     <div className="today-stack">
@@ -4288,41 +4307,56 @@ function TodayView({
             <div className="week-bar"><div className="week-bar-fill" style={{ width: '8%' }} /></div>
             <span className="week-label">Week 1 of 12 — you're just getting started</span>
           </div>
+          <div className="greeting-meta-row">
+            <span><strong>812</strong> students</span>
+            <span className="gm-dot" />
+            <span><strong>38</strong> events</span>
+            <span className="gm-dot" />
+            <span><strong>14 days</strong> to Day 1</span>
+          </div>
         </div>
         <span className="soft-pill"><BadgeCheck size={15} /> {institution.shortName} verified</span>
       </div>
 
-      {/* Checklist */}
-      <article className="panel checklist-card">
-        <div className="section-heading compact-heading">
-          <div>
-            <span className="eyebrow">Orientation progress</span>
-            <h2>Your first-week checklist</h2>
-          </div>
+      {/* Next best action — single focal hero */}
+      <article className="panel next-action-card">
+        <div className="next-action-main">
+          <span className="eyebrow">Next best step · {doneCount}/{checklistItems.length} done</span>
+          {nextTask ? (
+            <>
+              <h2>{nextTask.label}</h2>
+              <p>The fastest way to feel settled before Day 1 — this takes most students under five minutes.</p>
+              <button
+                className="primary-button"
+                onClick={() => nextTask.view && setActiveView(nextTask.view)}
+              >
+                {nextTask.label.startsWith('Join') ? 'Browse module rooms' : nextTask.label.startsWith('RSVP') ? 'See events' : 'Meet people'}
+                <ArrowRight size={15} />
+              </button>
+            </>
+          ) : (
+            <>
+              <h2>You're fully launched. Nice work.</h2>
+              <p>Every first-week task is done — keep an eye on events and module rooms as the term gets closer.</p>
+            </>
+          )}
         </div>
-        <div className="checklist-progress-row">
-          <div className="checklist-bar">
-            <div className="checklist-bar-fill" style={{ width: `${(doneCount / checklistItems.length) * 100}%` }} />
-          </div>
-          <span className="checklist-count">{doneCount} / {checklistItems.length} done</span>
-        </div>
-        <div className="checklist-items">
-          {checklistItems.map((task) => (
-            <div key={task.label} className={`checklist-item ${task.done ? 'done' : ''}`}>
-              {task.done ? <Check size={16} /> : <span className="todo-circle" />}
-              {task.label}
-            </div>
-          ))}
-        </div>
-        <div className="checklist-footer">
-          <span>{checklistItems.length - doneCount} tasks left before you're fully in</span>
-          <button className="text-button" onClick={() => setActiveView('people')}>Keep going <ArrowRight size={14} /></button>
+        <div className="next-action-checklist">
+          <div className="checklist-bar"><div className="checklist-bar-fill" style={{ width: `${(doneCount / checklistItems.length) * 100}%` }} /></div>
+          <ul className="checklist-items">
+            {checklistItems.map((task) => (
+              <li key={task.label} className={`checklist-item ${task.done ? 'done' : ''}`}>
+                {task.done ? <Check size={14} /> : <span className="todo-circle" />}
+                {task.label}
+              </li>
+            ))}
+          </ul>
         </div>
       </article>
 
       {/* For you row */}
       <div className="for-you-row">
-        <button className="for-you-card" onClick={() => setActiveView('classes')}>
+        <button className="for-you-card for-you-card--featured" onClick={() => setActiveView('classes')}>
           <div className="for-you-icon indigo"><BookOpen size={18} /></div>
           <h4>10.014 Computational Thinking</h4>
           <p>4 seniors active now · 28 Q&amp;As this week</p>
@@ -4344,19 +4378,21 @@ function TodayView({
 
       {/* Bottom two-col */}
       <div className="today-two-col">
-        <article className="panel">
+        <article className="panel belonging-pulse-card">
           <div className="section-heading compact-heading" style={{ marginBottom: 14 }}>
             <div>
               <span className="eyebrow">This week</span>
-              <h2>Campus pulse</h2>
+              <h2>Your belonging pulse</h2>
             </div>
           </div>
-          <div className="compact-stats">
-            <div className="compact-stat"><strong>812</strong><span>verified students</span><em>+184 this week</em></div>
-            <div className="compact-stat"><strong>5.7k</strong><span>connections made</span><em>avg 6.8 each</em></div>
-            <div className="compact-stat"><strong>2,480</strong><span>questions answered</span><em>91% response rate</em></div>
-            <div className="compact-stat"><strong>126</strong><span>events live</span><em>38 before Day 1</em></div>
-          </div>
+          {history.length > 0 ? (
+            <BelongingScoreBanner userEmail={user.email} />
+          ) : (
+            <p className="pulse-empty-copy">A 10-second weekly check-in — helps SUTD spot students who need support early. Fully anonymous to your peers.</p>
+          )}
+          <button className="secondary-button wide" onClick={onOpenPulse}>
+            <Sparkles size={14} /> Take this week's pulse
+          </button>
         </article>
         <article className="panel event-preview-panel">
           <div className="section-heading compact-heading">
@@ -5340,11 +5376,12 @@ function PeopleView({ userEmail, onMessage }: { userEmail?: string; onMessage?: 
       </div>
 
       <div className="people-grid">
-        {filtered.map((person) => {
+        {filtered.map((person, index) => {
           const isConnected = connected.has(person.name);
+          const isFeatured = index === 0;
           return (
             <article
-              className="person-card"
+              className={isFeatured ? 'person-card person-card--featured' : 'person-card'}
               key={person.name}
               onClick={() => setSelectedPerson(person)}
               style={{ cursor: 'pointer' }}
@@ -5461,6 +5498,10 @@ function ClassesView({
 
   const myRooms = classRooms.filter((r) => enrolledCodes.includes(r.code));
   const otherRooms = classRooms.filter((r) => !enrolledCodes.includes(r.code));
+
+  useEffect(() => {
+    if (selectedCode === null && myRooms.length > 0) setSelectedCode(myRooms[0].code);
+  }, [myRooms.length]);
 
   const handleImportParse = (text: string) => {
     setImportText(text);
@@ -5721,7 +5762,10 @@ function ClassesView({
                     </div>
                     {q.answered && q.answer ? (
                       <div className="qa-answer">
-                        <span className="qa-answerer">{q.answerer}</span>
+                        <div className="qa-answer-header">
+                          <Check size={12} className="qa-answer-check" />
+                          <span className="qa-answerer">{q.answerer}</span>
+                        </div>
                         <p>{q.answer}</p>
                       </div>
                     ) : isMentor ? (
@@ -6171,15 +6215,17 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
 
   const defaultMessages = isMentor ? (
     <>
+      <Message tone="system" author="Cohortly" text="Matched via 10.014 Computational Thinking · Weekday evenings · SUTD verified" />
       <Message tone="student" author="Vanika" text="Hi, I'm struggling with the recursion exercises in 10.014 lab 2. The tree traversal part is confusing me." />
       <Message tone="mentor" author="Aarav" text="No worries — this trips most people up. I'll run a walkthrough session tonight in Building 5, Room 3. Come at 8:30 PM." />
-      <Message tone="system" author="Cohortly" text="Matched via 10.014 Computational Thinking · Weekday evenings · SUTD verified" />
+      <Message tone="student" author="Vanika" text="That sounds great, I'll be there. Should I review anything specific before coming?" />
     </>
   ) : (
     <>
+      <Message tone="system" author="Cohortly" text="Matched on 10.014, Startups & iCube, Badminton, and weekday evening availability." />
+      <Message tone="mentor" author="Aarav" text="Hey! Saw you joined the 10.014 room. I run weekly coding prep sessions for Freshmores — happy to help." />
       <Message tone="student" author="Vanika" text="I am nervous about coding because everyone sounds ahead already." />
       <Message tone="mentor" author="Aarav" text="That is exactly why the prep room exists. Drop by Building 5 Level 3 this week and we will start with tracing code by hand." />
-      <Message tone="system" author="Cohortly" text="Matched on 10.014, Startups & iCube, Badminton, and weekday evening availability." />
     </>
   );
 
@@ -6702,7 +6748,7 @@ function AdminOverview() {
           <span className="admin-metric-label">Question response rate</span>
           <span className="admin-metric-change neutral">2,480 total answered</span>
         </div>
-        <div className="admin-metric">
+        <div className="admin-metric at-risk">
           <span className="admin-metric-value">14</span>
           <span className="admin-metric-label">At-risk students</span>
           <span className="admin-metric-change neutral" style={{ color: 'var(--warning)' }}>0 connections, 0 events</span>
