@@ -85,6 +85,7 @@ type LucideIcon = ForwardRefExoticComponent<
 >;
 
 type UserRole = 'student' | 'mentor';
+type DemoMode = 'freshman' | 'returning';
 type View = 'today' | 'launchpad' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'hostel' | 'mentor-home' | 'mentor-help' | 'privacy' | 'notifications';
 type InstitutionId = 'sutd';
 type BelongingEntry = { week: string; score: number; at: number };
@@ -247,8 +248,8 @@ const starterEvents: EventItem[] = [
     time: '8:30 PM',
     location: 'Building 5 Library, Room 3',
     audience: 'Freshmore — Computational Thinking',
-    meta: '68 joined · 4 seniors active',
-    description: 'Senior-led prep for tracing code, recursion basics, and what to revise before the first graded lab. ISTD and EPD seniors rotate through.',
+    meta: '68 joined · 4 returning students active',
+    description: 'Returning-student prep for tracing code, recursion basics, and what to revise before the first graded lab. ISTD and EPD students rotate through.',
     tone: 'study',
   },
   {
@@ -305,7 +306,7 @@ const people: Person[] = [
   {
     name: 'Aarav Menon',
     role: 'Year 3 · ISTD',
-    detail: 'Runs weekly 10.014 coding prep for freshmores. Reach him through the cohort drop.',
+    detail: 'Year 3 ISTD student running weekly 10.014 coding prep. Reach him through the cohort drop.',
     match: '94%',
     tags: ['10.014', '50.007 ML', 'Badminton'],
     color: 'teal',
@@ -363,7 +364,7 @@ const people: Person[] = [
     color: 'coral',
       pillar: 'ISTD',
     year: 'Year 3',
-    bio: "Y3 ISTD here. I mentor 10.009 and enjoy thinking about how large systems talk to each other. Sunday crammer — building 1.401, every week.",
+    bio: "Y3 ISTD here. I help with 10.009 and enjoy thinking about how large systems talk to each other. Sunday crammer — building 1.401, every week.",
     modules: ['10.009 The Digital World', '30.007 Engineering Design Innovation'],
     availability: 'Sundays 2–6 PM · Wednesday evenings',
     helpStyle: ['Group cram sessions', 'System design whiteboarding'],
@@ -404,7 +405,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     id: 'week0', label: 'Week 0 orientation', icon: 'orientation',
     tasks: [
       { id: 'camp', label: 'Attend Freshmore Orientation Camp', desc: 'SUTD\'s intro event — ice breakers, campus tour, team building.' },
-      { id: 'campus-tour', label: 'Get a campus tour from a senior', desc: 'FabLab, library, Level 3 hangout spots, best food nearby.' },
+      { id: 'campus-tour', label: 'Get a campus tour from a returning student', desc: 'FabLab, library, Level 3 hangout spots, best food nearby.' },
       { id: 'admin', label: 'Complete admin setup', desc: 'SUTD email, Canvas LMS, ModTrek, Student Hub — all activated.' },
       { id: 'fifth-row-fair', label: 'Attend Fifth Row Club Fair', desc: 'Browse 80+ clubs — find your co-curricular home.', link: { label: 'Browse Fifth Row', view: 'fifth-row' } },
       { id: 'wellbeing', label: 'Know where Wellbeing Services is', desc: 'Level 2, Building 54. Counselling, mental health support — no stigma.' },
@@ -414,8 +415,8 @@ const launchpadPhases: LaunchpadPhase[] = [
     id: 'week1', label: 'Week 1 academic setup', icon: 'academic',
     tasks: [
       { id: 'first-class', label: 'Attend your first class', desc: 'Check Canvas for room allocation and pre-read materials.' },
-      { id: 'module-room', label: 'Join your module rooms on Cohortly', desc: 'Seniors are already answering in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
-      { id: 'mentor-match', label: 'Connect with a senior mentor', desc: 'Your matched mentors are in People → Senior Mentors.', link: { label: 'Find a mentor', view: 'people' } },
+      { id: 'module-room', label: 'Join your module rooms on Cohortly', desc: 'Returning students are already answering in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
+      { id: 'returning-match', label: 'Connect with a returning student', desc: 'Find Year 2, 3, and 4 students grouped by pillar and module.', link: { label: 'Find people', view: 'people' } },
       { id: 'first-q', label: 'Ask your first module question', desc: 'No question is too basic. Post it in the class room.', link: { label: 'Ask a question', view: 'classes' } },
       { id: 'study-group', label: 'Form or join a study group', desc: 'Check Events or module rooms for group study sessions.', link: { label: 'Browse Events', view: 'events' } },
     ],
@@ -424,7 +425,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     id: 'people5', label: 'Find my first 5 people', icon: 'people',
     tasks: [
       { id: 'p1', label: 'Connect with someone in your module', desc: 'Find a 10.014 or 10.009 coursemate.', link: { label: 'Find people', view: 'people' } },
-      { id: 'p2', label: 'Connect with a senior mentor', desc: 'Someone who has done your exact modules already.', link: { label: 'Find mentors', view: 'people' } },
+      { id: 'p2', label: 'Connect with a returning student', desc: 'Someone who has done your exact modules already.', link: { label: 'Find returning students', view: 'people' } },
       { id: 'p3', label: 'Connect with a floor neighbour', desc: 'From your hostel floor or block.' },
       { id: 'p4', label: 'Connect with someone from a different pillar', desc: 'SUTD is cross-disciplinary — start meeting across pillars early.', link: { label: 'Browse everyone', view: 'people' } },
       { id: 'p5', label: 'Connect with an international student', desc: 'Exchange or international Freshmore — build a global circle.' },
@@ -442,16 +443,16 @@ const launchpadPhases: LaunchpadPhase[] = [
   {
     id: 'qa-phase', label: 'Ask my first module question', icon: 'qa',
     tasks: [
-      { id: 'q-read', label: 'Read existing Q&A threads in your module', desc: 'See what seniors have already answered in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
+      { id: 'q-read', label: 'Read existing Q&A threads in your module', desc: 'See what returning students have already answered in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
       { id: 'q-post', label: 'Post your first question', desc: 'Any confusion in any module — ask it. No question is too small.', link: { label: 'Post a question', view: 'classes' } },
-      { id: 'q-answered', label: 'Get an answer from a senior', desc: 'Seniors respond within a few hours.' },
+      { id: 'q-answered', label: 'Get an answer from a returning student', desc: 'Helpful classmates usually respond within a few hours.' },
     ],
   },
   {
-    id: 'mentor-phase', label: 'Book my first senior session', icon: 'mentor',
+    id: 'returning-phase', label: 'Join a returning-student session', icon: 'people',
     tasks: [
-      { id: 'm-view', label: 'View a senior mentor\'s profile', desc: 'See their modules, availability, help style, and compatibility score.', link: { label: 'Browse mentors', view: 'people' } },
-      { id: 'm-connect', label: 'Request an intro with a mentor', desc: 'Send your first connection request to a senior.', link: { label: 'Find mentors', view: 'people' } },
+      { id: 'm-view', label: 'View a returning student profile', desc: 'See their modules, year, pillar, availability, and compatibility score.', link: { label: 'Browse people', view: 'people' } },
+      { id: 'm-connect', label: 'Request an intro with a returning student', desc: 'Send your first connection request to someone a year or two ahead.', link: { label: 'Find people', view: 'people' } },
       { id: 'm-attend', label: 'Attend a prep session or office hours', desc: 'Aarav runs weekly 10.014 coding prep — check Events.', link: { label: 'Browse Events', view: 'events' } },
     ],
   },
@@ -490,7 +491,7 @@ const classRooms: ClassRoom[] = [
   {
     code: '10.009',
     title: 'The Digital World',
-    activity: '19 questions · 3 seniors active',
+    activity: '19 questions · 3 returning students active',
     mentors: 'Wei Jian (Y3 ISTD), Priya (Y2 ESD)',
     status: '2D project kickoff slides pinned',
   },
@@ -690,7 +691,7 @@ const interestOptions = [
 ];
 const goalOptions = [
   'Find my first-week circle',
-  'Get senior module advice',
+  'Get returning-student module advice',
   'Join casual sports events',
   'Build a study group',
   'Find a startup co-founder',
@@ -732,7 +733,7 @@ type KBArticle = { id: string; category: KBCategory; title: string; summary: str
 const kbArticles: KBArticle[] = [
   {
     id: 'ka1', category: 'Academics', title: 'How Freshmore modules work', summary: 'All Year 1s take the same 5 Freshmore modules in Term 1. Here\'s what to expect.',
-    content: `<p>Every SUTD Freshmore takes a common set of 5 modules in Term 1: <strong>10.001 Advanced Mathematics I</strong>, <strong>10.002 Modelling the Systems World</strong>, <strong>10.003 Modelling Space and Systems</strong>, <strong>10.009 The Digital World</strong>, and <strong>10.014 Computational Thinking for Design</strong>.</p><p>These modules are integrated — the maths you learn feeds directly into the design modules. Attendance is compulsory and there are no bell curves in most assessments. Collaborate freely; academic integrity rules apply to final exams and individual assignments.</p><ul><li>Canvas is the LMS — check it daily for announcements</li><li>ModTrek shows your timetable</li><li>Office hours are posted in the module room — use them</li><li>Senior mentors in Cohortly answer questions within hours</li></ul>`,
+    content: `<p>Every SUTD Freshmore takes a common set of 5 modules in Term 1: <strong>10.001 Advanced Mathematics I</strong>, <strong>10.002 Modelling the Systems World</strong>, <strong>10.003 Modelling Space and Systems</strong>, <strong>10.009 The Digital World</strong>, and <strong>10.014 Computational Thinking for Design</strong>.</p><p>These modules are integrated — the maths you learn feeds directly into the design modules. Attendance is compulsory and there are no bell curves in most assessments. Collaborate freely; academic integrity rules apply to final exams and individual assignments.</p><ul><li>Canvas is the LMS — check it daily for announcements</li><li>ModTrek shows your timetable</li><li>Office hours are posted in the module room — use them</li><li>Returning students in Cohortly answer practical module questions through the same student network</li></ul>`,
     views: 512, helpful: 89,
   },
   {
@@ -741,8 +742,8 @@ const kbArticles: KBArticle[] = [
     views: 388, helpful: 74,
   },
   {
-    id: 'ka3', category: 'Academics', title: 'Using the Cohortly module rooms', summary: 'How to get help fast from senior mentors in 10.014, 10.009, and more.',
-    content: `<p>Each module on Cohortly has a <strong>Q&A room</strong> where verified senior mentors answer student questions. Mentors are Year 2–4 students who have already passed these modules.</p><p>To get the best answers: be specific about your problem, share relevant code or working (a screenshot is fine), and mention what you've already tried. Vague questions get vague answers.</p><ul><li>Most questions in 10.014 and 10.009 are answered within 4 hours</li><li>Urgent? Post in the module room AND send a direct message to a mentor</li><li>Mentors run prep rooms in person — check Events for session dates</li></ul>`,
+    id: 'ka3', category: 'Academics', title: 'Using the Cohortly module rooms', summary: 'How to get help fast from classmates and returning students in 10.014, 10.009, and more.',
+    content: `<p>Each module on Cohortly has a <strong>Q&A room</strong> where verified students ask and answer questions. Returning students are grouped by year and pillar inside the same student network.</p><p>To get the best answers: be specific about your problem, share relevant code or working (a screenshot is fine), and mention what you've already tried. Vague questions get vague answers.</p><ul><li>Most questions in 10.014 and 10.009 should include the exact error message or worksheet step</li><li>Urgent? Post in the module room and message a classmate or returning student in the same module</li><li>Prep rooms and office hours live in Events so everyone sees the same schedule</li></ul>`,
     views: 290, helpful: 68,
   },
   {
@@ -752,8 +753,18 @@ const kbArticles: KBArticle[] = [
   },
   {
     id: 'kh2', category: 'Hostel & Housing', title: 'Hostel jios — how to find people to eat and study with', summary: 'The unofficial guide to meal jios, supper runs, and study groups in the hostel.',
-    content: `<p>A "jio" (Singapore slang for "invite") is how hostel life runs. Someone posts in the floor chat that they're heading to the canteen — anyone who wants to join, joins.</p><p>On Cohortly, the <strong>People → Hostel tab</strong> shows active jios near you: food runs, study sessions, sports bookings. You can join or post your own.</p><ul><li>Breakfast: Koufu at 1N opens at 7:30 AM, Campus Bistro at 8 AM</li><li>Late supper: McDonalds Dover is 12 minutes walk, open 24h</li><li>Study sessions: FabLab Level 3 is the go-to late-night study spot</li><li>Laundry: book the machines on the app — peak times are Sunday 2–6 PM</li></ul>`,
+    content: `<p>A "jio" (Singapore slang for "invite") is how hostel life runs. Someone posts in the floor chat that they're heading to the canteen — anyone who wants to join, joins.</p><p>On Cohortly, the <strong>Hostel tab</strong> shows active jios near you: food runs, study sessions, sports bookings. You can join or post your own.</p><ul><li>Breakfast plans usually start from the housing lobby path toward the campus food areas</li><li>Late supper runs are grouped by block so nobody walks alone</li><li>Study sessions around Building 5 and FabLab are linked back to the relevant module room</li><li>Laundry and move-in questions stay inside verified block/floor groups</li></ul>`,
     views: 407, helpful: 88,
+  },
+  {
+    id: 'kh3', category: 'Hostel & Housing', title: 'Campus housing map — blocks 51, 55, 57 and 59', summary: 'A practical guide to the public SUTD housing cluster map without guessing private room counts.',
+    content: `<p>The public SUTD campus maps show the academic buildings on the west side, the recreational centre and sports facilities on the south-east side, and the housing cluster around <strong>Blocks 51, 55, 57, and 59</strong> near Changi South Avenue 1.</p><p>Cohortly's map redraws that layout as an interactive campus atlas: Building 1, Building 2, Building 3 / One-Stop Centre, Building 5, the recreational centre, track, pool, pedestrian paths, and the housing blocks are positioned to match the provided reference maps.</p><ul><li><strong>Block 51</strong>: north-west housing marker on the public map</li><li><strong>Block 55</strong>: northern housing marker near the internal paths</li><li><strong>Block 57</strong>: central housing marker closest to the sports/recreation route</li><li><strong>Block 59</strong>: east housing marker; the public map notes management/security office at this block</li></ul><p>Exact internal room rosters and floor-by-floor occupancy are not published in public sources. Cohortly therefore treats room counts as <strong>Housing Office roster data</strong>: admins can import the official room list, and students only reveal their exact room after opting in.</p>`,
+    views: 684, helpful: 146,
+  },
+  {
+    id: 'kh4', category: 'Hostel & Housing', title: 'Setting up your room without exposing your privacy', summary: 'How room setup works, who can see what, and why exact room sharing is opt-in.',
+    content: `<p>Room setup is designed around proximity, not public exposure. Your block and floor help the app show floor jios, move-in help, laundry reminders, and nearby classmates. Your exact room is shown only inside verified hostel contexts.</p><ul><li><strong>Before opt-in</strong>: people can see that you are in the hostel community, but not your room</li><li><strong>After opt-in</strong>: verified floor/block residents can see room proximity and message you</li><li><strong>Admin view</strong>: staff see aggregate readiness and support signals, not casual room browsing</li><li><strong>Change anytime</strong>: update or remove your room from the Hostel tab</li></ul><p>If your assigned room changes during move-in, update it immediately so jios and floor contacts stay accurate.</p>`,
+    views: 512, helpful: 119,
   },
   {
     id: 'kr1', category: 'Admin & Registration', title: 'What to do in your first week — admin checklist', summary: 'Student card, bank account, Singpass, Canvas — the complete list.',
@@ -766,6 +777,11 @@ const kbArticles: KBArticle[] = [
     views: 318, helpful: 67,
   },
   {
+    id: 'kr3', category: 'Admin & Registration', title: 'Telegram and WhatsApp alert setup', summary: 'How Cohortly alert channels work and what still needs official bot credentials.',
+    content: `<p>Cohortly can send the same alert stream to browser push, Telegram, and WhatsApp: module answer received, event starting soon, new connection request, housing notice, or admin safety message.</p><ul><li><strong>Telegram</strong>: start the Cohortly bot, enter your username, and verify the connection in Notifications & Bots</li><li><strong>WhatsApp</strong>: WhatsApp Cloud API requires the student to message first, so use the opt-in link before enabling alerts</li><li><strong>Privacy</strong>: alert channels store only the handle/phone required to deliver notifications</li><li><strong>Production</strong>: working delivery requires official Telegram bot and Meta WhatsApp Cloud API credentials on the backend webhook host</li></ul><p>If the app is running on GitHub Pages only, alerts can be configured in the UI but server-side delivery still requires a deployed webhook service.</p>`,
+    views: 431, helpful: 92,
+  },
+  {
     id: 'kf1', category: 'Fifth Row', title: 'What is Fifth Row and why it matters', summary: 'SUTD\'s co-curricular system — and how to find your community in it.',
     content: `<p>SUTD calls its co-curricular activities "Fifth Row" — a nod to the academic, social, sports, and cultural pillars, with Fifth Row as the fifth dimension of your education. It's taken seriously here; many students say their Fifth Row CCA is where they made their closest friends.</p><p>There are 80+ clubs across 5 clusters: <strong>Arts</strong>, <strong>Sports</strong>, <strong>Community</strong>, <strong>Culture</strong>, and <strong>Makers</strong>. Most clubs have low-commitment trial sessions in Week 1–2 — you don't need to commit to anything upfront.</p><ul><li>Fifth Row Fair: Week 0, all clubs set up booths on campus</li><li>Use the Fifth Row tab on Cohortly to filter by cluster, commitment level, and beginner-friendliness</li><li>Most clubs have WhatsApp groups — join the trial group first</li></ul>`,
     views: 489, helpful: 93,
@@ -776,8 +792,8 @@ const kbArticles: KBArticle[] = [
     views: 556, helpful: 121,
   },
   {
-    id: 'kw2', category: 'Wellbeing', title: 'Managing Freshmore workload — practical strategies', summary: 'The first semester is intense. Here\'s what seniors say actually works.',
-    content: `<p>Freshmore Term 1 is genuinely demanding — five integrated modules, orientation activities, and a new environment simultaneously. The students who thrive are those who build systems early.</p><ul><li><strong>Front-load understanding</strong>: Don't wait until the night before. Read the pre-lecture notes on the train or at breakfast</li><li><strong>Study in groups</strong>: for 10.014 especially, talking through code with someone else is 3x faster than debugging alone</li><li><strong>Use office hours</strong>: professors and TAs are here to help. Coming in with a specific question gets you far more than attending lectures passively</li><li><strong>Sleep</strong>: non-negotiable. SUTD students who sleep less than 6 hours consistently show the steepest grade drops in Term 2</li><li><strong>Talk to your mentor</strong>: they have been through the exact same modules and know which weeks are rough</li></ul>`,
+    id: 'kw2', category: 'Wellbeing', title: 'Managing Freshmore workload — practical strategies', summary: 'The first semester is intense. Here is what returning students say actually works.',
+    content: `<p>Freshmore Term 1 is genuinely demanding — five integrated modules, orientation activities, and a new environment simultaneously. The students who thrive are those who build systems early.</p><ul><li><strong>Front-load understanding</strong>: Don't wait until the night before. Read the pre-lecture notes on the train or at breakfast</li><li><strong>Study in groups</strong>: for 10.014 especially, talking through code with someone else is faster than debugging alone</li><li><strong>Use office hours</strong>: professors and TAs are here to help. Coming in with a specific question gets you far more than attending lectures passively</li><li><strong>Sleep</strong>: non-negotiable. Protect at least one regular sleep block during project weeks</li><li><strong>Talk to returning students</strong>: they have been through the exact same modules and know which weeks are rough</li></ul>`,
     views: 412, helpful: 98,
   },
   {
@@ -803,13 +819,13 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'm-10014',
     triggers: ['10.014', 'computational thinking', 'computational thinking for design', 'python module', 'coding module', 'programming module', 'lab 1', 'lab 2', 'lab 3', 'recursion', 'tree traversal', 'jupyter', 'ctd'],
-    response: `**10.014 Computational Thinking for Design** is your intro to Python and algorithmic thinking. Here's what to know:\n\n- Labs use **Jupyter notebooks** — install Anaconda or use the lab machines in Building 5 (open 24h)\n- Key topics: functions, loops, recursion, data structures, basic algorithms\n- Recursion trips most people up — trace through the factorial example by hand before the lab\n- **Submit via Canvas** — check the assignment page for the exact deadline and format\n- Senior mentor **Aarav** (Y3 ISTD) runs weekly prep sessions — check Events for the next one\n- Stuck? Post in the **10.014 module room** on Cohortly — Aarav or Sara usually answer within 2–4 hours`,
+    response: `**10.014 Computational Thinking for Design** is your intro to Python and algorithmic thinking. Here's what to know:\n\n- Labs use **Jupyter notebooks** — install Anaconda or use the lab machines in Building 5 (open 24h)\n- Key topics: functions, loops, recursion, data structures, basic algorithms\n- Recursion trips most people up — trace through the factorial example by hand before the lab\n- **Submit via Canvas** — check the assignment page for the exact deadline and format\n- Returning student **Aarav** (Y3 ISTD) runs weekly prep sessions — check Events for the next one\n- Stuck? Post in the **10.014 module room** on Cohortly — classmates and returning students usually answer within a few hours`,
     followUps: ['How do I set up Python?', 'Who is Aarav Menon?', 'Where do I submit my lab?'],
   },
   {
     id: 'm-10009',
     triggers: ['10.009', 'digital world', 'the digital world', '2d project', '2d project brief', 'digital world project', 'team formation 10.009'],
-    response: `**10.009 The Digital World** is about technology, systems, and how digital tools shape society. The big deliverable is the **2D Group Project** — here's what seniors say:\n\n- The brief drops in **Week 2** — don't wait to form your team\n- Pick teammates with **complementary skills** — ideally across different pillars (ASD + ISTD combos work well)\n- Past project themes: smart city systems, assistive tech, sustainability platforms\n- Module room on Cohortly has **Wei Jian** and Aarav answering scope questions\n- Don't overbuild — scoping down is always better than running out of time`,
+    response: `**10.009 The Digital World** is about technology, systems, and how digital tools shape society. The big deliverable is the **2D Group Project** — here's what returning students say:\n\n- The brief drops in **Week 2** — don't wait to form your team\n- Pick teammates with **complementary skills** — ideally across different pillars (ASD + ISTD combos work well)\n- Past project themes: smart city systems, assistive tech, sustainability platforms\n- Module room on Cohortly has **Wei Jian** and Aarav answering scope questions\n- Don't overbuild — scoping down is always better than running out of time`,
     followUps: ['How do I form a good team?', 'What other modules do I take?', 'How does Pass/Fail grading work?'],
   },
   {
@@ -840,8 +856,8 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'pillar-selection',
     triggers: ['pillar selection', 'pillar', 'choose pillar', 'asd pillar', 'esd pillar', 'epd pillar', 'istd pillar', 'dai pillar', 'which pillar', 'architecture pillar', 'engineering pillar', 'design ai', 'information systems'],
-    response: `SUTD has **5 undergraduate pillars** — you choose at the end of Freshmore year:\n\n- **ASD** — Architecture and Sustainable Design: spatial design, buildings, sustainability\n- **ESD** — Engineering Systems and Design: complex systems, supply chain, finance engineering\n- **EPD** — Engineering Product Development: physical products, manufacturing, robotics\n- **ISTD** — Information Systems Technology and Design: software, cybersecurity, AI/ML\n- **DAI** — Design and Artificial Intelligence: human-centred AI, UX, data design\n\nPillar selection is competitive but most pillars have enough places for engaged students. Start thinking about which direction excites you most — talk to seniors in each pillar via Cohortly's People tab.`,
-    followUps: ['Who are the ISTD mentors?', 'How do I connect with seniors?', 'What is Freshmore grading?'],
+    response: `SUTD has **5 undergraduate pillars** — you choose at the end of Freshmore year:\n\n- **ASD** — Architecture and Sustainable Design: spatial design, buildings, sustainability\n- **ESD** — Engineering Systems and Design: complex systems, supply chain, finance engineering\n- **EPD** — Engineering Product Development: physical products, manufacturing, robotics\n- **ISTD** — Information Systems Technology and Design: software, cybersecurity, AI/ML\n- **DAI** — Design and Artificial Intelligence: human-centred AI, UX, data design\n\nPillar selection is competitive but most pillars have enough places for engaged students. Start thinking about which direction excites you most — talk to Year 2+ students in each pillar via Cohortly's People tab.`,
+    followUps: ['Who are the ISTD students?', 'How do I connect with returning students?', 'What is Freshmore grading?'],
   },
   {
     id: 'canvas-modtrek',
@@ -921,7 +937,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'workload-tips',
     triggers: ['workload', 'so much work', 'overwhelmed', 'stressed', 'too many assignments', 'behind', 'falling behind', 'time management', 'study tips', 'how to cope', 'busy', 'manage work', 'semester hard'],
-    response: `Freshmore Term 1 is genuinely intense — 5 modules simultaneously. Here's what seniors say actually works:\n\n- **Front-load understanding**: skim the lecture before class, even for 5 minutes — makes everything click faster\n- **Study in groups**: for 10.014 especially, working through code with someone else is 3x faster than debugging alone\n- **Use office hours**: most students don't — showing up with a specific question gets you more than a whole extra hour of solo study\n- **Sleep**: non-negotiable. Students who consistently sleep under 6 hours see the steepest drop in Term 2\n- **Ask early**: don't wait until the night before — post in module rooms on Cohortly the day you're confused\n- If it's more than work stress, the **Wellbeing Centre** (Bldg 54) is genuinely helpful`,
+    response: `Freshmore Term 1 is genuinely intense — 5 modules simultaneously. Here's what returning students say actually works:\n\n- **Front-load understanding**: skim the lecture before class, even for 5 minutes — makes everything click faster\n- **Study in groups**: for 10.014 especially, working through code with someone else is 3x faster than debugging alone\n- **Use office hours**: most students don't — showing up with a specific question gets you more than a whole extra hour of solo study\n- **Sleep**: non-negotiable. Students who consistently sleep under 6 hours see the steepest drop in Term 2\n- **Ask early**: don't wait until the night before — post in module rooms on Cohortly the day you're confused\n- If it's more than work stress, the **Wellbeing Centre** (Bldg 54) is genuinely helpful`,
     followUps: ['How do I ask a question in a module room?', 'How do I find a study group?', 'Where is the Wellbeing Centre?'],
   },
   // ── Fifth Row ─────────────────────────────────────────────────────────────
@@ -978,31 +994,31 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'launchpad-feature',
     triggers: ['launchpad', 'freshmore launchpad', 'checklist', 'task checklist', '8 phases', 'phase', 'orientation tasks', 'launchpad tasks', 'what is launchpad'],
-    response: `The **Freshmore Launchpad** is your guided checklist for the whole first year — 8 phases, ~38 tasks.\n\n**The 8 phases:**\n1. Before I arrive (visa, modules review, hostel app)\n2. Move into hostel\n3. Week 0 orientation\n4. Week 1 academic setup\n5. Find my first 5 people\n6. Join one Fifth Row club\n7. Ask my first module question\n8. Book my first senior session\n\nEach task has 4 states: **todo → doing → done → need-help**. Click the circle to cycle through. Progress is saved — your completions stay across sessions.\n\nFind it on the main nav as **Launchpad**.`,
+    response: `The **Freshmore Launchpad** is your guided checklist for the whole first year — 8 phases, ~38 tasks.\n\n**The 8 phases:**\n1. Before I arrive (visa, modules review, hostel app)\n2. Move into hostel\n3. Week 0 orientation\n4. Week 1 academic setup\n5. Find my first 5 people\n6. Join one Fifth Row club\n7. Ask my first module question\n8. Ask my first returning-student question\n\nEach task has 4 states: **todo → doing → done → need-help**. Click the circle to cycle through. Progress is saved — your completions stay across sessions.\n\nFind it on the main nav as **Launchpad**.`,
     followUps: ['How do I connect with people?', 'How do I join a Fifth Row club?', 'How do I ask a question?'],
   },
   {
     id: 'people-feature',
     triggers: ['people tab', 'people feature', 'connect with people', 'compatibility', 'compatibility score', 'how to connect', 'request intro', 'find students', 'network', 'people section'],
-    response: `The **People tab** is where you build your network on Cohortly.\n\n- **Everyone**: all verified SUTD students\n- **Senior Mentors**: filtered to Year 2–4 mentors matched by module and interest\n- **My Modules**: people in your same modules\n- **New Students**: other incoming Freshmores\n- **Hostel**: your floor and nearby — with meal jio cards\n\nEach card shows a **% compatibility score** based on shared interests, modules, and goals — the higher the %, the more you have in common.\n\nClick any card to see their full profile. Hit "Request intro" to connect.`,
-    followUps: ['How is compatibility calculated?', 'How do I find a mentor?', 'What is the Hostel tab?'],
+    response: `The **People tab** is where you build your network on Cohortly.\n\n- **Everyone**: all verified SUTD students\n- **Year 1**: freshmen, exchange students, and new arrivals\n- **Year 2** and **Year 3+**: returning students grouped by year and pillar\n- **My Modules**: people in your same modules\n- **Hostel**: your floor and nearby — with meal jio cards\n\nEach card shows a **% compatibility score** based on shared interests, modules, and goals — the higher the %, the more you have in common.\n\nClick any card to see their full profile. Hit "Request intro" to connect.`,
+    followUps: ['How is compatibility calculated?', 'How do I find returning students?', 'What is the Hostel tab?'],
   },
   {
-    id: 'mentors',
-    triggers: ['mentor', 'senior mentor', 'find mentor', 'get a mentor', 'aarav', 'sara halim', 'wei jian', 'mentor profile', 'connect mentor', 'mentor match', 'senior student'],
-    response: `Cohortly has verified senior mentors — here are the active ones:\n\n- **Aarav Menon** (Y3 ISTD, ✦ Legendary): answers in 10.014, 50.007, 10.009. Runs weekly coding prep sessions Tuesday evenings. Best for Python debugging, recursion, ML.\n- **Sara Binte Halim** (Y2 DAI, ◆ Rare): active in 10.014 and 10.009. Weekday evenings.\n- **Wei Jian Lim** (Y3 ISTD, ◈ High): 10.014, 10.009, 50.007. Sunday study cram sessions.\n\n**How to connect:** People → Senior Mentors → click their card → Request intro.\n\nYou can also just post in their module room — they monitor it and often respond faster than DMs.`,
-    followUps: ['How do I use module rooms?', 'What events do mentors run?', 'How does the Aura system work?'],
+    id: 'returning-students',
+    triggers: ['mentor', 'senior mentor', 'find mentor', 'get a mentor', 'aarav', 'sara halim', 'wei jian', 'mentor profile', 'connect mentor', 'mentor match', 'senior student', 'returning student', 'year 2', 'year 3'],
+    response: `Cohortly no longer uses a separate mentor concept. Returning students are grouped by year, pillar, module, hostel block, and activity.\n\nUseful returning students right now:\n\n- **Aarav Menon** (Y3 ISTD): active in 10.014, 50.007, and 10.009; runs weekly coding prep sessions\n- **Sara Binte Halim** (Y2 DAI): active in 10.014 and 10.009; good for Python and data questions\n- **Wei Jian Lim** (Y3 ISTD): active in 10.009 and systems design; runs Sunday study crams\n\n**How to connect:** People → Year 2 or Year 3+ → click a card → Request intro. You can also post in the module room so everyone benefits from the answer.`,
+    followUps: ['How do I use module rooms?', 'What events are running?', 'How does compatibility work?'],
   },
   {
     id: 'module-rooms',
     triggers: ['module room', 'qa room', 'class room', 'q&a', 'ask question', 'post question', 'classes tab', 'how to ask', 'question forum', 'cohortly classes'],
-    response: `**Module rooms** are Q&A forums for each module — accessed via the **Classes tab**.\n\n**How they work:**\n- Select your module (10.014, 10.009, etc.)\n- Read existing threads — someone may have already asked your question\n- Post a new question: be specific (include error messages, what you've tried)\n- Senior mentors **claim and answer** questions — usually within 2–4 hours during term\n\n**Tips for getting fast answers:**\n- Post the actual error message, not just "it doesn't work"\n- Say what you've already tried\n- Post early in the day (not the night before the deadline)`,
+    response: `**Module rooms** are Q&A forums for each module — accessed via the **Classes tab**.\n\n**How they work:**\n- Select your module (10.014, 10.009, etc.)\n- Read existing threads — someone may have already asked your question\n- Post a new question: be specific (include error messages, what you've tried)\n- Classmates and returning students answer in shared threads so the answer helps everyone\n\n**Tips for getting fast answers:**\n- Post the actual error message, not just "it doesn't work"\n- Say what you've already tried\n- Post early in the day (not the night before the deadline)`,
     followUps: ['Who answers in the module rooms?', 'How do I post a question?', 'What is 10.014 like?'],
   },
   {
     id: 'events-feature',
     triggers: ['events', 'events tab', 'rsvp', 'create event', 'join event', 'event approval', 'campus events', 'sutd events', 'post event'],
-    response: `The **Events tab** is where all campus happenings live.\n\n- **Browse and RSVP** to upcoming events — from study sessions to food crawls to sports\n- **Create your own event**: fill in the form and submit — it goes through admin approval before appearing in the feed\n- **Filter by type**: social, academic, sports, cultural, community\n\nSenior mentors post prep sessions here (like Aarav's 10.014 coding nights). Check it weekly — especially in Weeks 1–4 when most orientation events cluster.\n\n**Student-created events need approval** — so post at least 24h before you want it live.`,
+    response: `The **Events tab** is where all campus happenings live.\n\n- **Browse and RSVP** to upcoming events — from study sessions to food crawls to sports\n- **Create your own event**: fill in the form and submit — it goes through admin approval before appearing in the feed\n- **Filter by type**: social, academic, sports, cultural, community\n\nReturning students and class groups post prep sessions here, like Aarav's 10.014 coding nights. Check it weekly — especially in Weeks 1–4 when most orientation events cluster.\n\n**Student-created events need approval** — so post at least 24h before you want it live.`,
     followUps: ['How do I create an event?', 'What events are coming up?', 'How do I connect with people at events?'],
   },
   {
@@ -1020,7 +1036,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'hostel-tab',
     triggers: ['hostel tab', 'people hostel', 'floor mates', 'floor neighbors', 'floor neighbours', 'block community', 'hostel community', 'find floor mate'],
-    response: `The **Hostel tab** is inside People on Cohortly.\n\nIt shows:\n- **Active jios near you**: meal runs, study sessions, and sports outings posted by people on your floor and block — tap "Join jio" to get in on them\n- **Your floor**: see who lives near you (Block 1N, your floor), their pillar, and their interests. Say hi directly from the app.\n\nIt's the quickest way to stop eating alone in Week 1. Check it morning and evening.`,
+    response: `The **Hostel tab** is inside People on Cohortly.\n\nIt shows:\n- **Active jios near you**: meal runs, study sessions, and sports outings posted by people on your floor and block — tap "Join jio" to get in on them\n- **Your floor**: see who lives near you in Blocks 51, 55, 57, or 59, their year, pillar, and interests. Say hi directly from the app.\n\nIt's the quickest way to stop eating alone in Week 1. Check it morning and evening.`,
     followUps: ['How do jios work?', 'What food is nearby?', 'How do I meet people?'],
   },
   // ── Making Friends & Social ────────────────────────────────────────────────
@@ -1033,14 +1049,14 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'orientation-camp',
     triggers: ['orientation camp', 'orientation', 'camp', 'o week', 'week 0', 'freshmore camp', 'orientation activities', 'frosh'],
-    response: `**Freshmore Orientation** runs during Week 0 (the week before classes start).\n\nWhat to expect:\n- **Orientation Camp**: 1–2 days of icebreakers, team activities, campus exploration — run by senior student leaders\n- **Admin setup sessions**: help desks for student card, email, Canvas\n- **Fifth Row Club Fair**: all 80+ clubs have booths — browse and sign up for trial mailing lists\n- **Campus tour**: seniors take you through all the buildings, labs, and hidden hangout spots\n- **Wellbeing briefing**: they'll tell you about all the support services\n\nGo to everything. It feels optional but it's actually your best window to meet people before the semester pressure starts.`,
+    response: `**Freshmore Orientation** runs during Week 0 (the week before classes start).\n\nWhat to expect:\n- **Orientation Camp**: 1–2 days of icebreakers, team activities, campus exploration — run by student leaders\n- **Admin setup sessions**: help desks for student card, email, Canvas\n- **Fifth Row Club Fair**: all 80+ clubs have booths — browse and sign up for trial mailing lists\n- **Campus tour**: returning students take you through all the buildings, labs, and hidden hangout spots\n- **Wellbeing briefing**: they'll tell you about all the support services\n\nGo to everything. It feels optional but it's actually your best window to meet people before the semester pressure starts.`,
     followUps: ['What is Fifth Row?', 'What should I set up in Week 1?', 'How do I meet people?'],
   },
   // ── About Cohortly ────────────────────────────────────────────────────────
   {
     id: 'about-cohortly',
     triggers: ['what is cohortly', 'about cohortly', 'how does cohortly work', 'cohortly features', 'what can cohortly do', 'explain cohortly', 'cohortly app'],
-    response: `**Cohortly** is SUTD's verified student network — built for Freshmore belonging and connection.\n\n**What it does:**\n- **Launchpad**: guided 8-phase checklist from pre-arrival to mentorship\n- **People**: find and connect with students, senior mentors, and floor neighbours\n- **Events**: discover and join campus events, create your own\n- **Fifth Row**: browse and track interest in 80+ clubs\n- **Classes**: Q&A module rooms with senior mentors answering questions\n- **Knowledge Base**: searchable articles on everything SUTD\n- **Messages**: 1-on-1 and group threads\n- **Weekly Pulse**: anonymous wellbeing check-in\n- **Cohortly AI** (that's me!): ask anything, any time\n\nAll profiles are verified against SUTD email — so everyone you see is real.`,
+    response: `**Cohortly** is SUTD's verified student network — built for Freshmore belonging and connection.\n\n**What it does:**\n- **Launchpad**: guided checklist from pre-arrival to first-week readiness\n- **People**: find and connect with freshmen, returning students, module mates, and floor neighbours\n- **Events**: discover and join campus events, create your own\n- **Fifth Row**: browse and track interest in 80+ clubs\n- **Classes**: Q&A module rooms where classmates and returning students answer questions\n- **Knowledge Base**: searchable articles on everything SUTD\n- **Messages**: 1-on-1 and group threads\n- **Weekly Pulse**: anonymous wellbeing check-in\n- **Cohortly AI** (that's me!): ask anything, any time\n\nAll profiles are verified against SUTD email — so everyone you see is real.`,
     followUps: ['How do I use the Launchpad?', 'How do I connect with people?', 'What module rooms are available?'],
   },
   {
@@ -1122,7 +1138,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'fail-module',
     triggers: ['fail', 'failed', 'failing', 'fail module', 'failed module', 'retake', 'academic probation', 'academic warning', 'remediation', 'what if i fail', 'repeat module', 'consequence', 'flunk'],
-    response: `**If you fail a module at SUTD:**\n\nFreshmore is Pass/Fail — so the bar is clear: you either pass or you don't, and it's based on attendance + continuous assessment + finals.\n\n**Consequences of failing:**\n- You may need to **retake the module** in the next available term — this can delay your pillar entry\n- Two failed modules in a term triggers an **academic review** with OSA and your faculty advisor\n- Continued poor performance leads to **academic probation** — official letter, reduced module load, mandatory check-ins\n\n**Before it gets to that:**\n- If you're struggling mid-term, talk to the **module coordinator or prof** early — they have seen it all and often have accommodations\n- Post in the **Cohortly module room** — seniors spot common misconceptions fast\n- **OSA student advisors** (Building 1) can help you make a recovery plan\n\nMost students who fail a module in Term 1 and get support do fine in Term 2.`,
+    response: `**If you fail a module at SUTD:**\n\nFreshmore is Pass/Fail — so the bar is clear: you either pass or you don't, and it's based on attendance + continuous assessment + finals.\n\n**Consequences of failing:**\n- You may need to **retake the module** in the next available term — this can delay your pillar entry\n- Two failed modules in a term triggers an **academic review** with OSA and your faculty advisor\n- Continued poor performance leads to **academic probation** — official letter, reduced module load, mandatory check-ins\n\n**Before it gets to that:**\n- If you're struggling mid-term, talk to the **module coordinator or prof** early — they have seen it all and often have accommodations\n- Post in the **Cohortly module room** — returning students spot common misconceptions fast\n- **OSA student advisors** (Building 1) can help you make a recovery plan\n\nMost students who fail a module in Term 1 and get support do fine in Term 2.`,
     followUps: ['How does Pass/Fail grading work?', 'Where is OSA?', 'How do I manage workload?'],
   },
   {
@@ -1181,7 +1197,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'internships',
     triggers: ['internship', 'intern', 'job', 'career', 'work experience', 'co-op', 'industry', 'summer internship', 'when can i intern', 'oip', 'office of industry', 'career services', 'job fair', 'linkedin', 'resume', 'cv'],
-    response: `**Internships and career at SUTD:**\n\n**When can you intern:**\n- **First real internship opportunity: Summer after Year 1 (May–Aug 2027)** — term break is long enough for a 2–3 month stint\n- **Structured internship (mandatory for most pillars)**: typically Year 3, built into the academic calendar\n\n**SUTD Career Services (OIP — Office of Industry Programs):**\n- Located in Building 1 — runs job fairs, company talks, mock interviews\n- **SUTD Internship Fair**: usually October and March — major tech companies, consulting firms, local companies all attend\n- Career portal: careers.sutd.edu.sg (log in with your SUTD credentials)\n\n**For Freshmores — build now:**\n- Strengthen Python via 10.014\n- Start a GitHub portfolio with your lab projects\n- Join the Entrepreneurship Society for startup exposure\n- Talk to seniors about their internship experiences via People tab\n\n**iCube (SUTD's startup incubator)** at Building 2 sometimes takes student interns — check their board.`,
+    response: `**Internships and career at SUTD:**\n\n**When can you intern:**\n- **First real internship opportunity: Summer after Year 1 (May–Aug 2027)** — term break is long enough for a 2–3 month stint\n- **Structured internship (mandatory for most pillars)**: typically Year 3, built into the academic calendar\n\n**SUTD Career Services (OIP — Office of Industry Programs):**\n- Located in Building 1 — runs job fairs, company talks, mock interviews\n- **SUTD Internship Fair**: usually October and March — major tech companies, consulting firms, local companies all attend\n- Career portal: careers.sutd.edu.sg (log in with your SUTD credentials)\n\n**For Freshmores — build now:**\n- Strengthen Python via 10.014\n- Start a GitHub portfolio with your lab projects\n- Join the Entrepreneurship Society for startup exposure\n- Talk to returning students about their internship experiences via People tab\n\n**iCube (SUTD's startup incubator)** at Building 2 sometimes takes student interns — check their board.`,
     followUps: ['What is iCube?', 'How do I build a portfolio?', 'How do I use the SUTD email for GitHub?'],
   },
   {
@@ -1193,7 +1209,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'sep-exchange',
     triggers: ['exchange program', 'exchange programme', 'sep', 'study abroad', 'partner university', 'overseas study', 'student exchange', 'exchange year', 'ntu exchange', 'nus exchange', 'mit exchange', 'overseas university'],
-    response: `**Student Exchange Programme (SEP) at SUTD:**\n\nSUTD has exchange partnerships with 70+ universities worldwide — MIT, ETH Zürich, TU Delft, NUS, NTU, and many more.\n\n**When you can go:**\n- Typically **Year 3 Term 1 or 2** — after pillar selection and core module completion\n- Duration: 1 semester (13–14 weeks)\n\n**How to apply:**\n- Applications open in **Year 2 Term 2** via the OSA Global Programmes office\n- GPA requirement: typically 3.0/4.0+ (letter grade GPA from Year 2 onwards)\n- Need a **Statement of Purpose** and faculty recommendation\n\n**What to expect:**\n- You take equivalent modules at the host university that map back to SUTD electives\n- Accommodation is arranged through the host university (usually in their dorms)\n- Cost is roughly similar to studying at SUTD (some are cheaper, some more expensive)\n\nStart researching in Year 1 — talk to seniors who've been on exchange via the People tab.`,
+    response: `**Student Exchange Programme (SEP) at SUTD:**\n\nSUTD has exchange partnerships with 70+ universities worldwide — MIT, ETH Zürich, TU Delft, NUS, NTU, and many more.\n\n**When you can go:**\n- Typically **Year 3 Term 1 or 2** — after pillar selection and core module completion\n- Duration: 1 semester (13–14 weeks)\n\n**How to apply:**\n- Applications open in **Year 2 Term 2** via the OSA Global Programmes office\n- GPA requirement: typically 3.0/4.0+ (letter grade GPA from Year 2 onwards)\n- Need a **Statement of Purpose** and faculty recommendation\n\n**What to expect:**\n- You take equivalent modules at the host university that map back to SUTD electives\n- Accommodation is arranged through the host university (usually in their dorms)\n- Cost is roughly similar to studying at SUTD (some are cheaper, some more expensive)\n\nStart researching in Year 1 — talk to returning students who've been on exchange via the People tab.`,
     followUps: ['When do letter grades start?', 'What is pillar selection?', 'What is Year 2 like?'],
   },
   {
@@ -1246,7 +1262,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'lab-safety',
     triggers: ['lab safety', 'lab induction', 'safety briefing', 'safety training', 'lab access', 'lab rules', 'ehs', 'environment health safety', 'fablab induction', 'lab accident', 'how to use lab', 'safety shoes', 'ppe'],
-    response: `**Lab safety at SUTD:**\n\n**Mandatory inductions** before you can use equipment:\n- **FabLab induction**: 1.5h session covering 3D printers, laser cutters, and basic tools. Book via the FabLab portal or just show up during a drop-in session. Must complete before touching machines.\n- **Engineering workshop**: Additional induction for power tools, lathe, metal work — required before EPD-type projects\n- **Chemistry/biology labs**: Specific EHS briefings run by the module coordinator\n\n**General rules:**\n- Closed-toe shoes required in all labs (no flip-flops — they will turn you away)\n- Safety glasses when working with anything that chips, sparks, or sprays\n- Never work alone with dangerous equipment — bring a buddy\n- First aid kits are marked in every lab. SUTD Security (6303-6002) for emergencies.\n\n**FabLab-specific:** Don't run jobs unsupervised if you're new. The first few times, ask a FabLab staff member or a Makers club senior to guide you.`,
+    response: `**Lab safety at SUTD:**\n\n**Mandatory inductions** before you can use equipment:\n- **FabLab induction**: 1.5h session covering 3D printers, laser cutters, and basic tools. Book via the FabLab portal or just show up during a drop-in session. Must complete before touching machines.\n- **Engineering workshop**: Additional induction for power tools, lathe, metal work — required before EPD-type projects\n- **Chemistry/biology labs**: Specific EHS briefings run by the module coordinator\n\n**General rules:**\n- Closed-toe shoes required in all labs (no flip-flops — they will turn you away)\n- Safety glasses when working with anything that chips, sparks, or sprays\n- Never work alone with dangerous equipment — bring a buddy\n- First aid kits are marked in every lab. SUTD Security (6303-6002) for emergencies.\n\n**FabLab-specific:** Don't run jobs unsupervised if you're new. The first few times, ask a FabLab staff member or a returning Makers club student to guide you.`,
     followUps: ['Where is the FabLab?', 'How do I join the FabLab club?', 'What are the campus buildings?'],
   },
   // ── Chitchat ─────────────────────────────────────────────────────────────
@@ -1254,12 +1270,12 @@ const COHORTLY_KB: AIEntry[] = [
     id: 'chitchat-thanks',
     triggers: ['thank you', 'thanks', 'thank u', 'tq', 'ty', 'thx', 'appreciate it', 'helpful', 'that helps'],
     response: `Anytime! That's what I'm here for.\n\nIf you think of anything else — modules, hostel, social stuff, admin — just ask. Good luck with your Freshmore journey.`,
-    followUps: ['What is the Launchpad?', 'How do I find my mentor?', 'What is Fifth Row?'],
+    followUps: ['What is the Launchpad?', 'How do I find returning students?', 'What is Fifth Row?'],
   },
   {
     id: 'chitchat-greeting',
     triggers: ['hello', 'hi', 'hey', 'hiya', 'yo', 'sup', 'good morning', 'good afternoon', 'good evening', 'howdy'],
-    response: `Hey! Welcome to Cohortly AI — I know everything about SUTD and this app.\n\nWhat can I help you with? You can ask about modules, hostel life, clubs, how to find a mentor, admin stuff, or anything else about starting at SUTD.`,
+    response: `Hey! Welcome to Cohortly AI — I know everything about SUTD and this app.\n\nWhat can I help you with? You can ask about modules, hostel life, clubs, returning students, admin setup, or anything else about starting at SUTD.`,
     followUps: ['Tell me about 10.014', 'What should I pack for hostel?', 'What is Fifth Row?', 'How does Pass/Fail work?'],
   },
   {
@@ -1402,7 +1418,7 @@ const COHORTLY_KB: AIEntry[] = [
   },
   {
     id: 'year2-housing',
-    triggers: ['year 2 housing', 'year 2 hostel', 'upper year housing', 'y2 hostel', 'senior hostel', 'can i stay hostel year 2', 'off campus year 2', 'leave hostel', 'move out hostel', 'housing after freshmore', 'accommodation year 2'],
+    triggers: ['year 2 housing', 'year 2 hostel', 'upper year housing', 'y2 hostel', 'returning student hostel', 'can i stay hostel year 2', 'off campus year 2', 'leave hostel', 'move out hostel', 'housing after freshmore', 'accommodation year 2'],
     response: `**Housing for Year 2 and beyond:**\n\n**On-campus (Blocks 2N and 2S)**: Available for Year 2 students subject to availability. Apply via the SUTD Housing portal in Freshmore Term 3 — apply early.\n\n**Off-campus option**: Some students rent near Clementi, Buona Vista, or one-north (1–2 MRT stops). HDB rooms ~S$800–1,200/month. Sharing a flat with 2–3 friends is most cost-effective.\n\n**Why stay on campus**: Convenient, cheaper than renting, community continues.\n\n**International students**: Check with OSA that your Student's Pass conditions don't require on-campus housing (rarely an issue but worth confirming).`,
     followUps: ['How much does living cost?', 'What is the hostel like?'],
   },
@@ -1590,7 +1606,7 @@ function findAIResponse(input: string, lastEntryId: string | null): { response: 
 
   if (!scored.length || scored[0].s < 1.2) {
     return {
-      response: `I'm not sure I have specific information on that. Here are a few things I can help with:\n\n- Module questions (10.014, 10.009, etc.)\n- Hostel, food, and campus life\n- Admin setup (student card, email, etc.)\n- Finding mentors and making connections\n- Wellbeing and support resources\n- Fifth Row clubs\n\nTry rephrasing your question, or check the **Knowledge Base** tab for articles!`,
+      response: `I'm not sure I have specific information on that. Here are a few things I can help with:\n\n- Module questions (10.014, 10.009, etc.)\n- Hostel, food, and campus life\n- Admin setup (student card, email, etc.)\n- Finding classmates and returning students\n- Wellbeing and support resources\n- Fifth Row clubs\n\nTry rephrasing your question, or check the **Knowledge Base** tab for articles!`,
       followUps: ['What modules do I take?', 'Tell me about the hostel', 'Where do I get my student card?'],
       entryId: 'fallback',
     };
@@ -1659,7 +1675,7 @@ const riskStudents: RiskStudent[] = [
     signals: [
       { text: '5 days since last login', severity: 'amber' },
       { text: '0 questions asked in any module room', severity: 'amber' },
-      { text: 'No mentor connection yet', severity: 'blue' },
+      { text: 'No returning-student connection yet', severity: 'blue' },
     ],
     lastActive: '2026-06-03', daysInactive: 5,
   },
@@ -1716,10 +1732,10 @@ const adminClassHealth: Array<{
 ];
 
 const adminAlerts: Array<{ type: 'urgent' | 'warning' | 'info'; title: string; detail: string; action: string }> = [
-  { type: 'urgent', title: '3 questions unanswered for >6 hours', detail: '10.014 Computational Thinking · Lab 2 recursion help', action: 'Notify mentor' },
+  { type: 'urgent', title: '3 questions unanswered for >6 hours', detail: '10.014 Computational Thinking · Lab 2 recursion help', action: 'Notify returning students' },
   { type: 'warning', title: '14 students have zero connections', detail: 'First-week isolation risk — no events RSVPd or messages sent', action: 'Send care nudge' },
   { type: 'warning', title: '22 students haven\'t joined any event', detail: 'Signed up and verified but not yet engaged with the cohort', action: 'Highlight events' },
-  { type: 'info', title: '30.007 Engineering Design needs more mentor coverage', detail: 'Only 1 active senior — 11 open questions this week', action: 'Recruit mentor' },
+  { type: 'info', title: '30.007 Engineering Design needs more returning-student coverage', detail: 'Only 1 active Year 2+ student — 11 open questions this week', action: 'Invite returning students' },
 ];
 
 const adminStudents: Array<{ name: string; pillar: string; joined: string; connections: number; events: number }> = [
@@ -1732,37 +1748,34 @@ const adminStudents: Array<{ name: string; pillar: string; joined: string; conne
   { name: 'Priya Nair', pillar: 'ESD', joined: '2d ago', connections: 4, events: 1 },
 ];
 
-function getDemoProfile(role: UserRole): StudentProfile {
-  if (role === 'mentor') {
+function getDemoProfile(mode: DemoMode): StudentProfile {
+  if (mode === 'returning') {
     return {
-      role: 'mentor',
-      classes: ['10.014 Computational Thinking', '50.007 Machine Learning'],
-      interests: [],
-      goals: [],
+      role: 'student',
+      classes: ['50.001 Introduction to ISTD', '50.004 Algorithm Design', '50.007 Machine Learning'],
+      interests: ['Startups & iCube', 'Robotics', 'Study groups'],
+      goals: ['Find project teammates', 'Share module notes', 'Join a returning-student circle'],
       availability: 'Weekday evenings',
-      homeBase: 'ISTD pillar',
-      intro: 'Year 3 ISTD mentor. Specialises in algorithms, ML, and computational thinking for freshmores.',
-      mentorYear: 'Year 3',
-      mentorPillar: 'ISTD',
-      mentorModules: [
-        '10.014 Computational Thinking',
-        '50.001 Introduction to ISTD',
-        '50.004 Algorithm Design',
-        '50.007 Machine Learning',
-        '50.003 Software Construction',
-      ],
-      mentorHelpStyle: ['One-on-one sessions', 'Group study rooms', 'Weekly office hours'],
+      homeBase: 'Block 57 / ISTD pillar',
+      intro: 'Returning ISTD student looking for project teammates, class groups, and useful ways to help incoming students settle in.',
+      pillar: 'ISTD',
+      year: 'Year 3',
+      hostelBlock: '57',
+      hostelFloor: 6,
+      hostelRoom: '09',
     };
   }
   return {
     role: 'student',
     classes: ['10.014 Computational Thinking', '10.009 The Digital World', '10.001 Advanced Maths I'],
     interests: ['Startups & iCube', 'Badminton', 'Food & Cafes'],
-    goals: ['Find my first-week circle', 'Get senior module advice'],
+    goals: ['Find my first-week circle', 'Get module advice from returning students'],
     availability: 'Weekday evenings',
     homeBase: 'Freshmore housing / East Coast',
     intro: 'New to SUTD — looking for low-pressure events, coding help, and startup friends.',
-    hostelBlock: '1N',
+    pillar: 'Freshmore',
+    year: 'Year 1',
+    hostelBlock: '55',
     hostelFloor: 4,
     hostelRoom: '12',
   };
@@ -2080,9 +2093,9 @@ function App() {
     saveProfile(session.email, nextProfile); // async fire-and-forget
   };
 
-  const handleDemoLogin = (role: UserRole) => {
-    const demoUsers: Record<UserRole, VerifiedUser> = {
-      student: {
+  const handleDemoLogin = (mode: DemoMode) => {
+    const demoUsers: Record<DemoMode, VerifiedUser> = {
+      freshman: {
         name: 'Vanika Sharma',
         email: 'demo.student@mymail.sutd.edu.sg',
         studentId: 'DEMO0001',
@@ -2091,9 +2104,9 @@ function App() {
         shortName: 'SUTD',
         verifiedAt: new Date().toISOString(),
       },
-      mentor: {
+      returning: {
         name: 'Aarav Menon',
-        email: 'demo.mentor@mymail.sutd.edu.sg',
+        email: 'demo.returning@mymail.sutd.edu.sg',
         studentId: 'DEMO0002',
         institutionId: 'sutd',
         institutionName: 'Singapore University of Technology and Design',
@@ -2101,12 +2114,12 @@ function App() {
         verifiedAt: new Date().toISOString(),
       },
     };
-    const user = demoUsers[role];
+    const user = demoUsers[mode];
     if (wasReset.current) {
       wasReset.current = false;
       setSession(user);
     } else {
-      const demoProfile = getDemoProfile(role);
+      const demoProfile = getDemoProfile(mode);
       setSession(user);
       setProfile(demoProfile);
       setProfileLoaded(true);
@@ -2214,7 +2227,7 @@ function LandingScreen({
   ssoError,
 }: {
   onSelectRole: (role: UserRole) => void;
-  onDemoLogin: (role: UserRole) => void;
+  onDemoLogin: (mode: DemoMode) => void;
   onAdminDemo: () => void;
   onSSOLogin: (p: 'microsoft') => void;
   ssoError: string;
@@ -2229,7 +2242,7 @@ function LandingScreen({
         </div>
         <div className="landing-nav-right">
           <span className="landing-live-pill">Verified access</span>
-          <span className="landing-join-count">Student, mentor, and staff demos</span>
+          <span className="landing-join-count">Freshman and returning student demos</span>
         </div>
       </nav>
 
@@ -2240,7 +2253,7 @@ function LandingScreen({
           </span>
           <h1>Meet your verified SUTD community before Day 1.</h1>
           <p>
-            Find classmates, get module help from verified seniors, join small-group plans,
+            Find classmates, get module help from returning students, join small-group plans,
             and settle into campus with fewer unknowns.
           </p>
 
@@ -2252,7 +2265,7 @@ function LandingScreen({
 
           <div className="landing-story-panel">
             <strong>One calm place for the first weeks of university.</strong>
-            <span>Students see the next useful action, mentors see who needs help, and staff see privacy-safe support signals.</span>
+            <span>Freshmen see the next useful action. Returning students find class groups, floor circles, and first-week plans by year.</span>
           </div>
 
           <div className="sso-primary-block">
@@ -2269,17 +2282,17 @@ function LandingScreen({
             <button className="path-card student-path" onClick={() => onSelectRole('student')}>
               <div className="path-card-icon"><GraduationCap size={20} /></div>
               <div className="path-card-text">
-                <strong>I'm a new student</strong>
+                <strong>I'm a freshman</strong>
                 <span>Freshmore · Exchange · Incoming 2026</span>
               </div>
               <span className="path-card-arrow"><ArrowRight size={18} /></span>
             </button>
 
-            <button className="path-card mentor-path" onClick={() => onSelectRole('mentor')}>
-              <div className="path-card-icon"><HeartHandshake size={20} /></div>
+            <button className="path-card returning-path" onClick={() => onSelectRole('student')}>
+              <div className="path-card-icon"><Users size={20} /></div>
               <div className="path-card-text">
-                <strong>I'm a senior mentor</strong>
-                <span>Year 2, 3 or 4 · answer module questions</span>
+                <strong>I'm a returning student</strong>
+                <span>Year 2, 3 or 4 · grouped by year and pillar</span>
               </div>
               <span className="path-card-arrow"><ArrowRight size={18} /></span>
             </button>
@@ -2287,11 +2300,11 @@ function LandingScreen({
 
           <div className="landing-demo-inline" aria-label="Open demo modes">
             <span>Try a demo:</span>
-            <button className="demo-btn student-demo" onClick={() => onDemoLogin('student')}>
-              <GraduationCap size={14} /> Student
+            <button className="demo-btn student-demo" onClick={() => onDemoLogin('freshman')}>
+              <GraduationCap size={14} /> Freshman
             </button>
-            <button className="demo-btn mentor-demo" onClick={() => onDemoLogin('mentor')}>
-              <HeartHandshake size={14} /> Mentor
+            <button className="demo-btn returning-demo" onClick={() => onDemoLogin('returning')}>
+              <Users size={14} /> Returning
             </button>
             <button className="demo-btn admin-demo" onClick={onAdminDemo}>
               <Building2 size={14} /> Admin
@@ -2301,7 +2314,7 @@ function LandingScreen({
 
         <div className="landing-hero-right">
           <div className="product-preview-frame">
-            <img src={productPreview} alt="Cohortly student Today view showing next actions, events, mentors, and module help" />
+            <img src={productPreview} alt="Cohortly student Today view showing next actions, events, hostel, and module help" />
             <div className="product-preview-caption">
               <span>Real student workspace</span>
               <strong>Today, people, events, classes, messages, hostel and support in one flow.</strong>
@@ -2311,8 +2324,8 @@ function LandingScreen({
       </div>
 
       <section className="landing-value-section">
-        <h2>Built for the people running orientation</h2>
-        <p>Cohortly turns scattered onboarding into a measurable, supportive launch — for students and the staff who guide them.</p>
+        <h2>Built around student years and real campus groups</h2>
+        <p>Cohortly keeps incoming and returning SUTD students together by cohort, module, floor, and Fifth Row interest.</p>
         <div className="landing-value-cards">
           <div className="landing-value-card landing-value-card--lead">
             <div className="landing-value-card-icon" style={{ background: 'rgba(56,189,248,0.12)', color: '#38bdf8' }}><Rocket size={20} /></div>
@@ -2320,9 +2333,9 @@ function LandingScreen({
             <p>Track who's ready before Day 1, and surface students who quietly fall behind.</p>
           </div>
           <div className="landing-value-card">
-            <div className="landing-value-card-icon" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399' }}><GraduationCap size={20} /></div>
-            <h3>Senior Mentor Q&amp;A</h3>
-            <p>Academic help that scales — verified seniors answer module questions in shared rooms.</p>
+            <div className="landing-value-card-icon" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399' }}><Users size={20} /></div>
+            <h3>Returning student circles</h3>
+            <p>Year 2, 3, and 4 students are grouped by pillar, module, floor, and live study plans.</p>
           </div>
           <div className="landing-value-card">
             <div className="landing-value-card-icon" style={{ background: 'rgba(168,85,247,0.12)', color: '#c084fc' }}><Sparkles size={20} /></div>
@@ -2331,27 +2344,11 @@ function LandingScreen({
           </div>
           <div className="landing-value-card landing-value-card--wide">
             <div className="landing-value-card-icon" style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24' }}><HeartHandshake size={20} /></div>
-            <h3>Admin Intervention</h3>
+            <h3>Staff support signals</h3>
             <p>Privacy-safe support signals so advisors can reach out before a student disengages.</p>
           </div>
         </div>
       </section>
-
-      <div className="landing-footer-area">
-        <div className="landing-demo">
-          <span>Try without verifying:</span>
-          <button className="demo-btn student-demo" onClick={() => onDemoLogin('student')}>
-            <GraduationCap size={14} /> Student
-          </button>
-          <button className="demo-btn mentor-demo" onClick={() => onDemoLogin('mentor')}>
-            <HeartHandshake size={14} /> Mentor
-          </button>
-<button className="demo-btn admin-demo" onClick={onAdminDemo}>
-            <Building2 size={14} /> Admin view
-          </button>
-        </div>
-        <p className="landing-footer-text">Verified SUTD email required · SSO or OTP · Students only</p>
-      </div>
     </div>
   );
 }
@@ -2441,8 +2438,8 @@ function AuthScreen({
         </div>
 
         <div className="auth-role-hint">
-          {role === 'mentor' ? <HeartHandshake size={16} /> : <GraduationCap size={16} />}
-          {role === 'mentor' ? 'Joining as a senior mentor' : 'Joining as a SUTD student'}
+          <GraduationCap size={16} />
+          Joining as a verified SUTD student
         </div>
 
         {step === 'identity' && (
@@ -2574,7 +2571,7 @@ type InviteRecord = {
   id: string;
   name: string;
   email: string;
-  role: 'Freshmore' | 'Exchange' | 'Senior Mentor' | 'Staff';
+  role: 'Freshmore' | 'Exchange' | 'Returning Student' | 'Staff';
   pillar: string;
   cohort: string;
   status: 'not_sent' | 'sent' | 'opened' | 'verified' | 'onboarded';
@@ -2584,7 +2581,7 @@ type InviteRecord = {
 const inviteDemoCsv = `Aarav Menon,aarav_menon@mymail.sutd.edu.sg,Freshmore,Freshmore
 Lim Jia En,jiaen_lim@mymail.sutd.edu.sg,Freshmore,DAI
 Nur Aisyah,aisyah_nur@mymail.sutd.edu.sg,Exchange,Exchange
-Tan Wei Ming,weiming_tan@mymail.sutd.edu.sg,Senior Mentor,ISTD
+Tan Wei Ming,weiming_tan@mymail.sutd.edu.sg,Returning Student,ISTD
 Sarah Chen,sarah_chen@mymail.sutd.edu.sg,Freshmore,ASD
 Nikhil Kumar,nikhil_kumar@mymail.sutd.edu.sg,Freshmore,EPD`;
 
@@ -2595,7 +2592,7 @@ function saveInviteRecords(records: InviteRecord[]) {
   try { localStorage.setItem('admin_invites', JSON.stringify(records)); } catch {}
 }
 function parseInviteCsv(text: string, cohort: string): InviteRecord[] {
-  const validRoles = ['Freshmore', 'Exchange', 'Senior Mentor', 'Staff'];
+  const validRoles = ['Freshmore', 'Exchange', 'Returning Student', 'Staff'];
   return text.split('\n').map((l) => l.trim()).filter(Boolean).map((line, i) => {
     const [name = '', email = '', role = 'Freshmore', pillar = ''] = line.split(',').map((s) => s.trim());
     const safeRole = (validRoles.includes(role) ? role : 'Freshmore') as InviteRecord['role'];
@@ -2704,7 +2701,7 @@ function ProfileOnboarding({
   // Student fields
   const [classes, setClasses] = useState<string[]>(['10.014 Computational Thinking', '10.009 The Digital World']);
   const [interests, setInterests] = useState<string[]>(['Startups & iCube', 'Badminton', 'Food & Cafes']);
-  const [goals, setGoals] = useState<string[]>(['Find my first-week circle', 'Get senior module advice']);
+  const [goals, setGoals] = useState<string[]>(['Find my first-week circle', 'Get returning-student module advice']);
   const [availability, setAvailability] = useState(availabilityOptions[0]);
   const [homeBase, setHomeBase] = useState('Freshmore housing / East Coast');
   const [intro, setIntro] = useState('New to SUTD and looking for low-pressure events, coding help, and startup friends.');
@@ -2773,18 +2770,18 @@ function ProfileOnboarding({
         </div>
         <div className="role-select-content">
           <h1>Welcome to SUTD Cohortly, {user.name.split(' ')[0]}.</h1>
-          <p>How are you joining? This shapes everything Cohortly shows you.</p>
+          <p>Pick the student stage that fits you. Cohortly groups people by year, pillar, module, and floor.</p>
           <div className="role-cards">
             <button
               className="role-card student-role-card"
               onClick={() => { setSelectedRole('student'); setOnboardStep('major'); }}
             >
               <div className="role-card-icon"><GraduationCap size={28} /></div>
-              <strong>Incoming Student</strong>
+              <strong>Freshman</strong>
               <em>Freshmore · Exchange · New arrival</em>
               <ul>
                 <li><Check size={14} /> Find your first-week cohort circle</li>
-                <li><Check size={14} /> Get module help from verified seniors</li>
+                <li><Check size={14} /> Get module help from returning students</li>
                 <li><Check size={14} /> Join events before orientation starts</li>
                 <li><Check size={14} /> One place for classes, people, events</li>
               </ul>
@@ -2792,18 +2789,18 @@ function ProfileOnboarding({
             </button>
             <button
               className="role-card mentor-role-card"
-              onClick={() => { setSelectedRole('mentor'); setOnboardStep('profile'); }}
+              onClick={() => { setSelectedRole('student'); setOnboardStep('major'); }}
             >
               <div className="role-card-icon mentor"><Users size={28} /></div>
-              <strong>Senior Mentor</strong>
-              <em>Year 2, 3 or 4 · Help freshmores</em>
+              <strong>Returning Student</strong>
+              <em>Year 2, 3 or 4 · grouped by year</em>
               <ul>
-                <li><Check size={14} /> See student questions requiring attention</li>
-                <li><Check size={14} /> Cover modules you already know well</li>
-                <li><Check size={14} /> Host study rooms and answer fast</li>
-                <li><Check size={14} /> Keep helping visible to staff</li>
+                <li><Check size={14} /> Find students in your pillar and year</li>
+                <li><Check size={14} /> Join module rooms and project groups</li>
+                <li><Check size={14} /> Share useful campus plans with your cohort</li>
+                <li><Check size={14} /> Keep hostel, Fifth Row, and class circles together</li>
               </ul>
-              <span className="role-card-cta">Set up mentor profile <ArrowRight size={15} /></span>
+              <span className="role-card-cta">Set up returning profile <ArrowRight size={15} /></span>
             </button>
           </div>
         </div>
@@ -2833,7 +2830,7 @@ function ProfileOnboarding({
               <ChevronLeft size={15} /> Back
             </button>
             <h1>Tell us about your journey.</h1>
-            <p>Cohortly uses this to match you to the right seniors and module rooms instantly.</p>
+            <p>Cohortly uses this to match you to the right classmates, returning students, and module rooms instantly.</p>
           </div>
 
           <div className="setup-section">
@@ -2892,7 +2889,7 @@ function ProfileOnboarding({
             </span>
           </div>
           <div>
-            <span className="soft-pill"><HeartHandshake size={15} /> Senior Mentor setup</span>
+            <span className="soft-pill"><HeartHandshake size={15} /> Returning student setup</span>
             <h1>Your profile tells freshmores exactly who to reach.</h1>
             <p>
               Pick the modules you can help with. Cohortly matches you to students who have questions in those exact rooms
@@ -3051,7 +3048,7 @@ function ProfileOnboarding({
           <h1>Pick your classes. Find your people.</h1>
           <p>
             Choose courses from any pillar, your interests, and first-week goals. Cohortly uses these to surface relevant
-            class rooms, senior mentors, and student circles — instead of one giant chat.
+            class rooms, returning-student groups, and student circles — instead of one giant chat.
           </p>
         </div>
         <div className="setup-proof">
@@ -3179,7 +3176,7 @@ function ProfileOnboarding({
           <div className="preview-list">
             <div>
               <BookOpen size={18} />
-              <span>{classes.slice(0, 2).join(', ') || 'Module'} rooms with seniors already attached</span>
+              <span>{classes.slice(0, 2).join(', ') || 'Module'} rooms with returning students already attached</span>
             </div>
             <div>
               <Users size={18} />
@@ -3319,7 +3316,7 @@ function PrivacyConsentModal({ onAccept, onDecline }: { onAccept: () => void; on
       <div className="consent-modal">
         <div className="consent-modal-head">
           <strong>Before you continue</strong>
-          <p>Cohortly collects and processes your data to connect you with the right people, events, and mentors at SUTD. Under the Singapore Personal Data Protection Act (PDPA), you have the right to know what we collect and why.</p>
+          <p>Cohortly collects and processes your data to connect you with the right people, events, classes, and hostel groups at SUTD. Under the Singapore Personal Data Protection Act (PDPA), you have the right to know what we collect and why.</p>
         </div>
         <div className="consent-points">
           <div className="consent-point">
@@ -3333,7 +3330,7 @@ function PrivacyConsentModal({ onAccept, onDecline }: { onAccept: () => void; on
             <div className="consent-point-icon"><Eye size={16} /></div>
             <div className="consent-point-text">
               <strong>Who can see your data</strong>
-              <p>Other verified SUTD students and mentors can see your profile and connection activity. SUTD administrators can see anonymised aggregate wellbeing signals. Individual pulse responses are never shared.</p>
+              <p>Other verified SUTD students can see your profile and connection activity. SUTD administrators can see anonymised aggregate wellbeing signals. Individual pulse responses are never shared.</p>
             </div>
           </div>
           <div className="consent-point">
@@ -3417,7 +3414,7 @@ function renderMarkdown(text: string): React.ReactNode {
 const INITIAL_SUGGESTIONS = [
   'How does 10.014 work?',
   'What should I bring to hostel?',
-  'How do I find a mentor?',
+  'How do I find returning students?',
   'How does Pass/Fail grading work?',
   'What is Fifth Row?',
   'Where to get mental health help?',
@@ -3952,9 +3949,9 @@ function StudentApp({
   onProfileUpdate: (p: StudentProfile) => void;
   onResetDemo: () => void;
 }) {
-  const isMentor = profile.role === 'mentor';
-  const appNavItems = isMentor ? mentorNavItems : navItems;
-  const [activeView, setActiveView] = useState<View>(isMentor ? 'mentor-home' : 'today');
+  const isMentor = false;
+  const appNavItems = navItems;
+  const [activeView, setActiveView] = useState<View>('today');
   const [dmTarget, setDmTarget] = useState<string | null>(null);
   const openDm = (name: string) => { setDmTarget(name); setActiveView('messages'); };
   const [showSearch, setShowSearch] = useState(false);
@@ -4095,7 +4092,7 @@ function StudentApp({
     <>
     {showSearch && <GlobalSearch onClose={() => setShowSearch(false)} onNavigate={(v) => { setActiveView(v); setShowSearch(false); }} />}
     {showNotifPanel && <NotificationPanel notifs={notifs} onClose={() => setShowNotifPanel(false)} onMarkAll={markAllRead} onMarkRead={markRead} onNavigate={(v) => { setActiveView(v); setShowNotifPanel(false); }} />}
-    <MobileBottomNav active={activeView} setActive={setActiveView} role={profile.role} />
+    <MobileBottomNav active={activeView} setActive={setActiveView} role="student" />
     {showPulse && <WeeklyPulseModal onClose={() => setShowPulse(false)} userEmail={user.email} />}
     {showEditProfile && (
       <EditProfileSheet
@@ -4120,11 +4117,11 @@ function StudentApp({
     )}
     <div className="student-shell">
       <aside className="app-rail">
-        <button className="brand-button" onClick={() => setActiveView(isMentor ? 'mentor-home' : 'today')}>
+        <button className="brand-button" onClick={() => setActiveView('today')}>
           <span className="brand-mark">C</span>
           <span>
             <strong>Cohortly</strong>
-            <small>{institution.shortName} · {isMentor ? 'Mentor' : 'Student'}</small>
+            <small>{institution.shortName} · Student</small>
           </span>
         </button>
 
@@ -4176,7 +4173,7 @@ function StudentApp({
       <div className="student-main">
         <header className="app-topbar">
           <div>
-            <span className="eyebrow">{isMentor ? 'Mentor service workspace' : 'Student-led campus network'}</span>
+            <span className="eyebrow">Student-led campus network</span>
             <h1>{activeView === 'privacy' ? 'Privacy & Data' : activeView === 'notifications' ? 'Notifications & Bots' : (appNavItems.find((item) => item.id === activeView)?.label ?? 'Cohortly')}</h1>
           </div>
           <div className="topbar-actions">
@@ -4246,7 +4243,7 @@ function StudentApp({
           {showNotifBanner && (
             <div className="notif-permission-bar" style={{ margin: '0 0 16px' }}>
               <BellRing size={18} style={{ color: 'var(--accent)', flexShrink: 0 }} />
-              <p>Get notified when a mentor answers your question or a new event is posted near you.</p>
+              <p>Get notified when your module question is answered or a new event is posted near you.</p>
               <button className="primary-button" style={{ flexShrink: 0 }} onClick={requestNotifPermission}>Enable notifications</button>
               <button className="icon-button" onClick={() => setShowNotifBanner(false)}><X size={14} /></button>
             </div>
@@ -4403,7 +4400,7 @@ function TodayView({
         <button className="for-you-card for-you-card--featured" onClick={() => setActiveView('classes')}>
           <div className="for-you-icon indigo"><BookOpen size={18} /></div>
           <h4>10.014 Computational Thinking</h4>
-          <p>4 seniors active now · 28 Q&amp;As this week</p>
+          <p>4 returning students active now · 28 Q&amp;As this week</p>
           <span className="for-you-cta">Open room <ArrowRight size={12} /></span>
         </button>
         <button className="for-you-card" onClick={() => setActiveView('events')}>
@@ -4415,7 +4412,7 @@ function TodayView({
         <button className="for-you-card" onClick={() => setActiveView('people')}>
           <div className="for-you-icon violet"><Users size={18} /></div>
           <h4>Aarav Menon</h4>
-          <p>Year 3 ISTD · 94% match · 10.014 mentor</p>
+          <p>Year 3 ISTD · 94% match · 10.014 guide</p>
           <span className="for-you-cta">Connect <ArrowRight size={12} /></span>
         </button>
       </div>
@@ -4462,8 +4459,8 @@ const phaseDesc: Record<string, string> = {
   'week1': 'Academic setup, first lectures, and your first connections.',
   'people5': 'Your first 5 key relationships on campus.',
   'fifth-row-phase': 'Find your co-curricular community.',
-  'qa-phase': 'Get comfortable asking — seniors are here to answer.',
-  'mentor-phase': 'Make the most of your senior mentors.',
+  'qa-phase': 'Get comfortable asking — returning students and classmates are here to answer.',
+  'returning-phase': 'Use returning-student sessions grouped by year, pillar, and module.',
 };
 
 function BelongingScoreBanner({ userEmail }: { userEmail: string }) {
@@ -5242,17 +5239,17 @@ function PersonProfileModal({ person, onClose, onMessage }: { person: Person; on
 }
 
 const hostelJios = [
-  { id: 'jio1', icon: 'food', title: 'Breakfast run · Koufu', time: 'Tomorrow 7:45 AM', desc: 'Walking to Koufu at 1N before 8AM lectures. 3 spots.', host: 'Mei Lin · 1N-04' },
-  { id: 'jio2', icon: 'food', title: 'Dinner jio · PGP Canteen', time: 'Tonight 6:30 PM', desc: 'Heading to PGP canteen for dinner — come join!', host: 'Noah · 2N-11' },
-  { id: 'jio3', icon: 'study', title: 'Study session · 10.014 lab', time: 'Wed 8 PM · FabLab Level 3', desc: 'Going through Lab 2 recursion. Bring your laptop.', host: 'Aarav · 3S-07' },
-  { id: 'jio4', icon: 'sports', title: 'Late supper · Macs Dover', time: 'Tonight 11 PM', desc: 'Anyone for supper at Macs Dover? Walking from hostel.', host: 'Priya · 1S-12' },
+  { id: 'jio1', icon: 'food', title: 'Breakfast run · campus food court', time: 'Tomorrow 7:45 AM', desc: 'Walking from Block 55 before 8 AM lectures. 3 spots.', host: 'Mei Lin · Block 55' },
+  { id: 'jio2', icon: 'food', title: 'Dinner jio · Changi Business Park', time: 'Tonight 6:30 PM', desc: 'Heading out after class — returning students welcome freshmen.', host: 'Noah · Block 57' },
+  { id: 'jio3', icon: 'study', title: 'Study session · 10.014 lab', time: 'Wed 8 PM · Building 5', desc: 'Going through Lab 2 recursion. Bring your laptop.', host: 'Aarav · Block 57' },
+  { id: 'jio4', icon: 'sports', title: 'Late supper · Dover run', time: 'Tonight 11 PM', desc: 'Anyone for supper after training? Walking from the housing path.', host: 'Priya · Block 59' },
 ];
 
 const hostelFloorMates = [
-  { name: 'Mei Lin', room: '1N-04', pillar: 'ASD', tags: ['architecture', 'sketching'] },
-  { name: 'Jerome', room: '1N-06', pillar: 'ESD', tags: ['math', 'chess', 'badminton'] },
-  { name: 'Sofia', room: '1N-09', pillar: 'DAI', tags: ['ML', 'music', 'bouldering'] },
-  { name: 'Kai', room: '1N-11', pillar: 'ISTD', tags: ['hackathons', 'basketball'] },
+  { name: 'Mei Lin', room: '55-0412', pillar: 'ASD', tags: ['architecture', 'sketching'] },
+  { name: 'Jerome', room: '55-0406', pillar: 'ESD', tags: ['math', 'chess', 'badminton'] },
+  { name: 'Sofia', room: '55-0409', pillar: 'DAI', tags: ['ML', 'music', 'bouldering'] },
+  { name: 'Kai', room: '55-0411', pillar: 'ISTD', tags: ['hackathons', 'basketball'] },
 ];
 
 // ─── Campus map + hostel directory data ──────────────────────────────────────
@@ -5281,48 +5278,45 @@ type HostelResident = {
 };
 
 const hostelResidents: HostelResident[] = [
-  // Block 1N — Freshmore North
-  { block: '1N', floor: 1, room: '01', name: 'Mei Lin', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '1N', floor: 1, room: '03', name: 'Jerome', pillar: 'ESD', year: 'Y1', online: true },
-  { block: '1N', floor: 1, room: '06', name: 'Sofia', pillar: 'DAI', year: 'Y1', online: false },
-  { block: '1N', floor: 1, room: '09', name: 'Kai', pillar: 'ISTD', year: 'Y1', online: true },
-  { block: '1N', floor: 1, room: '11', name: 'Rui', pillar: 'EPD', year: 'Y1', online: false },
-  { block: '1N', floor: 2, room: '02', name: 'Layla', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '1N', floor: 2, room: '04', name: 'Marcus', pillar: 'EPD', year: 'Y1', online: false },
-  { block: '1N', floor: 2, room: '07', name: 'Aisha', pillar: 'ISTD', year: 'Y1', online: true },
-  { block: '1N', floor: 2, room: '10', name: 'Jin', pillar: 'ESD', year: 'Y1', online: true },
-  { block: '1N', floor: 3, room: '01', name: 'Fabian', pillar: 'ESD', year: 'Y1', online: false },
-  { block: '1N', floor: 3, room: '05', name: 'Riana', pillar: 'DAI', year: 'Y1', online: true },
-  { block: '1N', floor: 3, room: '08', name: 'Soren', pillar: 'ASD', year: 'Y1', online: false },
-  { block: '1N', floor: 4, room: '03', name: 'Hana', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '1N', floor: 4, room: '07', name: 'Leon', pillar: 'ISTD', year: 'Y1', online: false },
-  { block: '1N', floor: 5, room: '02', name: 'Yuki', pillar: 'DAI', year: 'Y1', online: true },
-  { block: '1N', floor: 5, room: '09', name: 'Andre', pillar: 'EPD', year: 'Y1', online: true },
-  // Block 1S — Freshmore South
-  { block: '1S', floor: 1, room: '02', name: 'Priya', pillar: 'ESD', year: 'Y1', online: true },
-  { block: '1S', floor: 1, room: '05', name: 'Noah', pillar: 'EPD', year: 'Y1', online: true },
-  { block: '1S', floor: 1, room: '08', name: 'Zara', pillar: 'ISTD', year: 'Y1', online: false },
-  { block: '1S', floor: 1, room: '10', name: 'Ben', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '1S', floor: 2, room: '03', name: 'Daniel', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '1S', floor: 2, room: '06', name: 'Leila', pillar: 'DAI', year: 'Y1', online: true },
-  { block: '1S', floor: 2, room: '09', name: 'Tariq', pillar: 'ESD', year: 'Y1', online: false },
-  { block: '1S', floor: 3, room: '01', name: 'Tommy', pillar: 'ESD', year: 'Y1', online: false },
-  { block: '1S', floor: 3, room: '07', name: 'Min', pillar: 'ISTD', year: 'Y1', online: true },
-  { block: '1S', floor: 4, room: '04', name: 'Lena', pillar: 'ASD', year: 'Y1', online: false },
-  { block: '1S', floor: 4, room: '11', name: 'Aryan', pillar: 'EPD', year: 'Y1', online: true },
-  // Block 2N — Year 2+ North
-  { block: '2N', floor: 1, room: '03', name: 'Aarav Menon', pillar: 'ISTD', year: 'Y3', online: true },
-  { block: '2N', floor: 2, room: '07', name: 'Sara Binte Halim', pillar: 'DAI', year: 'Y2', online: false },
-  { block: '2N', floor: 4, room: '09', name: 'Wei Jian Lim', pillar: 'ISTD', year: 'Y3', online: true },
-  { block: '2N', floor: 3, room: '05', name: 'Kevin', pillar: 'ISTD', year: 'Y4', online: true },
-  { block: '2N', floor: 5, room: '11', name: 'Daryl', pillar: 'EPD', year: 'Y3', online: false },
-  { block: '2N', floor: 6, room: '02', name: 'Cass', pillar: 'ASD', year: 'Y2', online: true },
-  // Block 2S — Year 2+ South
-  { block: '2S', floor: 1, room: '04', name: 'Priscilla', pillar: 'ASD', year: 'Y2', online: true },
-  { block: '2S', floor: 2, room: '08', name: 'Haruto', pillar: 'EPD', year: 'Y2', online: false },
-  { block: '2S', floor: 3, room: '06', name: 'Aanya', pillar: 'DAI', year: 'Y2', online: true },
-  { block: '2S', floor: 4, room: '03', name: 'Felix', pillar: 'ISTD', year: 'Y2', online: true },
-  { block: '2S', floor: 5, room: '09', name: 'Nadia', pillar: 'ESD', year: 'Y3', online: false },
+  // Public SUTD housing map labels: Blocks 51, 55, 57 and 59. Room data is roster/sample-driven.
+  { block: '55', floor: 1, room: '01', name: 'Mei Lin', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '55', floor: 1, room: '03', name: 'Jerome', pillar: 'ESD', year: 'Y1', online: true },
+  { block: '55', floor: 1, room: '06', name: 'Sofia', pillar: 'DAI', year: 'Y1', online: false },
+  { block: '55', floor: 1, room: '09', name: 'Kai', pillar: 'ISTD', year: 'Y1', online: true },
+  { block: '55', floor: 1, room: '11', name: 'Rui', pillar: 'EPD', year: 'Y1', online: false },
+  { block: '55', floor: 2, room: '02', name: 'Layla', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '55', floor: 2, room: '04', name: 'Marcus', pillar: 'EPD', year: 'Y1', online: false },
+  { block: '55', floor: 2, room: '07', name: 'Aisha', pillar: 'ISTD', year: 'Y1', online: true },
+  { block: '55', floor: 2, room: '10', name: 'Jin', pillar: 'ESD', year: 'Y1', online: true },
+  { block: '55', floor: 3, room: '01', name: 'Fabian', pillar: 'ESD', year: 'Y1', online: false },
+  { block: '55', floor: 3, room: '05', name: 'Riana', pillar: 'DAI', year: 'Y1', online: true },
+  { block: '55', floor: 3, room: '08', name: 'Soren', pillar: 'ASD', year: 'Y1', online: false },
+  { block: '55', floor: 4, room: '03', name: 'Hana', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '55', floor: 4, room: '07', name: 'Leon', pillar: 'ISTD', year: 'Y1', online: false },
+  { block: '55', floor: 5, room: '02', name: 'Yuki', pillar: 'DAI', year: 'Y1', online: true },
+  { block: '55', floor: 5, room: '09', name: 'Andre', pillar: 'EPD', year: 'Y1', online: true },
+  { block: '59', floor: 1, room: '02', name: 'Priya', pillar: 'ESD', year: 'Y1', online: true },
+  { block: '59', floor: 1, room: '05', name: 'Noah', pillar: 'EPD', year: 'Y1', online: true },
+  { block: '59', floor: 1, room: '08', name: 'Zara', pillar: 'ISTD', year: 'Y1', online: false },
+  { block: '59', floor: 1, room: '10', name: 'Ben', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '59', floor: 2, room: '03', name: 'Daniel', pillar: 'ASD', year: 'Y1', online: true },
+  { block: '59', floor: 2, room: '06', name: 'Leila', pillar: 'DAI', year: 'Y1', online: true },
+  { block: '59', floor: 2, room: '09', name: 'Tariq', pillar: 'ESD', year: 'Y1', online: false },
+  { block: '59', floor: 3, room: '01', name: 'Tommy', pillar: 'ESD', year: 'Y1', online: false },
+  { block: '59', floor: 3, room: '07', name: 'Min', pillar: 'ISTD', year: 'Y1', online: true },
+  { block: '59', floor: 4, room: '04', name: 'Lena', pillar: 'ASD', year: 'Y1', online: false },
+  { block: '59', floor: 4, room: '11', name: 'Aryan', pillar: 'EPD', year: 'Y1', online: true },
+  { block: '57', floor: 1, room: '03', name: 'Aarav Menon', pillar: 'ISTD', year: 'Y3', online: true },
+  { block: '57', floor: 2, room: '07', name: 'Sara Binte Halim', pillar: 'DAI', year: 'Y2', online: false },
+  { block: '57', floor: 4, room: '09', name: 'Wei Jian Lim', pillar: 'ISTD', year: 'Y3', online: true },
+  { block: '57', floor: 3, room: '05', name: 'Kevin', pillar: 'ISTD', year: 'Y4', online: true },
+  { block: '57', floor: 5, room: '11', name: 'Daryl', pillar: 'EPD', year: 'Y3', online: false },
+  { block: '57', floor: 6, room: '02', name: 'Cass', pillar: 'ASD', year: 'Y2', online: true },
+  { block: '51', floor: 1, room: '04', name: 'Priscilla', pillar: 'ASD', year: 'Y2', online: true },
+  { block: '51', floor: 2, room: '08', name: 'Haruto', pillar: 'EPD', year: 'Y2', online: false },
+  { block: '51', floor: 3, room: '06', name: 'Aanya', pillar: 'DAI', year: 'Y2', online: true },
+  { block: '51', floor: 4, room: '03', name: 'Felix', pillar: 'ISTD', year: 'Y2', online: true },
+  { block: '51', floor: 5, room: '09', name: 'Nadia', pillar: 'ESD', year: 'Y3', online: false },
 ];
 
 const PILLAR_COLOR: Record<string, string> = {
@@ -5337,6 +5331,19 @@ function activityDot(n: number) {
   if (n >= 60) return '#34d399';
   if (n >= 30) return '#fbbf24';
   return '#6b7280';
+}
+
+const hostelBlockInfo: Record<string, { desc: string; sub: string; color: string; floors: number; group: string }> = {
+  '51': { desc: 'Housing north-west', sub: 'Public campus map block 51 · roster import required', color: '#38bdf8', floors: 11, group: 'Returning students' },
+  '55': { desc: 'Housing north', sub: 'Public campus map block 55 · roster import required', color: '#34d399', floors: 11, group: 'Freshmen' },
+  '57': { desc: 'Housing central', sub: 'Public campus map block 57 · roster import required', color: '#a78bfa', floors: 11, group: 'Returning students' },
+  '59': { desc: 'Housing east', sub: 'Public map notes management/security office here', color: '#fbbf24', floors: 11, group: 'Freshmen' },
+};
+
+const hostelBlockIds = Object.keys(hostelBlockInfo);
+
+function hostelFloorCount(block: string) {
+  return hostelBlockInfo[block]?.floors ?? 11;
 }
 
 function PeopleView({ userEmail, onMessage }: { userEmail?: string; onMessage?: (name: string) => void }) {
@@ -5639,7 +5646,7 @@ function ClassesView({
   const submitAnswer = (threadId: string) => {
     const text = answerText.trim();
     if (!text || !selectedCode) return;
-    const displayName = 'Senior Student';
+    const displayName = 'Returning Student';
     const updated = (localQA[selectedCode] ?? []).map((q) =>
       q.id === threadId ? { ...q, answered: true, answer: text, answerer: displayName } : q,
     );
@@ -5834,7 +5841,7 @@ function ClassesView({
                         </button>
                       )
                     ) : (
-                      <span className="qa-waiting">Waiting for a senior mentor…</span>
+                      <span className="qa-waiting">Waiting for a classmate or returning student…</span>
                     )}
                   </div>
                 );
@@ -5869,7 +5876,7 @@ function ClassesView({
         <div className="panel class-empty-state">
           <BookOpen size={28} style={{ opacity: 0.25 }} />
           <strong>Select a module room</strong>
-          <span>Open Q&amp;As, see what seniors are answering, and post your own questions.</span>
+          <span>Open Q&amp;As, see what classmates are answering, and post your own questions.</span>
         </div>
       )}
     </div>
@@ -6012,7 +6019,7 @@ function DesignAIRoomPanel({
                       <button className="qa-claim-btn" onClick={() => { setClaimedId(q.id); setAnswerText(''); }}><ThumbsUp size={13} /> Claim & answer</button>
                     )
                   ) : (
-                    <span className="qa-waiting">Waiting for a senior mentor…</span>
+                    <span className="qa-waiting">Waiting for a classmate or returning student…</span>
                   )}
                 </div>
               ))}
@@ -6021,7 +6028,7 @@ function DesignAIRoomPanel({
               <div className="qa-compose">
                 <textarea placeholder={`Ask a design or process question in ${room.code}…`} value={questionText} onChange={(e) => setQuestionText(e.target.value)} />
                 <div className="qa-compose-actions">
-                  <span>Visible to all iDeA students and mentors</span>
+                  <span>Visible to all verified iDeA students</span>
                   <button className="primary-button" onClick={postQuestion} disabled={!questionText.trim()}><Send size={15} /> Post question</button>
                 </div>
               </div>
@@ -6695,7 +6702,7 @@ function AdminClassTable() {
             <th>Students</th>
             <th>Questions</th>
             <th>Response rate</th>
-            <th>Mentors</th>
+            <th>Returning students</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -6718,7 +6725,7 @@ function AdminClassTable() {
                     <span>{rate}%</span>
                   </div>
                 </td>
-                <td>{row.mentors} senior{row.mentors !== 1 ? 's' : ''}</td>
+                <td>{row.mentors} returning student{row.mentors !== 1 ? 's' : ''}</td>
                 <td>
                   <span className={`admin-status ${row.status}`}>
                     {row.status === 'healthy' ? '✓ Active' : '⚠ Needs attention'}
@@ -7319,7 +7326,7 @@ function AdminIsolationView() {
   const [filterLevel, setFilterLevel] = useState<RiskLevel | 'all'>('all');
   const [stages, setStages] = useState<Record<string, InterventionStage>>({});
   const [interventionLog, setInterventionLog] = useState<Array<{ student: string; action: string; time: string }>>([
-    { student: 'Yusuf A.', action: 'Mentor assigned: Aarav Menon (Y3 ISTD)', time: '2 days ago' },
+    { student: 'Yusuf A.', action: 'Returning-student buddy assigned: Aarav Menon (Y3 ISTD)', time: '2 days ago' },
     { student: 'Aisha M.', action: 'OSA nudge sent via email', time: '1 day ago' },
   ]);
   const [studentRecords, setStudentRecords] = useState<Record<string, InterventionRecord[]>>({});
@@ -7351,7 +7358,7 @@ function AdminIsolationView() {
   };
 
   const doIntervention = (studentId: string, studentName: string, action: string) => {
-    const nextStage: InterventionStage = action.includes('Mentor') ? 'contacted' : action.includes('OSA') ? 'escalated' : action.includes('Mark') ? 'resolved' : 'contacted';
+    const nextStage: InterventionStage = action.includes('buddy') ? 'contacted' : action.includes('OSA') ? 'escalated' : action.includes('Mark') ? 'resolved' : 'contacted';
     const note = noteInput[studentId]?.trim() ?? '';
     const record: InterventionRecord = { action, note, time: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }), stage: nextStage };
     setStudentRecords((prev) => ({ ...prev, [studentId]: [record, ...(prev[studentId] ?? [])] }));
@@ -7515,7 +7522,7 @@ function AdminIsolationView() {
 
                 <div className="risk-card-actions">
                   {[
-                    { label: 'Assign mentor', action: 'Mentor assigned by admin' },
+                    { label: 'Assign buddy', action: 'Returning-student buddy assigned by admin' },
                     { label: 'Send nudge', action: 'Wellbeing nudge sent via email' },
                     { label: 'OSA referral', action: 'Referred to OSA for follow-up' },
                     { label: 'Mark resolved', action: 'Marked as OK — no action needed' },
@@ -7599,7 +7606,7 @@ function AdminIsolationView() {
 function PrivacySettingsView({
   userEmail, userName, onBack, onLogout,
 }: { userEmail: string; userName: string; onBack: () => void; onLogout: () => void }) {
-  const [visibilityProfile, setVisibilityProfile] = useState<'everyone' | 'verified' | 'mentors'>('verified');
+  const [visibilityProfile, setVisibilityProfile] = useState<'everyone' | 'verified' | 'returning'>('verified');
   const [visibilityPulse, setVisibilityPulse] = useState(true);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [deleteInput, setDeleteInput] = useState('');
@@ -7701,8 +7708,8 @@ function PrivacySettingsView({
               onChange={(e) => setVisibilityProfile(e.target.value as typeof visibilityProfile)}
             >
               <option value="everyone">All verified SUTD members</option>
-              <option value="verified">Freshmores &amp; Mentors only</option>
-              <option value="mentors">Senior Mentors only</option>
+              <option value="verified">Freshmen &amp; returning students</option>
+              <option value="returning">Returning students only</option>
             </select>
           </div>
           <div className="privacy-control-row">
@@ -7720,7 +7727,7 @@ function PrivacySettingsView({
           <div className="privacy-control-row">
             <div>
               <strong>Who can message you</strong>
-              <p>All verified Cohortly members (students and mentors). You can block any user from a message thread.</p>
+              <p>All verified Cohortly students. You can block any user from a message thread.</p>
             </div>
             <span style={{ fontSize: '0.8rem', color: 'var(--muted)', fontStyle: 'italic' }}>Verified members</span>
           </div>
@@ -7837,6 +7844,7 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
   const [tgVerifying, setTgVerifying] = useState(false);
   const [waVerifying, setWaVerifying] = useState(false);
   const [prefSaved, setPrefSaved] = useState(false);
+  const [channelNotice, setChannelNotice] = useState('');
 
   const tgConnected = prefs.botConnected && !!prefs.telegramHandle;
   const waConnected = !!prefs.whatsappNumber && prefs.whatsappNumber.length >= 6;
@@ -7845,10 +7853,22 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
     const handle = telegramInput.trim().replace(/^@/, '');
     if (!handle) return;
     setTgVerifying(true);
-    await new Promise<void>((r) => setTimeout(r, 1800));
+    let notice = '';
+    try {
+      const response = await fetch('/api/notifications/telegram/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, username: handle }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      notice = payload.message || (response.ok ? 'Telegram alerts connected.' : 'Start the bot first, then verify again.');
+    } catch {
+      notice = 'Telegram username saved in this browser. Live delivery needs the notification server deployed with TELEGRAM_BOT_TOKEN.';
+    }
     const updated: NotifPrefs = { ...prefs, telegramHandle: '@' + handle, botConnected: true };
     setPrefs(updated);
     saveNotifPrefs(userEmail, updated);
+    setChannelNotice(notice);
     setTgVerifying(false);
   };
 
@@ -7856,10 +7876,22 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
     const num = whatsappInput.trim();
     if (!num || num.length < 6) return;
     setWaVerifying(true);
-    await new Promise<void>((r) => setTimeout(r, 1400));
+    let notice = '';
+    try {
+      const response = await fetch('/api/notifications/whatsapp/connect', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: userEmail, phone: num }),
+      });
+      const payload = await response.json().catch(() => ({}));
+      notice = payload.message || (response.ok ? 'WhatsApp alerts connected.' : 'WhatsApp setup saved, but delivery still needs webhook credentials.');
+    } catch {
+      notice = 'WhatsApp number saved in this browser. Live delivery needs the notification server deployed with WhatsApp Cloud API credentials.';
+    }
     const updated: NotifPrefs = { ...prefs, whatsappNumber: num };
     setPrefs(updated);
     saveNotifPrefs(userEmail, updated);
+    setChannelNotice(notice);
     setWaVerifying(false);
   };
 
@@ -7891,6 +7923,17 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
   return (
     <div className="privacy-view">
       <div className="privacy-sections">
+        {channelNotice && (
+          <div className="privacy-card notif-status-card">
+            <div className="privacy-card-head" style={{ marginBottom: 0 }}>
+              <BellRing size={18} style={{ color: 'var(--accent)' }} />
+              <div>
+                <strong>Channel status</strong>
+                <p>{channelNotice}</p>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* ── Telegram ── */}
         <div className="privacy-card notif-channel-card">
@@ -8055,7 +8098,7 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
           </div>
           <div className="notif-pref-list">
             {([
-              { key: 'onAnswer', label: 'My Q&A question gets answered', desc: 'When a mentor posts an answer in your module room' },
+              { key: 'onAnswer', label: 'My Q&A question gets answered', desc: 'When someone answers in your module room' },
               { key: 'onEvent', label: 'Event starting in 1 hour', desc: "For events you've RSVPd to" },
               { key: 'onConnection', label: 'New connection request', desc: 'When someone connects with you on Cohortly' },
             ] as Array<{ key: keyof NotifPrefs; label: string; desc: string }>).map(({ key, label, desc }) => (
@@ -8378,12 +8421,6 @@ function HostelSetupModal({ onSave, onSkip }: { onSave: (block: string, floor: s
   const [block, setBlock] = useState('');
   const [floor, setFloor] = useState('');
   const [room, setRoom] = useState('');
-  const blockInfo: Record<string, { desc: string; color: string; sub: string }> = {
-    '1N': { desc: 'Freshmore North', sub: 'Floors 1–8 · most freshmores', color: '#38bdf8' },
-    '1S': { desc: 'Freshmore South', sub: 'Floors 1–8 · mixed year', color: '#34d399' },
-    '2N': { desc: 'Year 2+ North', sub: 'Floors 1–10 · seniors', color: '#a78bfa' },
-    '2S': { desc: 'Year 2+ South', sub: 'Floors 1–10 · seniors', color: '#fbbf24' },
-  };
   const roomCode = block && floor && room ? `${block}-${floor.padStart(2,'0')}${room.padStart(2,'0')}` : null;
 
   return (
@@ -8399,7 +8436,7 @@ function HostelSetupModal({ onSave, onSkip }: { onSave: (block: string, floor: s
             <h2>Set up your room</h2>
             <p>Pin yourself to the hostel directory and let floor mates find you</p>
             <div className="hostel-block-picker">
-              {Object.entries(blockInfo).map(([b, info]) => (
+              {Object.entries(hostelBlockInfo).map(([b, info]) => (
                 <button key={b} className={`block-pick-card${block === b ? ' selected' : ''}`}
                   onClick={() => setBlock(b)} style={{ '--block-color': info.color } as React.CSSProperties}>
                   <span className="block-pick-id">Block {b}</span>
@@ -8417,17 +8454,17 @@ function HostelSetupModal({ onSave, onSkip }: { onSave: (block: string, floor: s
 
         {step === 1 && (
           <>
-            <div className="hostel-setup-icon" style={{ background: `${blockInfo[block]?.color}22`, color: blockInfo[block]?.color }}>
+            <div className="hostel-setup-icon" style={{ background: `${hostelBlockInfo[block]?.color}22`, color: hostelBlockInfo[block]?.color }}>
               <Home size={26} />
             </div>
             <h2>Block {block} · Your room</h2>
-            <p>Enter your floor and room number to appear on the building</p>
+            <p>Enter your floor and room number. Exact room visibility stays opt-in.</p>
             <div className="hostel-room-inputs">
               <div className="hostel-input-group">
                 <label>Floor</label>
                 <select value={floor} onChange={e => setFloor(e.target.value)}>
                   <option value="">Select floor</option>
-                  {Array.from({ length: block.startsWith('2') ? 10 : 8 }, (_, i) => i + 1).map(n => (
+                  {Array.from({ length: hostelFloorCount(block) }, (_, i) => i + 1).map(n => (
                     <option key={n} value={String(n)}>Floor {n}</option>
                   ))}
                 </select>
@@ -8480,7 +8517,7 @@ function Building3DSVG({
 }) {
   const [hovered, setHovered] = useState<string | null>(null);
 
-  const N_FLOORS = block.startsWith('2') ? 10 : 8;
+  const N_FLOORS = hostelFloorCount(block);
   const N_ROOMS  = 7;
   const BLD_W    = 322;
   const FLOOR_H  = 42;
@@ -8672,7 +8709,7 @@ function Building3DSVG({
 
 function HostelView({ profile, onProfileUpdate, userEmail = '', userName = 'Student' }: { profile: StudentProfile; onProfileUpdate: (p: StudentProfile) => void; userEmail?: string; userName?: string }) {
   const [showSetup, setShowSetup]     = useState(!profile.hostelBlock);
-  const [activeBlock, setActiveBlock] = useState(profile.hostelBlock ?? '1N');
+  const [activeBlock, setActiveBlock] = useState(profile.hostelBlock ?? '55');
   const [selectedRoom, setSelectedRoom] = useState<HostelResident | null>(null);
   const [activeTab, setActiveTab]     = useState<'building'|'campus'|'jios'>('jios');
   const [joinedJios, setJoinedJios]   = useState<Set<string>>(new Set());
@@ -8724,7 +8761,7 @@ function HostelView({ profile, onProfileUpdate, userEmail = '', userName = 'Stud
             <article className="hostel-practical-card">
               <span>Tonight</span>
               <strong>Laundry room walk-through</strong>
-              <small>Block {activeBlock} lobby · 8:00 PM · seniors present</small>
+              <small>Block {activeBlock} lobby · 8:00 PM · returning students present</small>
             </article>
             <article className="hostel-practical-card">
               <span>Packing</span>
@@ -8763,59 +8800,100 @@ function HostelView({ profile, onProfileUpdate, userEmail = '', userName = 'Stud
 
           {activeTab === 'campus' && (
             <div className="hostel-campus-wrap">
-              <div className="campus-map-topbar" style={{ marginBottom: 12 }}>
+              <div className="campus-map-topbar">
                 <div>
-                  <span className="eyebrow">Live campus activity</span>
-                  <strong style={{ fontSize: '0.85rem', display: 'block', marginTop: 2 }}>SUTD Changi · click a hostel block to view</strong>
+                  <span className="eyebrow">SUTD campus atlas</span>
+                  <strong>SUTD Changi · public housing blocks 51, 55, 57, 59</strong>
+                  <p>Drawn from the supplied campus references; exact room rosters come from Housing/Admin import.</p>
                 </div>
                 <div className="campus-live-pill"><span className="live-dot"/>
                   {campusBuildings.reduce((s,b)=>s+b.activity,0) + hostelResidents.filter(r=>r.online).length} on campus
                 </div>
               </div>
-              <div className="campus-map-wrap" style={{ flex: 1 }}>
-                <svg viewBox="0 0 500 360" className="campus-svg" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="0" y="0" width="500" height="360" rx="10" fill="rgba(17,24,39,0.6)"/>
-                  <text x="250" y="20" textAnchor="middle" fill="rgba(229,231,235,0.25)" fontSize="8" fontWeight="700" letterSpacing="2">ACADEMIC ZONE</text>
-                  <line x1="18" y1="218" x2="482" y2="218" stroke="rgba(229,231,235,0.08)" strokeWidth="1" strokeDasharray="5,4"/>
-                  <text x="250" y="233" textAnchor="middle" fill="rgba(56,189,248,0.38)" fontSize="8" fontWeight="700" letterSpacing="2">HOSTEL ZONE</text>
-                  <line x1="75" y1="118" x2="455" y2="118" stroke="rgba(229,231,235,0.05)" strokeWidth="8" strokeLinecap="round"/>
-                  {campusBuildings.map(b => (
-                    <g key={b.id}>
-                      {/* 3D shadow */}
-                      <rect x={b.x+4} y={b.y+4} width={b.w} height={b.h} rx="8" fill="rgba(0,0,0,0.3)"/>
-                      {/* Top face strip */}
-                      <rect x={b.x} y={b.y} width={b.w} height={6} rx="3" fill={VIBE_STROKE[b.vibe].replace('0.35','0.5').replace('0.4','0.55').replace('0.5','0.6')}/>
-                      <rect x={b.x} y={b.y} width={b.w} height={b.h} rx="8"
-                        fill="rgba(31,41,55,0.88)" stroke={VIBE_STROKE[b.vibe]} strokeWidth="1"/>
-                      <text x={b.x+b.w/2} y={b.y+b.h/2-6} textAnchor="middle" fill="#e5e7eb" fontSize="9" fontWeight="700">{b.name}</text>
-                      <text x={b.x+b.w/2} y={b.y+b.h/2+8} textAnchor="middle" fill="rgba(229,231,235,0.5)" fontSize="7">{b.sub}</text>
-                      <circle cx={b.x+b.w-9} cy={b.y+9} r={4.5} fill={activityDot(b.activity)}/>
-                    </g>
-                  ))}
-                  {(['1N','1S','2N','2S'] as const).map((blk,i) => {
-                    const hx = 18 + i*118; const hy = 248;
-                    const isActive = blk === activeBlock;
-                    const online = hostelResidents.filter(r=>r.block===blk&&r.online).length;
-                    const total = hostelResidents.filter(r=>r.block===blk).length;
-                    return (
-                      <g key={blk} onClick={() => { setActiveBlock(blk); setActiveTab('building'); }} style={{ cursor: 'pointer' }}>
-                        <rect x={hx+4} y={hy+4} width={100} height={90} rx="8" fill="rgba(0,0,0,0.3)"/>
-                        {isActive && <rect x={hx-3} y={hy-3} width={106} height={96} rx="11" fill="rgba(56,189,248,0.08)"/>}
-                        <rect x={hx} y={hy} width={100} height={90} rx="8"
-                          fill={isActive?'rgba(56,189,248,0.18)':'rgba(31,41,55,0.9)'}
-                          stroke={isActive?'rgba(56,189,248,0.7)':'rgba(56,189,248,0.22)'} strokeWidth={isActive?1.5:1}/>
-                        <text x={hx+50} y={hy+33} textAnchor="middle" fill="#e5e7eb" fontSize="11" fontWeight="800">Block {blk}</text>
-                        <text x={hx+50} y={hy+49} textAnchor="middle" fill="rgba(229,231,235,0.5)" fontSize="7.5">{blk.startsWith('1')?'Freshmore':'Year 2+'}</text>
-                        <text x={hx+50} y={hy+64} textAnchor="middle" fill="rgba(56,189,248,0.9)" fontSize="7.5" fontWeight="600">{online}/{total} online</text>
-                        {hostelResidents.filter(r=>r.block===blk&&r.floor<=2).slice(0,5).map((r,ri) => (
-                          <circle key={ri} cx={hx+14+ri*16} cy={hy+80} r={4} fill={PILLAR_COLOR[r.pillar]??'#6b7280'} opacity={r.online?0.9:0.3}/>
-                        ))}
-                        {blk===myBlock && <circle cx={hx+90} cy={hy+10} r={5} fill="#34d399"/>}
-                      </g>
-                    );
-                  })}
-                  <text x="480" y="20" textAnchor="middle" fill="rgba(229,231,235,0.22)" fontSize="9" fontWeight="700">N</text>
-                  <line x1="480" y1="23" x2="480" y2="31" stroke="rgba(229,231,235,0.18)" strokeWidth="1.5"/>
+              <div className="campus-atlas-wrap">
+                <svg viewBox="0 0 900 560" className="campus-atlas-svg" xmlns="http://www.w3.org/2000/svg" aria-label="SUTD campus atlas with academic buildings, recreation centre and housing blocks">
+                  <defs>
+                    <linearGradient id="campusGrass" x1="0" y1="0" x2="1" y2="1">
+                      <stop offset="0%" stopColor="#eef7e8"/>
+                      <stop offset="100%" stopColor="#dcefd5"/>
+                    </linearGradient>
+                    <linearGradient id="buildingFace" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="0%" stopColor="#ffffff"/>
+                      <stop offset="100%" stopColor="#dfe7f2"/>
+                    </linearGradient>
+                    <filter id="mapShadow" x="-20%" y="-20%" width="140%" height="140%">
+                      <feDropShadow dx="0" dy="8" stdDeviation="7" floodColor="rgba(33, 52, 76, 0.18)" />
+                    </filter>
+                  </defs>
+                  <rect x="0" y="0" width="900" height="560" rx="28" fill="url(#campusGrass)" />
+                  <path d="M32 438 C180 394 255 420 380 374 C510 327 620 328 862 286" className="campus-road" />
+                  <path d="M42 508 C184 460 286 474 416 426 C566 371 674 378 872 340" className="campus-road campus-road--minor" />
+                  <path d="M38 70 L154 24" className="campus-road campus-road--edge" />
+                  <text x="92" y="74" transform="rotate(-22 92 74)" className="campus-road-label">Upper Changi Road East</text>
+                  <text x="258" y="508" className="campus-road-label">Somapah Road</text>
+                  <text x="726" y="454" transform="rotate(-33 726 454)" className="campus-road-label">Changi South Ave 1</text>
+
+                  <path d="M170 302 C275 286 340 230 430 230 C514 230 560 276 646 256 C724 238 778 204 842 206" className="campus-path" />
+                  <path d="M486 270 C540 318 604 314 666 344" className="campus-path" />
+                  <path d="M626 198 C590 232 560 250 514 268" className="campus-path" />
+
+                  <g className="campus-main-zone" filter="url(#mapShadow)">
+                    <path d="M130 318 L324 294 L336 238 L150 262 Z" className="campus-building-shape" />
+                    <text x="231" y="282" className="campus-label">Building 1</text>
+                    <path d="M112 238 L346 212 L354 152 L136 170 Z" className="campus-building-shape" />
+                    <text x="235" y="198" className="campus-label">Building 2</text>
+                    <path d="M356 255 L478 228 L456 170 L340 194 Z" className="campus-building-shape campus-building-shape--accent" />
+                    <text x="408" y="212" className="campus-label">Building 3</text>
+                    <text x="408" y="226" className="campus-label-sub">One-Stop Centre</text>
+                    <path d="M182 144 L366 124 L398 72 L234 84 Z" className="campus-building-shape" />
+                    <text x="294" y="116" className="campus-label">Building 5</text>
+                    <text x="248" y="60" className="campus-map-note">Main Campus</text>
+                  </g>
+
+                  <g className="campus-rec-zone" filter="url(#mapShadow)">
+                    <ellipse cx="680" cy="388" rx="118" ry="58" className="campus-track" />
+                    <rect x="591" y="356" width="178" height="58" rx="18" className="campus-field" />
+                    <rect x="760" y="280" width="96" height="62" rx="16" className="campus-pool" />
+                    <rect x="596" y="286" width="126" height="48" rx="14" className="campus-court" />
+                    <text x="678" y="470" className="campus-map-note">Recreational Centre</text>
+                  </g>
+
+                  <g className="campus-housing-zone">
+                    <path d="M520 82 C628 34 760 48 836 124 C780 178 674 196 554 174 Z" className="campus-water" />
+                    <text x="690" y="70" className="campus-map-note">Student Housing</text>
+                    {[
+                      { blk: '51', x: 518, y: 136, label: 'north-west' },
+                      { blk: '55', x: 626, y: 78, label: 'north' },
+                      { blk: '57', x: 676, y: 176, label: 'central' },
+                      { blk: '59', x: 774, y: 122, label: 'east / security' },
+                    ].map(({ blk, x, y, label }) => {
+                      const isActive = activeBlock === blk;
+                      const online = hostelResidents.filter(r=>r.block===blk&&r.online).length;
+                      const total = hostelResidents.filter(r=>r.block===blk).length;
+                      const info = hostelBlockInfo[blk];
+                      return (
+                        <g key={blk} className="campus-hostel-node" onClick={() => { setActiveBlock(blk); setActiveTab('building'); }} role="button" tabIndex={0}>
+                          {isActive && <rect x={x-10} y={y-10} width="96" height="78" rx="18" className="campus-hostel-selected" />}
+                          <rect x={x} y={y} width="76" height="58" rx="13" className="campus-hostel-block" style={{ '--block-color': info.color } as React.CSSProperties} />
+                          <rect x={x+8} y={y+8} width="18" height="42" rx="5" className="campus-window-strip" />
+                          <rect x={x+32} y={y+8} width="18" height="42" rx="5" className="campus-window-strip" />
+                          <text x={x+38} y={y+28} className="campus-hostel-label">Block {blk}</text>
+                          <text x={x+38} y={y+43} className="campus-hostel-sub">{online}/{total} online</text>
+                          <text x={x+38} y={y+71} className="campus-hostel-context">{label}</text>
+                          {blk === myBlock && <circle cx={x+68} cy={y+10} r="7" className="campus-you-dot" />}
+                        </g>
+                      );
+                    })}
+                    <text x="768" y="214" className="campus-label-sub">Management & security office at Block 59</text>
+                  </g>
+
+                  <g>
+                    <rect x="58" y="386" width="56" height="40" rx="10" className="campus-bus" />
+                    <text x="86" y="411" className="campus-label">Bus</text>
+                    <text x="88" y="438" className="campus-label-sub">2 · 5 · 24</text>
+                    <text x="836" y="36" className="campus-north">N</text>
+                    <path d="M836 48 L836 72" className="campus-north-line" />
+                  </g>
                 </svg>
               </div>
             </div>
@@ -8852,17 +8930,18 @@ function HostelView({ profile, onProfileUpdate, userEmail = '', userName = 'Stud
           <div className="hostel-panel-card">
             <span className="eyebrow" style={{ display:'block', marginBottom:12 }}>Select block</span>
             <div className="hostel-block-selector">
-              {(['1N','1S','2N','2S'] as const).map(blk => {
+              {hostelBlockIds.map(blk => {
                 const online = hostelResidents.filter(r=>r.block===blk&&r.online).length;
                 const total  = hostelResidents.filter(r=>r.block===blk).length;
                 const pct    = Math.round(online/Math.max(total,1)*100);
+                const info = hostelBlockInfo[blk];
                 return (
                   <button key={blk} className={`block-select-btn${blk===activeBlock?' active':''}`} onClick={() => setActiveBlock(blk)}>
                     <div className="bsb-head">
                       <strong>Block {blk}</strong>
                       {blk===myBlock && <span className="bsb-yours">You</span>}
                     </div>
-                    <div className="bsb-sub">{blk.startsWith('1')?'Freshmore':'Year 2+'}</div>
+                    <div className="bsb-sub">{info?.desc ?? 'Housing block'} · {info?.group ?? 'Students'}</div>
                     <div className="bsb-bar"><div className="bsb-fill" style={{ width:`${pct}%` }}/></div>
                     <div className="bsb-counts"><span style={{color:'#34d399'}}>{online} online</span><span>{total} total</span></div>
                   </button>

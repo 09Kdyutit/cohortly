@@ -25,14 +25,6 @@ const studentLabels = new Map([
   ['kb', 'Resources'],
 ]);
 
-const mentorLabels = new Map([
-  ['mentor-home', 'Home'],
-  ['mentor-help', 'Help'],
-  ['people', 'Students'],
-  ['messages', 'Chats'],
-  ['events', 'Events'],
-]);
-
 const adminLabels = new Map([
   ['overview', 'Overview'],
   ['students', 'Students'],
@@ -62,7 +54,8 @@ async function createPage(viewportName) {
   await page.goto(BASE, { waitUntil: 'domcontentloaded' });
   await page.evaluate(() => localStorage.clear());
   await page.reload({ waitUntil: 'domcontentloaded' });
-  await page.locator('#root').waitFor({ timeout: 20000 });
+  await page.locator('#root').waitFor({ state: 'attached', timeout: 20000 });
+  await page.locator('#root > *').first().waitFor({ state: 'visible', timeout: 20000 });
   await acceptConsent(page);
   return page;
 }
@@ -81,11 +74,11 @@ async function capture(page, name) {
   console.log('captured', name);
 }
 
-async function loginDemo(page, role) {
-  const selector = role === 'mentor' ? '.demo-btn.mentor-demo' : '.demo-btn.student-demo';
+async function loginDemo(page, mode = 'freshman') {
+  const selector = mode === 'returning' ? '.demo-btn.returning-demo' : '.demo-btn.student-demo';
   await page.locator(selector).first().scrollIntoViewIfNeeded();
   await page.locator(selector).first().click();
-  await page.locator(role === 'mentor' ? '.mentor-hero' : '.student-shell').first().waitFor({ timeout: 15000 });
+  await page.locator('.student-shell').first().waitFor({ timeout: 15000 });
 }
 
 async function openAdmin(page) {
@@ -98,25 +91,6 @@ async function navigateStudent(page, id, viewportName) {
   const label = id === 'kb' && viewportName !== 'mobile' && viewportName !== 'tablet'
     ? 'Knowledge Base'
     : studentLabels.get(id);
-  if (!label) return;
-  if (viewportName === 'mobile' || viewportName === 'tablet') {
-    const direct = page.locator(`.mobile-nav-btn:has-text("${label}")`).first();
-    if (await direct.isVisible().catch(() => false)) {
-      await direct.click();
-    } else {
-      await page.locator('.mobile-nav-btn:has-text("More")').first().click();
-      await page.locator(`.mobile-more-item:has-text("${label}")`).first().click();
-    }
-  } else {
-    await page.locator(`.rail-nav button:has-text("${label}")`).first().click();
-  }
-  await page.waitForTimeout(500);
-}
-
-async function navigateMentor(page, id, viewportName) {
-  const label = id === 'messages' && viewportName !== 'mobile' && viewportName !== 'tablet'
-    ? 'Messages'
-    : mentorLabels.get(id);
   if (!label) return;
   if (viewportName === 'mobile' || viewportName === 'tablet') {
     const direct = page.locator(`.mobile-nav-btn:has-text("${label}")`).first();
@@ -148,10 +122,10 @@ async function authScreens(viewportName) {
   await capture(page, `auth-signin-${viewportName}`);
   await page.close();
 
-  const mentor = await createPage(viewportName);
-  await mentor.locator('.path-card.mentor-path').first().click();
-  await capture(mentor, `auth-mentor-signin-${viewportName}`);
-  await mentor.close();
+  const returning = await createPage(viewportName);
+  await returning.locator('.path-card.returning-path').first().click();
+  await capture(returning, `auth-returning-signin-${viewportName}`);
+  await returning.close();
 }
 
 async function studentScreens(viewportName) {
@@ -192,17 +166,6 @@ async function studentScreens(viewportName) {
   await page.close();
 }
 
-async function mentorScreens(viewportName) {
-  const page = await createPage(viewportName);
-  await loginDemo(page, 'mentor');
-  await capture(page, `mentor-dashboard-${viewportName}`);
-  for (const id of ['mentor-help', 'people', 'messages', 'events']) {
-    await navigateMentor(page, id, viewportName);
-    await capture(page, `mentor-${id}-${viewportName}`);
-  }
-  await page.close();
-}
-
 async function adminScreens(viewportName) {
   const page = await createPage(viewportName);
   await openAdmin(page);
@@ -224,10 +187,6 @@ try {
 
   for (const viewportName of ['desktop1440', 'desktop1280', 'desktop1024', 'tablet', 'mobile']) {
     await studentScreens(viewportName).catch((error) => issue(`student-${viewportName}`, error));
-  }
-
-  for (const viewportName of ['desktop1440', 'mobile']) {
-    await mentorScreens(viewportName).catch((error) => issue(`mentor-${viewportName}`, error));
   }
 
   for (const viewportName of ['tablet', 'mobile']) {

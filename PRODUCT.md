@@ -6,7 +6,7 @@ product
 
 ## Users
 
-Incoming SUTD students, returning senior mentors, and SUTD student-life staff use Cohortly around orientation and the first weeks of term. Students need confidence before Day 1: who to meet, what to attend, where to get help, how to settle into hostel, and how to understand modules without feeling lost. Mentors need a calm way to spot questions, guide new students, and make useful introductions. Staff need credible operational visibility into adoption, readiness, wellbeing signals, events, classes, and support risks.
+Incoming SUTD students, returning students, and SUTD student-life staff use Cohortly around orientation and the first weeks of term. Freshmen need confidence before Day 1: who to meet, what to attend, where to get help, how to settle into hostel, and how to understand modules without feeling lost. Returning students need a calm way to find classmates by year, pillar, modules, Fifth Row interests, and hostel floor. Staff need credible operational visibility into adoption, readiness, wellbeing signals, events, classes, and support risks.
 
 ## Product Purpose
 
@@ -25,7 +25,7 @@ Cohortly must not look like a student project, hackathon dashboard, generic dark
 1. Community before controls: every student screen should foreground people, arrival, and the next useful action before navigation chrome or metrics.
 2. Institutional trust with consumer warmth: use clear hierarchy, readable typography, restrained color, and credible data while keeping the product welcoming.
 3. One focal point per screen: avoid stacks of equal cards; compose each view around the decision or feeling it needs to create.
-4. Distinct registers by role: student, mentor, and admin experiences share the brand but use different density, surface, and navigation behavior.
+4. Distinct registers by stage: freshmen, returning students, and admin experiences share the brand but use different density, surface, and navigation behavior.
 5. Offline demo reliability: the core demo must work without backend availability, broken requests, or surprising blockers.
 
 ## Accessibility & Inclusion

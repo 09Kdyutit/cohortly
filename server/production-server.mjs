@@ -4,12 +4,14 @@ import { createServer } from 'node:http';
 import { extname, join, normalize } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createAuthHandler } from './auth-core.mjs';
+import { createNotificationsHandler } from './notifications-core.mjs';
 
 const root = fileURLToPath(new URL('..', import.meta.url));
 const dist = join(root, 'dist');
 const port = Number(process.env.PORT || 4173);
 const host = process.env.HOST || '0.0.0.0';
 const authHandler = createAuthHandler({ devMode: process.env.COHORTLY_DEV_MODE === 'true' });
+const notificationsHandler = createNotificationsHandler();
 
 const contentTypes = {
   '.css': 'text/css; charset=utf-8',
@@ -39,6 +41,11 @@ function safeStaticPath(urlPath) {
 const server = createServer(async (req, res) => {
   if (req.url?.startsWith('/api/auth')) {
     const handled = await authHandler(req, res);
+    if (handled) return;
+  }
+
+  if (req.url?.startsWith('/api/notifications')) {
+    const handled = await notificationsHandler(req, res);
     if (handled) return;
   }
 
