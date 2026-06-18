@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from 'react';
+import * as THREE from 'three';
 import { db, auth, microsoftProvider } from './firebase';
-import productPreview from './assets/cohortly-product-preview.png';
 import {
   collection, doc, getDoc, setDoc, onSnapshot,
   query, orderBy, writeBatch,
@@ -2219,6 +2219,264 @@ function LoadingScreen() {
   );
 }
 
+function LandingHero3D() {
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const renderer = new THREE.WebGLRenderer({
+      canvas,
+      antialias: true,
+      alpha: true,
+      preserveDrawingBuffer: true,
+      powerPreference: 'high-performance',
+    });
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+    renderer.outputColorSpace = THREE.SRGBColorSpace;
+    renderer.toneMapping = THREE.ACESFilmicToneMapping;
+    renderer.toneMappingExposure = 1.12;
+
+    const scene = new THREE.Scene();
+    const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+    camera.position.set(6.8, 5.2, 8.2);
+    camera.lookAt(0, 0.35, 0);
+
+    const root = new THREE.Group();
+    root.rotation.y = -0.42;
+    root.rotation.x = -0.02;
+    root.position.y = 0.28;
+    root.scale.setScalar(1.12);
+    scene.add(root);
+
+    const ambient = new THREE.HemisphereLight(0xf6fbff, 0x17315d, 2.6);
+    scene.add(ambient);
+    const key = new THREE.DirectionalLight(0xffffff, 4.8);
+    key.position.set(6, 9, 4);
+    scene.add(key);
+    const rim = new THREE.PointLight(0x41e7c6, 3.2, 12);
+    rim.position.set(-4, 2.4, -3);
+    scene.add(rim);
+    const cobaltGlow = new THREE.PointLight(0x3155ff, 4.4, 14);
+    cobaltGlow.position.set(3, 3, 3);
+    scene.add(cobaltGlow);
+
+    const materials = {
+      platform: new THREE.MeshStandardMaterial({ color: 0xeaf1ff, roughness: 0.54, metalness: 0.08 }),
+      platformSide: new THREE.MeshStandardMaterial({ color: 0xb9c8f2, roughness: 0.5, metalness: 0.16 }),
+      building: new THREE.MeshStandardMaterial({ color: 0xf9fbff, roughness: 0.36, metalness: 0.18 }),
+      buildingBlue: new THREE.MeshStandardMaterial({ color: 0xd9e6ff, roughness: 0.34, metalness: 0.22 }),
+      dark: new THREE.MeshStandardMaterial({ color: 0x10203a, roughness: 0.42, metalness: 0.2 }),
+      cobalt: new THREE.MeshStandardMaterial({ color: 0x2346c7, emissive: 0x0b2a92, emissiveIntensity: 0.3, roughness: 0.32, metalness: 0.28 }),
+      glass: new THREE.MeshPhysicalMaterial({
+        color: 0x9bd8ff,
+        roughness: 0.1,
+        metalness: 0,
+        transmission: 0.22,
+        transparent: true,
+        opacity: 0.56,
+        thickness: 0.5,
+      }),
+      mint: new THREE.MeshStandardMaterial({ color: 0x45d6a3, emissive: 0x0d7b5d, emissiveIntensity: 0.45, roughness: 0.22 }),
+      amber: new THREE.MeshStandardMaterial({ color: 0xffc45c, emissive: 0xb56700, emissiveIntensity: 0.35, roughness: 0.25 }),
+      purple: new THREE.MeshStandardMaterial({ color: 0x9c7cff, emissive: 0x4023a8, emissiveIntensity: 0.38, roughness: 0.25 }),
+      line: new THREE.MeshBasicMaterial({ color: 0x40d9ff, transparent: true, opacity: 0.52 }),
+      packet: new THREE.MeshBasicMaterial({ color: 0xffffff }),
+      window: new THREE.MeshBasicMaterial({ color: 0xdbeaff, transparent: true, opacity: 0.82 }),
+    };
+
+    const addBox = (
+      parent: THREE.Group,
+      position: [number, number, number],
+      scale: [number, number, number],
+      material: THREE.Material,
+      rotation: [number, number, number] = [0, 0, 0],
+    ) => {
+      const mesh = new THREE.Mesh(new THREE.BoxGeometry(1, 1, 1), material);
+      mesh.position.set(...position);
+      mesh.scale.set(...scale);
+      mesh.rotation.set(...rotation);
+      parent.add(mesh);
+      return mesh;
+    };
+
+    const addTower = (
+      parent: THREE.Group,
+      x: number,
+      z: number,
+      floors: number,
+      width: number,
+      depth: number,
+      material: THREE.Material,
+    ) => {
+      const height = floors * 0.26;
+      const tower = addBox(parent, [x, height / 2, z], [width, height, depth], material);
+      addBox(parent, [x, height + 0.045, z], [width * 1.05, 0.08, depth * 1.05], materials.dark);
+      for (let floor = 1; floor < floors; floor += 1) {
+        const y = floor * 0.26;
+        addBox(parent, [x, y, z + depth / 2 + 0.012], [width * 0.72, 0.018, 0.018], materials.window);
+        addBox(parent, [x + width / 2 + 0.012, y, z], [0.018, 0.018, depth * 0.62], materials.window);
+      }
+      return tower;
+    };
+
+    const campus = new THREE.Group();
+    root.add(campus);
+
+    addBox(campus, [0, -0.14, 0], [6.4, 0.28, 4.55], materials.platformSide);
+    addBox(campus, [0, 0.02, 0], [6.15, 0.12, 4.3], materials.platform);
+    addBox(campus, [-1.95, 0.1, -1.28], [2.65, 0.055, 0.22], materials.cobalt, [0, 0.42, 0]);
+    addBox(campus, [-1.1, 0.11, 0.52], [2.75, 0.055, 0.22], materials.cobalt, [0, -0.22, 0]);
+    addBox(campus, [1.7, 0.11, 0.6], [2.4, 0.055, 0.2], materials.mint, [0, 0.38, 0]);
+    addBox(campus, [1.25, 0.12, -1.3], [2.1, 0.055, 0.2], materials.amber, [0, -0.48, 0]);
+
+    addTower(campus, -2.05, -0.85, 9, 0.72, 0.92, materials.building);
+    addTower(campus, -1.2, -1.2, 11, 0.66, 1.02, materials.buildingBlue);
+    addTower(campus, -1.6, 0.45, 8, 0.7, 0.9, materials.building);
+    addTower(campus, 0.25, -0.15, 5, 1.15, 0.8, materials.glass);
+    addTower(campus, 1.35, -0.82, 7, 0.78, 1.0, materials.building);
+    addTower(campus, 2.18, -0.42, 10, 0.74, 1.0, materials.buildingBlue);
+    addTower(campus, 1.7, 1.08, 6, 1.4, 0.54, materials.building);
+    addTower(campus, 2.62, 1.15, 5, 0.72, 0.76, materials.glass);
+
+    const court = new THREE.Group();
+    campus.add(court);
+    addBox(court, [-0.1, 0.16, 1.42], [1.6, 0.035, 0.92], materials.mint);
+    addBox(court, [-0.1, 0.2, 1.42], [1.44, 0.018, 0.02], materials.window);
+    addBox(court, [-0.1, 0.2, 1.42], [0.02, 0.018, 0.82], materials.window);
+
+    const arcNodes: THREE.Mesh[] = [];
+    const cGeo = new THREE.BoxGeometry(0.22, 0.13, 0.58);
+    for (let i = 0; i < 33; i += 1) {
+      const angle = THREE.MathUtils.degToRad(52 + i * 8.3);
+      if (angle > THREE.MathUtils.degToRad(330)) continue;
+      const radius = 3.1;
+      const segment = new THREE.Mesh(cGeo, materials.cobalt);
+      segment.position.set(Math.cos(angle) * radius, 0.42 + Math.sin(i * 0.7) * 0.035, Math.sin(angle) * radius * 0.72);
+      segment.rotation.y = -angle + Math.PI / 2;
+      campus.add(segment);
+      arcNodes.push(segment);
+    }
+
+    const nodePositions: Array<[number, number, number, THREE.Material]> = [
+      [-2.05, 2.72, -0.85, materials.mint],
+      [-1.2, 3.18, -1.2, materials.cobalt],
+      [0.25, 1.6, -0.15, materials.purple],
+      [1.35, 2.18, -0.82, materials.amber],
+      [2.18, 2.98, -0.42, materials.mint],
+      [1.7, 1.82, 1.08, materials.cobalt],
+      [-0.1, 0.54, 1.42, materials.amber],
+    ];
+
+    const nodeGeo = new THREE.SphereGeometry(0.11, 24, 24);
+    const nodes = nodePositions.map(([x, y, z, mat]) => {
+      const node = new THREE.Mesh(nodeGeo, mat);
+      node.position.set(x, y + 0.24, z);
+      campus.add(node);
+      return node;
+    });
+
+    const curves: THREE.CatmullRomCurve3[] = [];
+    const packets: Array<{ mesh: THREE.Mesh; curve: THREE.CatmullRomCurve3; speed: number; offset: number }> = [];
+    const packetGeo = new THREE.SphereGeometry(0.055, 18, 18);
+
+    for (let i = 0; i < nodes.length; i += 1) {
+      const start = nodes[i].position.clone();
+      const end = nodes[(i + 2) % nodes.length].position.clone();
+      const mid = start.clone().lerp(end, 0.5);
+      mid.y += 0.72 + (i % 3) * 0.18;
+      const curve = new THREE.CatmullRomCurve3([start, mid, end]);
+      curves.push(curve);
+      const tube = new THREE.Mesh(new THREE.TubeGeometry(curve, 42, 0.012, 8, false), materials.line);
+      campus.add(tube);
+      const packet = new THREE.Mesh(packetGeo, materials.packet);
+      campus.add(packet);
+      packets.push({ mesh: packet, curve, speed: 0.08 + i * 0.012, offset: i / nodes.length });
+    }
+
+    const halo = new THREE.Group();
+    root.add(halo);
+    for (let i = 0; i < 26; i += 1) {
+      const angle = (i / 26) * Math.PI * 2;
+      const node = new THREE.Mesh(new THREE.SphereGeometry(0.025, 12, 12), materials.line);
+      node.position.set(Math.cos(angle) * 4.25, 0.75 + Math.sin(i * 1.6) * 0.12, Math.sin(angle) * 2.65);
+      halo.add(node);
+    }
+
+    let frame = 0;
+    const clock = new THREE.Clock();
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const width = Math.max(1, rect.width);
+      const height = Math.max(1, rect.height);
+      renderer.setSize(width, height, false);
+      camera.aspect = width / height;
+      camera.updateProjectionMatrix();
+      renderer.render(scene, camera);
+    };
+    const observer = new ResizeObserver(resize);
+    observer.observe(canvas);
+    resize();
+
+    const animate = () => {
+      const t = clock.getElapsedTime();
+      root.rotation.y = -0.42 + Math.sin(t * 0.22) * 0.05;
+      root.position.y = 0.28 + Math.sin(t * 0.55) * 0.05;
+      halo.rotation.y = t * 0.08;
+      arcNodes.forEach((segment, index) => {
+        segment.position.y = 0.42 + Math.sin(t * 1.4 + index * 0.35) * 0.035;
+      });
+      nodes.forEach((node, index) => {
+        const pulse = 1 + Math.sin(t * 2.2 + index * 0.9) * 0.16;
+        node.scale.setScalar(pulse);
+      });
+      packets.forEach((packet) => {
+        const p = packet.curve.getPoint((t * packet.speed + packet.offset) % 1);
+        packet.mesh.position.copy(p);
+      });
+      renderer.render(scene, camera);
+      frame = window.requestAnimationFrame(animate);
+    };
+
+    if (prefersReducedMotion) {
+      renderer.render(scene, camera);
+    } else {
+      animate();
+    }
+
+    return () => {
+      if (frame) window.cancelAnimationFrame(frame);
+      observer.disconnect();
+      scene.traverse((object) => {
+        const mesh = object as THREE.Mesh;
+        if (mesh.geometry) mesh.geometry.dispose();
+      });
+      Object.values(materials).forEach((material) => material.dispose());
+      renderer.dispose();
+    };
+  }, []);
+
+  return (
+    <div className="hero-3d-stage" aria-label="Animated 3D Cohortly campus network">
+      <div className="hero-3d-grid" />
+      <canvas ref={canvasRef} className="hero-3d-canvas" />
+      <div className="hero-3d-hud hero-3d-hud--top">
+        <span>Live SUTD cohort map</span>
+        <strong>812 verified students</strong>
+        <small>Freshmen, returning students, rooms, events and module help moving in one campus graph.</small>
+      </div>
+      <div className="hero-3d-hud hero-3d-hud--bottom">
+        <span>Block 55 online</span>
+        <strong>10.014 room active</strong>
+      </div>
+      <div className="hero-3d-chip hero-3d-chip--left">Hostel circles</div>
+      <div className="hero-3d-chip hero-3d-chip--right">Fifth Row plans</div>
+    </div>
+  );
+}
+
 function LandingScreen({
   onSelectRole,
   onDemoLogin,
@@ -2313,13 +2571,7 @@ function LandingScreen({
         </div>
 
         <div className="landing-hero-right">
-          <div className="product-preview-frame">
-            <img src={productPreview} alt="Cohortly student Today view showing next actions, events, hostel, and module help" />
-            <div className="product-preview-caption">
-              <span>Real student workspace</span>
-              <strong>Today, people, events, classes, messages, hostel and support in one flow.</strong>
-            </div>
-          </div>
+          <LandingHero3D />
         </div>
       </div>
 
