@@ -1815,12 +1815,43 @@ function saveBelongingEntry(email: string, score: number): void {
 
 // ─── Bot/notification prefs ────────────────────────────────────────────────
 
-type NotifPrefs = { telegramHandle: string; whatsappNumber: string; onAnswer: boolean; onEvent: boolean; onConnection: boolean; botConnected: boolean };
+type NotifPrefs = {
+  telegramHandle: string;
+  whatsappNumber: string;
+  onAnswer: boolean;
+  onEvent: boolean;
+  onConnection: boolean;
+  botConnected: boolean;
+  whatsappConnected?: boolean;
+};
+
+type NotificationStatus = {
+  ok: boolean;
+  apiOnline: boolean;
+  telegram: {
+    configured: boolean;
+    botUsername: string;
+    webhookUrlConfigured: boolean;
+    connected: boolean;
+    username: string;
+    chatRegistered: boolean;
+  };
+  whatsapp: {
+    configured: boolean;
+    phoneNumberIdConfigured: boolean;
+    verifyTokenConfigured: boolean;
+    businessPhone: string;
+    connected: boolean;
+    optedIn: boolean;
+    phone: string;
+  };
+  preferences: Pick<NotifPrefs, 'onAnswer' | 'onEvent' | 'onConnection'>;
+};
 
 function loadNotifPrefs(email: string): NotifPrefs {
   try {
-    return JSON.parse(localStorage.getItem(`cohortly.notif.${email}`) ?? 'null') ?? { telegramHandle: '', whatsappNumber: '', onAnswer: true, onEvent: true, onConnection: true, botConnected: false };
-  } catch { return { telegramHandle: '', whatsappNumber: '', onAnswer: true, onEvent: true, onConnection: true, botConnected: false }; }
+    return JSON.parse(localStorage.getItem(`cohortly.notif.${email}`) ?? 'null') ?? { telegramHandle: '', whatsappNumber: '', onAnswer: true, onEvent: true, onConnection: true, botConnected: false, whatsappConnected: false };
+  } catch { return { telegramHandle: '', whatsappNumber: '', onAnswer: true, onEvent: true, onConnection: true, botConnected: false, whatsappConnected: false }; }
 }
 
 function saveNotifPrefs(email: string, prefs: NotifPrefs): void {
@@ -1961,6 +1992,36 @@ async function postJson<T>(url: string, body: unknown): Promise<T> {
   });
   const payload = (await response.json().catch(() => ({}))) as { message?: string };
   if (!response.ok) throw new Error(payload.message || 'Request failed.');
+  return payload as T;
+}
+
+const notificationApiBase = (import.meta.env.VITE_COHORTLY_API_BASE || '').replace(/\/$/, '');
+
+function notificationApi(path: string): string {
+  return `${notificationApiBase}${path}`;
+}
+
+function notificationStartToken(email: string): string {
+  return btoa(email).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/g, '');
+}
+
+async function notificationJson<T>(path: string, init: RequestInit = {}): Promise<T> {
+  const response = await fetch(notificationApi(path), {
+    ...init,
+    credentials: notificationApiBase ? 'omit' : 'include',
+    headers: {
+      ...(init.body ? { 'Content-Type': 'application/json' } : {}),
+      ...(init.headers || {}),
+    },
+  });
+  const contentType = response.headers.get('content-type') || '';
+  if (!contentType.includes('application/json')) {
+    throw new Error(notificationApiBase
+      ? 'Notification API did not return JSON. Check the deployed API URL.'
+      : 'Notification server is not available on this static deployment.');
+  }
+  const payload = (await response.json().catch(() => ({}))) as { message?: string };
+  if (!response.ok) throw new Error(payload.message || 'Notification request failed.');
   return payload as T;
 }
 
@@ -8231,72 +8292,138 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
   const [prefs, setPrefs] = useState<NotifPrefs>(() => loadNotifPrefs(userEmail));
   const [telegramInput, setTelegramInput] = useState(prefs.telegramHandle);
   const [whatsappInput, setWhatsappInput] = useState(prefs.whatsappNumber);
+  const [status, setStatus] = useState<NotificationStatus | null>(null);
+  const [statusLoading, setStatusLoading] = useState(true);
   const [tgVerifying, setTgVerifying] = useState(false);
   const [waVerifying, setWaVerifying] = useState(false);
+  const [testSending, setTestSending] = useState(false);
   const [prefSaved, setPrefSaved] = useState(false);
   const [channelNotice, setChannelNotice] = useState('');
 
-  const tgConnected = prefs.botConnected && !!prefs.telegramHandle;
-  const waConnected = !!prefs.whatsappNumber && prefs.whatsappNumber.length >= 6;
+  const refreshStatus = async () => {
+    setStatusLoading(true);
+    try {
+      const payload = await notificationJson<NotificationStatus>(`/api/notifications/status?email=${encodeURIComponent(userEmail)}`);
+      setStatus(payload);
+      const updated: NotifPrefs = {
+        ...prefs,
+        telegramHandle: payload.telegram.username || prefs.telegramHandle,
+        whatsappNumber: payload.whatsapp.phone || prefs.whatsappNumber,
+        botConnected: payload.telegram.connected,
+        whatsappConnected: payload.whatsapp.connected,
+        ...payload.preferences,
+      };
+      setPrefs(updated);
+      setTelegramInput(updated.telegramHandle);
+      setWhatsappInput(updated.whatsappNumber);
+      saveNotifPrefs(userEmail, updated);
+      if (!payload.telegram.configured || !payload.whatsapp.configured) {
+        setChannelNotice('Notification server is online, but one or more provider credentials are missing.');
+      }
+    } catch (error) {
+      setStatus(null);
+      setChannelNotice(error instanceof Error ? error.message : 'Notification server is not reachable.');
+    } finally {
+      setStatusLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    refreshStatus();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userEmail]);
+
+  const tgConnected = Boolean(status?.telegram.connected);
+  const waConnected = Boolean(status?.whatsapp.connected);
+  const apiLabel = notificationApiBase || 'same-origin /api';
+  const botName = status?.telegram.botUsername || 'CohortlyBot';
+  const startToken = notificationStartToken(userEmail);
+  const tgDeepLink = `https://t.me/${botName}?start=${startToken}`;
+  const waBusinessPhone = status?.whatsapp.businessPhone || '';
+  const waOptInLink = waBusinessPhone
+    ? `https://wa.me/${waBusinessPhone.replace(/[^\d]/g, '')}?text=${encodeURIComponent(`start ${startToken}`)}`
+    : '';
 
   const connectTelegram = async () => {
     const handle = telegramInput.trim().replace(/^@/, '');
     if (!handle) return;
     setTgVerifying(true);
-    let notice = '';
     try {
-      const response = await fetch('/api/notifications/telegram/connect', {
+      const payload = await notificationJson<{ connected: boolean; message?: string }>('/api/notifications/telegram/connect', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail, username: handle }),
       });
-      const payload = await response.json().catch(() => ({}));
-      notice = payload.message || (response.ok ? 'Telegram alerts connected.' : 'Start the bot first, then verify again.');
-    } catch {
-      notice = 'Telegram username saved in this browser. Live delivery needs the notification server deployed with TELEGRAM_BOT_TOKEN.';
+      const updated: NotifPrefs = { ...prefs, telegramHandle: `@${handle}`, botConnected: payload.connected };
+      setPrefs(updated);
+      saveNotifPrefs(userEmail, updated);
+      setChannelNotice(payload.message || 'Telegram connected. Confirmation message sent.');
+      await refreshStatus();
+    } catch (error) {
+      const updated: NotifPrefs = { ...prefs, telegramHandle: `@${handle}`, botConnected: false };
+      setPrefs(updated);
+      saveNotifPrefs(userEmail, updated);
+      setChannelNotice(error instanceof Error ? error.message : 'Telegram connection failed.');
+    } finally {
+      setTgVerifying(false);
     }
-    const updated: NotifPrefs = { ...prefs, telegramHandle: '@' + handle, botConnected: true };
-    setPrefs(updated);
-    saveNotifPrefs(userEmail, updated);
-    setChannelNotice(notice);
-    setTgVerifying(false);
   };
 
   const connectWhatsApp = async () => {
     const num = whatsappInput.trim();
     if (!num || num.length < 6) return;
     setWaVerifying(true);
-    let notice = '';
     try {
-      const response = await fetch('/api/notifications/whatsapp/connect', {
+      const payload = await notificationJson<{ connected: boolean; message?: string }>('/api/notifications/whatsapp/connect', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email: userEmail, phone: num }),
       });
-      const payload = await response.json().catch(() => ({}));
-      notice = payload.message || (response.ok ? 'WhatsApp alerts connected.' : 'WhatsApp setup saved, but delivery still needs webhook credentials.');
-    } catch {
-      notice = 'WhatsApp number saved in this browser. Live delivery needs the notification server deployed with WhatsApp Cloud API credentials.';
+      const updated: NotifPrefs = { ...prefs, whatsappNumber: num, whatsappConnected: payload.connected };
+      setPrefs(updated);
+      saveNotifPrefs(userEmail, updated);
+      setChannelNotice(payload.message || 'WhatsApp connected. Confirmation message sent.');
+      await refreshStatus();
+    } catch (error) {
+      const updated: NotifPrefs = { ...prefs, whatsappNumber: num, whatsappConnected: false };
+      setPrefs(updated);
+      saveNotifPrefs(userEmail, updated);
+      setChannelNotice(error instanceof Error ? error.message : 'WhatsApp connection failed.');
+    } finally {
+      setWaVerifying(false);
     }
-    const updated: NotifPrefs = { ...prefs, whatsappNumber: num };
-    setPrefs(updated);
-    saveNotifPrefs(userEmail, updated);
-    setChannelNotice(notice);
-    setWaVerifying(false);
   };
 
-  const disconnectTelegram = () => {
+  const disconnectTelegram = async () => {
     const updated: NotifPrefs = { ...prefs, telegramHandle: '', botConnected: false };
     setPrefs(updated);
     setTelegramInput('');
     saveNotifPrefs(userEmail, updated);
+    setChannelNotice('Telegram disconnected.');
+    try {
+      await notificationJson('/api/notifications/disconnect', {
+        method: 'POST',
+        body: JSON.stringify({ email: userEmail, channel: 'telegram' }),
+      });
+      await refreshStatus();
+    } catch (error) {
+      setChannelNotice(error instanceof Error ? error.message : 'Telegram disconnected locally.');
+    }
   };
 
-  const disconnectWhatsApp = () => {
-    const updated: NotifPrefs = { ...prefs, whatsappNumber: '' };
+  const disconnectWhatsApp = async () => {
+    const updated: NotifPrefs = { ...prefs, whatsappNumber: '', whatsappConnected: false };
     setPrefs(updated);
     setWhatsappInput('');
     saveNotifPrefs(userEmail, updated);
+    setChannelNotice('WhatsApp disconnected.');
+    try {
+      await notificationJson('/api/notifications/disconnect', {
+        method: 'POST',
+        body: JSON.stringify({ email: userEmail, channel: 'whatsapp' }),
+      });
+      await refreshStatus();
+    } catch (error) {
+      setChannelNotice(error instanceof Error ? error.message : 'WhatsApp disconnected locally.');
+    }
   };
 
   const togglePref = (key: keyof NotifPrefs) => {
@@ -8305,18 +8432,94 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
     saveNotifPrefs(userEmail, updated);
     setPrefSaved(true);
     setTimeout(() => setPrefSaved(false), 1800);
+    notificationJson('/api/notifications/preferences', {
+      method: 'POST',
+      body: JSON.stringify({
+        email: userEmail,
+        onAnswer: updated.onAnswer,
+        onEvent: updated.onEvent,
+        onConnection: updated.onConnection,
+      }),
+    }).catch(() => undefined);
   };
 
-  const tgDeepLink = `https://t.me/CohortlyBot?start=${btoa(userEmail).replace(/[+=\/]/g, '')}`;
-  const waOptInLink = `https://wa.me/6591234567?text=${encodeURIComponent('start')}`;
+  const sendTestAlert = async () => {
+    setTestSending(true);
+    try {
+      const payload = await notificationJson<{ message?: string; results?: Record<string, { ok?: boolean; reason?: string }> }>('/api/notifications/test', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: userEmail,
+          text: 'Cohortly test alert. Telegram and WhatsApp delivery are working.',
+        }),
+      });
+      const delivered = Object.entries(payload.results || {})
+        .filter(([, result]) => result?.ok)
+        .map(([name]) => name)
+        .join(' + ');
+      setChannelNotice(delivered ? `Test alert delivered via ${delivered}.` : (payload.message || 'Test alert sent.'));
+      await refreshStatus();
+    } catch (error) {
+      setChannelNotice(error instanceof Error ? error.message : 'Test alert failed.');
+    } finally {
+      setTestSending(false);
+    }
+  };
+
+  const setupItems = [
+    { label: 'API server', ok: Boolean(status), detail: apiLabel },
+    { label: 'Telegram token', ok: Boolean(status?.telegram.configured), detail: status?.telegram.configured ? `@${botName}` : 'Missing TELEGRAM_BOT_TOKEN' },
+    { label: 'Telegram webhook', ok: Boolean(status?.telegram.webhookUrlConfigured), detail: status?.telegram.webhookUrlConfigured ? 'Webhook URL configured' : 'Set webhook to /api/notifications/telegram/webhook' },
+    { label: 'WhatsApp Cloud API', ok: Boolean(status?.whatsapp.configured), detail: status?.whatsapp.configured ? 'Token and phone number ID configured' : 'Missing WHATSAPP_CLOUD_TOKEN / WHATSAPP_PHONE_NUMBER_ID' },
+    { label: 'WhatsApp webhook', ok: Boolean(status?.whatsapp.verifyTokenConfigured), detail: status?.whatsapp.verifyTokenConfigured ? 'Verify token configured' : 'Missing WHATSAPP_VERIFY_TOKEN' },
+  ];
 
   return (
     <div className="privacy-view">
       <div className="privacy-sections">
+        <div className="privacy-card notif-ops-card">
+          <div className="privacy-card-head" style={{ marginBottom: 0 }}>
+            <Bot size={18} style={{ color: 'var(--accent)' }} />
+            <div>
+              <strong>Live notification delivery</strong>
+              <p>
+                {statusLoading
+                  ? 'Checking Telegram and WhatsApp provider setup...'
+                  : status
+                    ? 'Notification server is reachable. Connected channels can receive real test alerts.'
+                    : 'Notification server is not reachable from this deployment.'}
+              </p>
+            </div>
+            <button className="secondary-button" onClick={refreshStatus} disabled={statusLoading}>
+              {statusLoading ? 'Checking...' : 'Refresh'}
+            </button>
+          </div>
+          <div className="notif-setup-grid">
+            {setupItems.map((item) => (
+              <div key={item.label} className={item.ok ? 'notif-setup-item ok' : 'notif-setup-item'}>
+                {item.ok ? <CheckCircle2 size={15} /> : <AlertTriangle size={15} />}
+                <div>
+                  <strong>{item.label}</strong>
+                  <span>{item.detail}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className="notif-test-row">
+            <div>
+              <strong>End-to-end test</strong>
+              <span>{tgConnected || waConnected ? 'Send a real alert to every connected channel.' : 'Connect Telegram or WhatsApp first.'}</span>
+            </div>
+            <button className="primary-button" onClick={sendTestAlert} disabled={testSending || (!tgConnected && !waConnected)}>
+              {testSending ? <><span className="notif-spinner" /> Sending...</> : <><Send size={14} /> Send test alert</>}
+            </button>
+          </div>
+        </div>
+
         {channelNotice && (
           <div className="privacy-card notif-status-card">
             <div className="privacy-card-head" style={{ marginBottom: 0 }}>
-              <BellRing size={18} style={{ color: 'var(--accent)' }} />
+              {status ? <BellRing size={18} style={{ color: 'var(--accent)' }} /> : <AlertTriangle size={18} style={{ color: '#d97706' }} />}
               <div>
                 <strong>Channel status</strong>
                 <p>{channelNotice}</p>
@@ -8361,9 +8564,9 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
                 <span className="notif-step-num">1</span>
                 <div>
                   <strong>Start the bot</strong>
-                  <p>Open Telegram and search <code>@CohortlyBot</code>, then press Start.</p>
+                  <p>Open Telegram and press Start. The deep link includes your Cohortly email token so the server can match your chat.</p>
                   <a className="notif-bot-link" href={tgDeepLink} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink size={13} /> Open @CohortlyBot
+                    <ExternalLink size={13} /> Open @{botName}
                   </a>
                 </div>
               </div>
@@ -8384,7 +8587,7 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
                 <span className="notif-step-num">3</span>
                 <div>
                   <strong>Verify connection</strong>
-                  <p>We confirm you've started the bot before sending alerts.</p>
+                  <p>We confirm the chat ID and send a real Telegram confirmation message.</p>
                   <button
                     className="primary-button"
                     style={{ marginTop: 8, padding: '7px 20px', fontSize: '0.84rem' }}
@@ -8451,16 +8654,21 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
                 <span className="notif-step-num">2</span>
                 <div>
                   <strong>Send a message to opt in</strong>
-                  <p>WhatsApp requires you to initiate the conversation. Send "start" to our number.</p>
-                  <a className="notif-bot-link notif-bot-link--wa" href={waOptInLink} target="_blank" rel="noopener noreferrer">
-                    <ExternalLink size={13} /> Open in WhatsApp
-                  </a>
+                  <p>WhatsApp requires you to message the business number first. Send the pre-filled start text, then return here.</p>
+                  {waOptInLink ? (
+                    <a className="notif-bot-link notif-bot-link--wa" href={waOptInLink} target="_blank" rel="noopener noreferrer">
+                      <ExternalLink size={13} /> Open Cohortly WhatsApp
+                    </a>
+                  ) : (
+                    <span className="notif-missing-inline">Set WHATSAPP_BUSINESS_PHONE to enable this link.</span>
+                  )}
                 </div>
               </div>
               <div className="notif-step">
                 <span className="notif-step-num">3</span>
                 <div>
                   <strong>Save and confirm your number</strong>
+                  <p>We send a real WhatsApp confirmation message before marking this connected.</p>
                   <button
                     className="primary-button"
                     style={{ marginTop: 8, padding: '7px 20px', fontSize: '0.84rem', background: 'linear-gradient(135deg, #25D366 0%, #128C7E 100%)', boxShadow: '0 4px 16px rgba(37,211,102,0.35)' }}
