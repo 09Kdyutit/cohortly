@@ -1,18 +1,30 @@
 {
   "name": "Cohortly",
   "short_name": "Cohortly",
-  "description": "SUTD verified student-led campus network — events, mentorship, module help, and belonging.",
+  "description": "SUTD verified student-led campus network for events, mentorship, module help, and belonging.",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#f8f9ff",
-  "theme_color": "#6366f1",
+  "theme_color": "#2346c7",
   "orientation": "portrait-primary",
   "categories": ["education", "social"],
   "icons": [
     {
-      "src": "favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
+      "src": "favicon.png",
+      "sizes": "32x32",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "cohortly-app-icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "cohortly-app-icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
       "purpose": "any maskable"
     }
   ],

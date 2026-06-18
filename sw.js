@@ -34,8 +34,8 @@ self.addEventListener('push', (e) => {
   e.waitUntil(
     self.registration.showNotification(title, {
       body,
-      icon: icon || './favicon.svg',
-      badge: './favicon.svg',
+      icon: icon || './favicon.png',
+      badge: './favicon.png',
       vibrate: [100, 50, 100],
     })
   );
