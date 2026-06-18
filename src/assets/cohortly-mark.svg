@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-labelledby="title desc">
+  <title id="title">Cohortly mark</title>
+  <desc id="desc">A cobalt C containing a supported student figure.</desc>
+  <path d="M49.4 13.7A25.5 25.5 0 1 0 50 49.5l-9.2-6.9A14 14 0 1 1 40.4 21l9-7.3Z" fill="#2346C7"/>
+  <path d="M29.3 39.6c-6.2-1.5-10-6.5-10.3-13.7l7.4 9.4c1.7 2.1 4.6 3 7.1 2.1l2.8-1c3.3-1.2 6.8.7 7.7 4.1l.3 1.2c-4.7 2.2-9.9 2.3-15 .1Z" fill="#fff"/>
+  <circle cx="36.5" cy="30.1" r="5.2" fill="#fff"/>
+  <path d="M25.1 15.2 36.4 9l11.3 6.2-11.3 6.2-11.3-6.2Z" fill="#111827"/>
+  <path d="M31.6 20.6v6.1l4.8 2.7 4.8-2.7v-6.1l-4.8 2.6-4.8-2.6Z" fill="#202938"/>
+</svg>

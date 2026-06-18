@@ -1,41 +1,54 @@
 # Cohortly Design System
 
-**Brand thesis:** "Your cohort, coming into focus." A verified campus OS that helps an incoming SUTD cohort feel connected before Day 1 — warm, calm, credible, slightly futuristic. Never a dashboard template, never a Discord/Notion clone.
+## Thesis
 
-Visual metaphors (used sparingly): arrival, signal, orientation, verified connection, cohort pulse. No glowing network nodes, no particle fields, no fake holograms.
+Cohortly is a verified campus community product: warm enough for new students, credible enough for SUTD staff, and structured enough to feel operational. The design thesis is "your campus, before Day 1" — the product should make the cohort feel present before orientation starts.
+
+## Brand System
+
+- Primary mark: cobalt `C` with a protected inner student/connection gesture, derived from the provided logo reference.
+- Assets: `src/assets/cohortly-mark.svg`, `src/assets/cohortly-mark-mono.svg`, `src/assets/cohortly-lockup.svg`, and `public/favicon.svg`.
+- Logo reference: `src/assets/cohortly-logo-reference.jpeg`.
+- Usage: the compact mark is used in the app rail, landing nav, loading/auth states, and favicon. The mark sits on a white rounded square with a restrained cobalt shadow.
 
 ## Color
-- Base: `--bg #111827` (blue-charcoal, not pure black), surfaces are lightly tinted glass (`rgba(255,255,255,0.04–0.07)`).
-- Primary accent: sky blue `--accent #38bdf8` / `--accent-dark #0ea5e9` / `--accent-deep #0284c7`. Buttons use `--accent-deep` at rest for AA-safer contrast with white text, lighten on hover — never a 3-stop gradient.
-- Status: success `#10b981`, warning `#f59e0b`, danger `#ef4444` (urgent only) — never decorative.
-- Text: `--ink #e5e7eb`, `--ink-soft`, `--muted`. No pure white cards, no gradient text.
 
-## Surfaces & elevation
-- `.panel` is the base card: subtle glass background + 1px border + soft shadow. Depth comes from **one** shadow layer, not stacked colored glows.
-- Featured/priority states use explicit variant classes — `person-card--featured`, `for-you-card--featured`, `landing-value-card--lead/--wide` — never `:first-child`/`:nth-child` for layout or feature meaning. DOM order ≠ visual priority.
-- Radius scale: `--radius-sm 6px` (buttons/inputs), `--radius 10px` (cards), `--radius-lg 14px` (hero panels).
+- Canvas: light institutional blue-gray (`--canvas`, `--canvas-warm`) with subtle campus-grid texture.
+- Primary: cobalt (`--cobalt-500/600/700`) for navigation, primary actions, current states, and key student progress.
+- Surfaces: white and very pale cobalt surfaces with one border and one shadow layer.
+- Status: green for success/online, amber for help-needed, red only for risk/destructive states.
+- Avoid: neon glows, purple/cyan AI gradients, gradient text, heavy glass, dark card soup, and color-only meaning.
 
 ## Typography
-- Inter, system stack. Headings use `text-wrap: balance` (already global). Tabular figures for stat blocks. Avoid tiny uppercase eyebrows on every section — use them only at true section boundaries.
 
-## Motion
-- Transform/opacity only. Standard durations via `--dur-fast/base/slow` (120/180/260ms) and `prefers-reduced-motion` is already respected globally.
-- No continuous decorative animation (no drifting background orbs, no pulsing brand mark, no shimmer sweep on buttons) — these were present from earlier "premium pass" CSS layers and have been removed; depth now comes from static corner gradients, not animation.
-- Modals/sheets: fade + small scale/translate, Esc + backdrop-click to dismiss (Weekly Pulse modal now supports both).
+- Font: Manrope variable via `@fontsource-variable/manrope`.
+- Headings: large, confident, tightly spaced, but scoped to true page or hero moments.
+- Product UI: dense enough for repeated use, with readable body copy and tabular figures where counts matter.
 
-## Component conventions
-- `.primary-button`: single source of truth at the top of `styles.css` (no longer redefined 5× through the cascade). Solid `--accent-deep`, white text, subtle press scale, no glow.
-- Avatars: flat tinted circle by `color` prop (teal/coral/blue/violet/green) — consistent across People, Messages, previews.
-- Aura/compatibility badge: `compat-badge` with `compat-high/good/ok` tiers, color only ever reinforces text, never the sole signal.
+## Layout
 
-## Layout patterns by register
-- **Student** screens (Today, People, Events, Classes, Messages, Launchpad, Fifth Row, Hostel): warm, one clear focal action per screen, secondary content visually subordinate.
-- **Mentor**: calmer, less playful, priority-ordered help requests.
-- **Admin**: denser, tighter grid, restrained status color, real tables — not student cards repainted.
+- App shell: icon rail on desktop, sticky topbar, mobile bottom nav with a More sheet for secondary destinations.
+- Landing: first viewport shows brand, offer, SSO/manual entry, and a real product preview with the next content peeking below.
+- Today: one large orientation greeting, one next-best action, then supporting cards.
+- People: compatibility directory with explicit featured variants, search, and year/module filters.
+- Events: plan-first calendar plus selected-day detail rail.
+- Classes: module-room list plus Q&A workspace, styled controls, answer states, anonymous posting, and import flow.
+- Hostel: light floor directory and block selector, not a game-like dark simulation.
 
-## Empty / loading / error
-- No screen should default to an empty state for a seeded demo account — Classes auto-selects the first enrolled room, Hostel auto-seeds a room assignment for the demo profile. Empty states only appear for genuinely-empty user data (e.g. no search results), with a one-line explanation + next step.
+## Components
 
-## Responsive
-- Breakpoints in active use: 1100px (two-col → stack), 768px (tablet), 640px (card grids → single column), mobile bottom nav below ~900px with a "more" sheet for secondary destinations (Launchpad, Fifth Row, Hostel, Knowledge Base).
-- Mobile sheets/modals use safe-area padding and stay within the viewport; primary CTAs remain above the bottom nav.
+- Buttons use `primary`, `secondary`, `text`, and `icon` roles with minimum touch targets and visible focus.
+- Cards use 12-16px radius, 1px borders, and one shadow layer.
+- Featured states use explicit classes such as `person-card--featured`; layout meaning is not tied to DOM order.
+- Mobile controls are sized for thumbs and avoid horizontal overflow.
+
+## Motion & Accessibility
+
+- Motion is limited to transform/opacity transitions on interaction.
+- `prefers-reduced-motion` disables transitions and animations.
+- Focus states are visible across links, buttons, form controls, and role buttons.
+- Text and controls target WCAG AA contrast on the implemented palette.
+
+## Verification
+
+Screenshots were captured for landing, Today, People, Events, Classes, Messages, Launchpad, Fifth Row, and Hostel on desktop and mobile into `.agents/shots/rebuild-final/`. Build and TypeScript checks are part of the delivery contract.

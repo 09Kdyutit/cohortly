@@ -1949,7 +1949,7 @@ const SUTD_DOMAINS = ['sutd.edu.sg', 'mymail.sutd.edu.sg'];
 const STATIC_DEMO_CODE = '123456';
 
 function isStaticHostedDemo(): boolean {
-  return typeof window !== 'undefined' && window.location.hostname.endsWith('github.io');
+  return typeof window !== 'undefined' && (import.meta.env.PROD || window.location.hostname.endsWith('github.io'));
 }
 
 function emailIsSUTD(email: string): boolean {
@@ -3949,6 +3949,14 @@ function MobileBottomNav({ active, setActive }: { active: View; setActive: (v: V
               </button>
             );
           })}
+          <button
+            className={`mobile-nav-btn${moreItems.some((item) => item.id === active) ? ' active' : ''}`}
+            onClick={() => setMoreOpen(true)}
+          >
+            <ChevronDown size={20} />
+            <span>More</span>
+            <div className="mobile-nav-dot" />
+          </button>
         </div>
       </nav>
     </>
@@ -8401,7 +8409,7 @@ function HostelSetupModal({ onSave, onSkip }: { onSave: (block: string, floor: s
           <>
             <div className="hostel-setup-icon"><Building2 size={30} /></div>
             <h2>Set up your room</h2>
-            <p>Pin yourself to the 3D campus map and let floor mates find you</p>
+            <p>Pin yourself to the hostel directory and let floor mates find you</p>
             <div className="hostel-block-picker">
               {Object.entries(blockInfo).map(([b, info]) => (
                 <button key={b} className={`block-pick-card${block === b ? ' selected' : ''}`}
@@ -8516,36 +8524,36 @@ function Building3DSVG({
       <defs>
         <filter id="g-sky"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
         <filter id="g-grn"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <filter id="g-bld"><feDropShadow dx="0" dy="10" stdDeviation="14" floodColor="rgba(0,0,0,0.55)"/></filter>
+        <filter id="g-bld"><feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="rgba(28,49,80,0.18)"/></filter>
         <linearGradient id="ff-grad" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#192d48"/>
-          <stop offset="100%" stopColor="#0f1e30"/>
+          <stop offset="0%" stopColor="#f7faff"/>
+          <stop offset="100%" stopColor="#dfe9f8"/>
         </linearGradient>
         <linearGradient id="rf-grad" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%" stopColor="#0b1a2a"/>
-          <stop offset="100%" stopColor="#08121e"/>
+          <stop offset="0%" stopColor="#cbd9ec"/>
+          <stop offset="100%" stopColor="#b7c8de"/>
         </linearGradient>
         <linearGradient id="roof-grad" x1="0" x2="0" y1="1" y2="0">
-          <stop offset="0%" stopColor="#1c3252"/>
-          <stop offset="100%" stopColor="#243d62"/>
+          <stop offset="0%" stopColor="#d7e4f5"/>
+          <stop offset="100%" stopColor="#f4f8ff"/>
         </linearGradient>
         <linearGradient id="sky-ambient" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="rgba(56,189,248,0.14)"/>
-          <stop offset="60%" stopColor="rgba(56,189,248,0)"/>
+          <stop offset="0%" stopColor="rgba(49,85,212,0.12)"/>
+          <stop offset="60%" stopColor="rgba(49,85,212,0)"/>
         </linearGradient>
       </defs>
 
       {/* Ground glow halo */}
-      <ellipse cx={BASE_X + BLD_W/2 + DEPTH_DX/2} cy={BASE_Y + 18} rx={BLD_W/2 + 65} ry={24} fill="rgba(56,189,248,0.09)"/>
-      <ellipse cx={BASE_X + BLD_W/2 + DEPTH_DX/2} cy={BASE_Y + 18} rx={BLD_W/2 + 30} ry={15} fill="rgba(0,0,0,0.4)"/>
+      <ellipse cx={BASE_X + BLD_W/2 + DEPTH_DX/2} cy={BASE_Y + 18} rx={BLD_W/2 + 65} ry={24} fill="rgba(49,85,212,0.08)"/>
+      <ellipse cx={BASE_X + BLD_W/2 + DEPTH_DX/2} cy={BASE_Y + 18} rx={BLD_W/2 + 30} ry={15} fill="rgba(28,49,80,0.10)"/>
 
       {/* Right depth face */}
       <polygon points={`${rfTL[0]},${rfTL[1]} ${rfTR[0]},${rfTR[1]} ${rfBR[0]},${rfBR[1]} ${rfBL[0]},${rfBL[1]}`}
-        fill="url(#rf-grad)" stroke="rgba(56,189,248,0.12)" strokeWidth="0.5"/>
+        fill="url(#rf-grad)" stroke="rgba(49,85,212,0.18)" strokeWidth="0.5"/>
       {Array.from({length: N_FLOORS - 1}, (_, i) => (
         <line key={i} x1={BASE_X+BLD_W} y1={bldgTop+(i+1)*FLOOR_H}
           x2={BASE_X+BLD_W+DEPTH_DX} y2={bldgTop+(i+1)*FLOOR_H+DEPTH_DY}
-          stroke="rgba(56,189,248,0.08)" strokeWidth="0.5"/>
+          stroke="rgba(49,85,212,0.12)" strokeWidth="0.5"/>
       ))}
       {/* Right face mini-windows (rooms 08-10) */}
       {Array.from({length: N_FLOORS}, (_, fi) => {
@@ -8555,14 +8563,14 @@ function Building3DSVG({
           const res = hostelResidents.find(r => r.block === block && r.floor === floorNum && r.room === String(ri+8).padStart(2,'0'));
           const rfx = BASE_X + BLD_W + DEPTH_DX*(0.22 + ri*0.26);
           return <rect key={ri} x={rfx-5} y={rfy-7} width={9} height={12} rx="2"
-            fill={res?.online ? 'rgba(56,189,248,0.65)' : res ? 'rgba(25,42,65,0.7)' : 'rgba(10,18,28,0.5)'}
+            fill={res?.online ? 'rgba(49,85,212,0.68)' : res ? 'rgba(108,128,156,0.45)' : 'rgba(180,195,216,0.35)'}
           />;
         });
       })}
 
       {/* Front face */}
       <rect x={BASE_X} y={bldgTop} width={BLD_W} height={BLD_H}
-        fill="url(#ff-grad)" stroke="rgba(56,189,248,0.22)" strokeWidth="0.75"
+        fill="url(#ff-grad)" stroke="rgba(49,85,212,0.22)" strokeWidth="0.75"
         filter="url(#g-bld)"/>
       <rect x={BASE_X} y={bldgTop} width={BLD_W} height={BLD_H * 0.45}
         fill="url(#sky-ambient)" pointerEvents="none"/>
@@ -8571,12 +8579,12 @@ function Building3DSVG({
       {Array.from({length: N_FLOORS - 1}, (_, i) => (
         <line key={i} x1={BASE_X} y1={bldgTop+(i+1)*FLOOR_H}
           x2={BASE_X+BLD_W} y2={bldgTop+(i+1)*FLOOR_H}
-          stroke="rgba(56,189,248,0.1)" strokeWidth="0.5"/>
+          stroke="rgba(102,122,154,0.18)" strokeWidth="0.5"/>
       ))}
       {Array.from({length: N_ROOMS - 1}, (_, j) => (
         <line key={j} x1={BASE_X+(j+1)*ROOM_W} y1={bldgTop}
           x2={BASE_X+(j+1)*ROOM_W} y2={BASE_Y}
-          stroke="rgba(56,189,248,0.07)" strokeWidth="0.5"/>
+          stroke="rgba(102,122,154,0.14)" strokeWidth="0.5"/>
       ))}
 
       {/* Room windows */}
@@ -8593,27 +8601,27 @@ function Building3DSVG({
           const isHovered = hovered === key;
           const winX = BASE_X + ri * ROOM_W + 4;
           const winW = ROOM_W - 7;
-          let fill = 'rgba(8,15,26,0.75)';
+          let fill = '#f3f7fd';
           let gFilter: string | undefined;
-          let stroke = 'rgba(56,189,248,0.05)';
-          if (isMyRoom)            { fill = 'rgba(52,211,153,0.88)'; gFilter = 'url(#g-grn)'; stroke = 'rgba(52,211,153,0.6)'; }
-          else if (isHovered && res){ fill = isOnline ? 'rgba(56,189,248,0.97)' : 'rgba(38,60,90,0.9)'; stroke = 'rgba(56,189,248,0.5)'; }
-          else if (isOnline)        { fill = 'rgba(56,189,248,0.8)';  gFilter = 'url(#g-sky)';  stroke = 'rgba(56,189,248,0.4)'; }
-          else if (res)             { fill = 'rgba(22,38,60,0.8)';   stroke = 'rgba(56,189,248,0.12)'; }
+          let stroke = 'rgba(102,122,154,0.22)';
+          if (isMyRoom)            { fill = '#b8ead8'; gFilter = 'url(#g-grn)'; stroke = '#1f8f68'; }
+          else if (isHovered && res){ fill = isOnline ? '#dce7ff' : '#e7eef8'; stroke = '#3155d4'; }
+          else if (isOnline)        { fill = '#e8efff';  gFilter = 'url(#g-sky)';  stroke = '#3155d4'; }
+          else if (res)             { fill = '#e7edf6';   stroke = 'rgba(102,122,154,0.32)'; }
           return (
             <g key={key} onClick={() => onSelectRoom(res ?? null)}
               onMouseEnter={() => setHovered(key)} onMouseLeave={() => setHovered(null)}
               style={{ cursor: res ? 'pointer' : 'default' }}>
               {(isOnline || isMyRoom) && <rect x={winX-2} y={winY-2} width={winW+4} height={winH+4} rx="5"
-                fill={isMyRoom ? 'rgba(52,211,153,0.12)' : 'rgba(56,189,248,0.1)'} pointerEvents="none"/>}
+                fill={isMyRoom ? 'rgba(31,143,104,0.14)' : 'rgba(49,85,212,0.10)'} pointerEvents="none"/>}
               <rect x={winX} y={winY} width={winW} height={winH} rx="3"
                 fill={fill} stroke={stroke} strokeWidth="0.75" filter={gFilter}/>
               <rect x={winX+2} y={winY+2} width={winW*0.42} height={winH*0.4} rx="1.5"
-                fill="rgba(255,255,255,0.07)" pointerEvents="none"/>
+                fill="rgba(255,255,255,0.70)" pointerEvents="none"/>
               {res ? (
                 <>
                   <text x={winX+winW/2} y={winY+winH/2+2.5} textAnchor="middle"
-                    fill={isMyRoom ? '#064e3b' : isOnline ? '#0b2030' : 'rgba(125,211,252,0.55)'}
+                    fill={isMyRoom ? '#064e3b' : isOnline ? '#1f3aa3' : '#4b5f78'}
                     fontSize="7" fontWeight="700" pointerEvents="none">
                     {res.name.split(' ')[0].slice(0,6)}
                   </text>
@@ -8622,7 +8630,7 @@ function Building3DSVG({
                 </>
               ) : (
                 <text x={winX+winW/2} y={winY+winH/2+2.5} textAnchor="middle"
-                  fill="rgba(56,189,248,0.1)" fontSize="6.5" pointerEvents="none">{roomNum}</text>
+                  fill="rgba(75,95,120,0.40)" fontSize="6.5" pointerEvents="none">{roomNum}</text>
               )}
             </g>
           );
@@ -8631,27 +8639,25 @@ function Building3DSVG({
 
       {/* Roof */}
       <polygon points={`${tfFL[0]},${tfFL[1]} ${tfFR[0]},${tfFR[1]} ${tfBR[0]},${tfBR[1]} ${tfBL[0]},${tfBL[1]}`}
-        fill="url(#roof-grad)" stroke="rgba(56,189,248,0.22)" strokeWidth="0.75"/>
-      <line x1={tfFL[0]} y1={tfFL[1]} x2={tfFR[0]} y2={tfFR[1]} stroke="rgba(56,189,248,0.55)" strokeWidth="1.5"/>
-      <line x1={tfFR[0]} y1={tfFR[1]} x2={tfBR[0]} y2={tfBR[1]} stroke="rgba(56,189,248,0.35)" strokeWidth="1"/>
+        fill="url(#roof-grad)" stroke="rgba(49,85,212,0.22)" strokeWidth="0.75"/>
+      <line x1={tfFL[0]} y1={tfFL[1]} x2={tfFR[0]} y2={tfFR[1]} stroke="rgba(49,85,212,0.35)" strokeWidth="1.5"/>
+      <line x1={tfFR[0]} y1={tfFR[1]} x2={tfBR[0]} y2={tfBR[1]} stroke="rgba(49,85,212,0.28)" strokeWidth="1"/>
 
       {/* Floor numbers (left side) */}
       {Array.from({length: N_FLOORS}, (_, fi) => (
         <text key={fi} x={BASE_X-10} y={bldgTop + fi*FLOOR_H + FLOOR_H/2 + 3.5}
-          textAnchor="middle" fill="rgba(125,211,252,0.45)" fontSize="8" fontWeight="700">
+          textAnchor="middle" fill="rgba(75,95,120,0.58)" fontSize="8" fontWeight="700">
           {N_FLOORS - fi}
         </text>
       ))}
 
       {/* Block label + online count */}
       <text x={BASE_X+BLD_W/2} y={bldgTop-20} textAnchor="middle"
-        fill="#7dd3fc" fontSize="13" fontWeight="800" letterSpacing="4">BLOCK {block}</text>
+        fill="#1f3aa3" fontSize="13" fontWeight="800" letterSpacing="4">BLOCK {block}</text>
       <rect x={BASE_X+BLD_W/2-52} y={bldgTop-38} width={104} height={16} rx="8"
         fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.28)" strokeWidth="0.75"/>
-      <circle cx={BASE_X+BLD_W/2-36} cy={bldgTop-30} r={3.5} fill="#34d399">
-        <animate attributeName="opacity" values="1;0.3;1" dur="2s" repeatCount="indefinite"/>
-      </circle>
-      <text x={BASE_X+BLD_W/2-26} y={bldgTop-25.5} fill="#34d399" fontSize="9" fontWeight="600">
+      <circle cx={BASE_X+BLD_W/2-36} cy={bldgTop-30} r={3.5} fill="#1f8f68" />
+      <text x={BASE_X+BLD_W/2-26} y={bldgTop-25.5} fill="#1f8f68" fontSize="9" fontWeight="600">
         {onlineCount} online · {totalCount} residents
       </text>
 
@@ -8664,11 +8670,9 @@ function Building3DSVG({
         const cy = bldgTop + fi * FLOOR_H;
         return (
           <>
-            <circle cx={cx} cy={cy - 10} r={4} fill="#34d399">
-              <animate attributeName="r" values="4;6.5;4" dur="2.2s" repeatCount="indefinite"/>
-            </circle>
-            <line x1={cx} y1={cy-6} x2={cx} y2={cy+1} stroke="#34d399" strokeWidth="1.5" opacity="0.7"/>
-            <text x={cx} y={cy-17} textAnchor="middle" fill="#34d399" fontSize="8" fontWeight="800">You</text>
+            <circle cx={cx} cy={cy - 10} r={4} fill="#1f8f68" />
+            <line x1={cx} y1={cy-6} x2={cx} y2={cy+1} stroke="#1f8f68" strokeWidth="1.5" opacity="0.7"/>
+            <text x={cx} y={cy-17} textAnchor="middle" fill="#1f8f68" fontSize="8" fontWeight="800">You</text>
           </>
         );
       })()}
@@ -8708,11 +8712,11 @@ function HostelView({ profile, onProfileUpdate, userEmail = '', userName = 'Stud
       {showSetup && <HostelSetupModal onSave={saveRoom} onSkip={() => setShowSetup(false)} />}
       <div className="hostel-3d-layout">
 
-        {/* ── Left: 3D building ───────────────────────────────────────────── */}
+        {/* ── Left: hostel directory ──────────────────────────────────────── */}
         <div className="hostel-3d-left">
           <div className="hostel-tab-bar">
             <button className={activeTab==='building'?'active':''} onClick={() => setActiveTab('building')}>
-              <Building2 size={13}/> 3D Building
+              <Building2 size={13}/> Floor directory
             </button>
             <button className={activeTab==='campus'?'active':''} onClick={() => setActiveTab('campus')}>
               <MapPinned size={13}/> Campus Map
