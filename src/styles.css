@@ -846,7 +846,6 @@ textarea::placeholder { color: #718196; opacity: 1; }
   background: #fff;
   box-shadow: var(--shadow-sm);
 }
-.landing-value-card--lead { background: var(--surface-blue); }
 .landing-value-card--wide { grid-column: span 2; }
 .landing-value-card h3 { margin: 14px 0 8px; font-size: 1.08rem; }
 .landing-value-card p { margin: 0; }
