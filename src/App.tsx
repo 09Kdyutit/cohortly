@@ -2879,6 +2879,48 @@ function compatClass(matchStr: string): string {
   return 'compat-low';
 }
 
+function personYearLabel(person: Person): string {
+  return person.year ?? person.role.split('·')[0].trim();
+}
+
+function personPillarLabel(person: Person): string {
+  if (person.pillar) return person.pillar;
+  const roleParts = person.role.split('·').map((part) => part.trim()).filter(Boolean);
+  return roleParts[1] ?? person.tags[0] ?? 'SUTD';
+}
+
+function personCompactDetail(person: Person, maxLength = 88): string {
+  const sentenceMatch = person.detail.match(/^.*?(?:\.(?=\s|$)|$)/);
+  const firstSentence = sentenceMatch?.[0]?.replace(/\.$/, '').trim() || person.detail;
+  if (firstSentence.length <= maxLength) return firstSentence;
+  return `${firstSentence.slice(0, Math.max(0, maxLength - 3)).trim()}...`;
+}
+
+function personCardHighlight(person: Person): string {
+  if (person.helpStyle?.[0]) return person.helpStyle[0];
+  if (person.modules?.[0]) return person.modules[0];
+
+  const roleLower = person.role.toLowerCase();
+  const keyTags = person.tags
+    .filter((tag) => !roleLower.includes(tag.toLowerCase()))
+    .slice(0, 2);
+  const tagSummary = keyTags.length > 0 ? keyTags.join(' + ') : person.tags.slice(0, 2).join(' + ');
+  if (/incoming|freshmore/i.test(person.role)) return `Incoming ${personPillarLabel(person)} · ${tagSummary}`;
+  if (/exchange/i.test(person.role)) return `Exchange ${personPillarLabel(person).replace(' pillar', '')} · ${tagSummary}`;
+  return tagSummary || personCompactDetail(person, 64);
+}
+
+function personKeyHighlights(person: Person): string[] {
+  const highlights = [
+    person.helpStyle?.[0],
+    person.modules?.[0],
+    person.availability,
+    personCompactDetail(person),
+    ...person.tags,
+  ].filter((item): item is string => Boolean(item));
+  return Array.from(new Set(highlights)).slice(0, 3);
+}
+
 function PfpUpload({ pfpUrl, onChange }: { pfpUrl: string; onChange: (url: string) => void }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -5438,51 +5480,130 @@ function EventsView({
   );
 }
 
-function PersonProfileModal({ person, onClose, onMessage }: { person: Person; onClose: () => void; onMessage?: (name: string) => void }) {
+function PersonProfileModal({
+  person,
+  onClose,
+  onMessage,
+  onConnect,
+  isConnected,
+}: {
+  person: Person;
+  onClose: () => void;
+  onMessage?: (name: string) => void;
+  onConnect: () => void;
+  isConnected: boolean;
+}) {
+  const highlights = personKeyHighlights(person);
+
+  useEffect(() => {
+    const handleKey = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', handleKey);
+    return () => window.removeEventListener('keydown', handleKey);
+  }, [onClose]);
+
   return (
     <div className="person-modal-overlay" onClick={(e) => { if (e.target === e.currentTarget) onClose(); }}>
       <div className="person-modal">
-        <button className="person-modal-close" onClick={onClose}><X size={16} /></button>
-        <div className="person-modal-avatar-section">
-          <Avatar name={person.name} color={person.color} size={60} />
-          <div>
-            <h2>{person.name}</h2>
-            <span className="person-card-role-line" style={{ fontSize: '0.82rem' }}>{person.role}</span>
-            <span className={`compat-badge ${compatClass(person.match)}`}>{person.match} compatibility</span>
+        <button className="person-modal-close" onClick={onClose} aria-label="Close profile"><X size={16} /></button>
+
+        <div className="person-modal-hero">
+          <div className="person-modal-avatar-section">
+            <Avatar name={person.name} color={person.color} size={66} />
+            <div className="person-modal-title">
+              <span className="eyebrow">Student profile hub</span>
+              <h2>{person.name}</h2>
+              <span>{person.role}</span>
+            </div>
+          </div>
+          <span className={`compat-badge ${compatClass(person.match)}`}>{person.match} match</span>
+        </div>
+
+        <div className="person-modal-metrics">
+          <div className="person-modal-metric">
+            <strong>{person.match}</strong>
+            <span>Compatibility</span>
+          </div>
+          <div className="person-modal-metric">
+            <strong>{personYearLabel(person)}</strong>
+            <span>Student year</span>
+          </div>
+          <div className="person-modal-metric">
+            <strong>{personPillarLabel(person)}</strong>
+            <span>Pillar / group</span>
           </div>
         </div>
-        {person.bio && (
-          <div className="person-modal-section">
-            <strong>About</strong>
-            <p>{person.bio}</p>
-          </div>
-        )}
-        {person.modules && person.modules.length > 0 && (
-          <div className="person-modal-section">
-            <strong>Modules covered</strong>
-            <div className="tag-row">{person.modules.map((m) => <span key={m}>{m}</span>)}</div>
-          </div>
-        )}
-        {person.availability && (
-          <div className="person-modal-section">
-            <strong>Availability</strong>
-            <p>{person.availability}</p>
-          </div>
-        )}
-        {person.helpStyle && person.helpStyle.length > 0 && (
-          <div className="person-modal-section">
-            <strong>How they help</strong>
-            <div className="tag-row">{person.helpStyle.map((s) => <span key={s}>{s}</span>)}</div>
-          </div>
-        )}
-        <div className="person-modal-divider" />
-        <div className="person-modal-section">
-          <div className="tag-row">{person.tags.map((t) => <span key={t}>{t}</span>)}</div>
+
+        <div className="person-modal-grid">
+          <section className="person-modal-section person-modal-section--wide">
+            <div className="person-modal-section-title">
+              <BadgeCheck size={16} />
+              <strong>Key highlights</strong>
+            </div>
+            <div className="person-highlight-list">
+              {highlights.map((highlight) => (
+                <span key={highlight}>{highlight}</span>
+              ))}
+            </div>
+          </section>
+
+          <section className="person-modal-section person-modal-section--wide">
+            <div className="person-modal-section-title">
+              <CircleUserRound size={16} />
+              <strong>About</strong>
+            </div>
+            <p>{person.bio ?? person.detail}</p>
+          </section>
+
+          {person.modules && person.modules.length > 0 && (
+            <section className="person-modal-section">
+              <div className="person-modal-section-title">
+                <BookOpen size={16} />
+                <strong>Modules covered</strong>
+              </div>
+              <div className="tag-row">{person.modules.map((m) => <span key={m}>{m}</span>)}</div>
+            </section>
+          )}
+
+          {person.availability && (
+            <section className="person-modal-section">
+              <div className="person-modal-section-title">
+                <CalendarCheck size={16} />
+                <strong>Availability</strong>
+              </div>
+              <p>{person.availability}</p>
+            </section>
+          )}
+
+          {person.helpStyle && person.helpStyle.length > 0 && (
+            <section className="person-modal-section">
+              <div className="person-modal-section-title">
+                <Sparkles size={16} />
+                <strong>How they help</strong>
+              </div>
+              <div className="tag-row">{person.helpStyle.map((s) => <span key={s}>{s}</span>)}</div>
+            </section>
+          )}
+
+          <section className="person-modal-section">
+            <div className="person-modal-section-title">
+              <CircleDot size={16} />
+              <strong>Interests</strong>
+            </div>
+            <div className="tag-row">{person.tags.map((t) => <span key={t}>{t}</span>)}</div>
+          </section>
         </div>
+
         <div className="person-modal-actions">
-          <button className="primary-button">Request intro</button>
+          <button className={isConnected ? 'primary-button joined' : 'primary-button'} onClick={onConnect} disabled={isConnected}>
+            {isConnected ? <><Check size={14} /> Connected</> : 'Request intro'}
+          </button>
           <button className="secondary-button" onClick={() => { onMessage?.(person.name); onClose(); }}>
             <MessageCircle size={15} /> Message
+          </button>
+          <button className="ghost-button" onClick={onClose}>
+            Close
           </button>
         </div>
       </div>
@@ -5647,7 +5768,15 @@ function PeopleView({ userEmail, onMessage }: { userEmail?: string; onMessage?: 
 
   return (
     <>
-    {selectedPerson && <PersonProfileModal person={selectedPerson} onClose={() => setSelectedPerson(null)} onMessage={onMessage} />}
+    {selectedPerson && (
+      <PersonProfileModal
+        person={selectedPerson}
+        onClose={() => setSelectedPerson(null)}
+        onMessage={onMessage}
+        onConnect={() => connect(selectedPerson.name)}
+        isConnected={connected.has(selectedPerson.name)}
+      />
+    )}
     <div className="screen-stack">
       <div className="people-header">
         <div>
@@ -5679,34 +5808,43 @@ function PeopleView({ userEmail, onMessage }: { userEmail?: string; onMessage?: 
       </div>
 
       <div className="people-grid">
-        {filtered.map((person, index) => {
+        {filtered.map((person) => {
           const isConnected = connected.has(person.name);
-          const isFeatured = index === 0;
+          const cardHighlight = personCardHighlight(person);
           return (
             <article
-              className={isFeatured ? 'person-card person-card--featured' : 'person-card'}
+              className="person-card"
               key={person.name}
               onClick={() => setSelectedPerson(person)}
               style={{ cursor: 'pointer' }}
             >
               <div className="person-card-top">
                 <Avatar name={person.name} color={person.color} />
-                <span className={`compat-badge ${compatClass(person.match)}`}>{person.match}</span>
+                <span className={`compat-badge ${compatClass(person.match)}`}>{person.match} match</span>
               </div>
-              <h3>{person.name}</h3>
-              <span className="person-card-role-line">{person.role}</span>
-              <p>{person.detail}</p>
-              <div className="tag-row" style={{ marginTop: 4 }}>
-                {person.tags.map((tag) => <span key={tag}>{tag}</span>)}
+              <div className="person-card-main">
+                <h3>{person.name}</h3>
+                <span className="person-card-role-line">{person.role}</span>
               </div>
-              <button
-                className={isConnected ? 'primary-button wide joined' : 'secondary-button wide'}
-                style={{ marginTop: 8 }}
-                onClick={(e) => { e.stopPropagation(); connect(person.name); }}
-                disabled={isConnected}
-              >
-                {isConnected ? <><Check size={14} /> Connected</> : 'Request intro'}
-              </button>
+              <div className="person-card-highlight">
+                <Sparkles size={14} />
+                <span>{cardHighlight}</span>
+              </div>
+              <div className="tag-row person-card-tags">
+                {person.tags.slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}
+              </div>
+              <div className="person-card-actions">
+                <button
+                  className={isConnected ? 'primary-button joined' : 'secondary-button'}
+                  onClick={(e) => { e.stopPropagation(); connect(person.name); }}
+                  disabled={isConnected}
+                >
+                  {isConnected ? <><Check size={14} /> Connected</> : 'Request intro'}
+                </button>
+                <span className="person-card-open">
+                  Details <ArrowRight size={14} />
+                </span>
+              </div>
             </article>
           );
         })}
