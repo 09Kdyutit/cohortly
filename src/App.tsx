@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { ForwardRefExoticComponent, RefAttributes, SVGProps } from 'react';
 import { db, auth, microsoftProvider } from './firebase';
+import productPreview from './assets/cohortly-product-preview.png';
 import {
   collection, doc, getDoc, setDoc, onSnapshot,
   query, orderBy, writeBatch,
@@ -83,8 +84,8 @@ type LucideIcon = ForwardRefExoticComponent<
     RefAttributes<SVGSVGElement>
 >;
 
-type UserRole = 'student';
-type View = 'today' | 'launchpad' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'hostel' | 'privacy' | 'notifications';
+type UserRole = 'student' | 'mentor';
+type View = 'today' | 'launchpad' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'hostel' | 'mentor-home' | 'mentor-help' | 'privacy' | 'notifications';
 type InstitutionId = 'sutd';
 type BelongingEntry = { week: string; score: number; at: number };
 type InterventionStage = 'flagged' | 'contacted' | 're-measured' | 'resolved' | 'escalated';
@@ -117,7 +118,7 @@ type EventItem = {
   audience: string;
   meta: string;
   description: string;
-  tone: 'social' | 'study' | 'arrival' | 'sports' | 'culture';
+  tone: 'social' | 'study' | 'arrival' | 'sports' | 'culture' | 'academic';
 };
 
 type Person = {
@@ -163,6 +164,10 @@ type StudentProfile = {
   hostelBlock?: string;
   hostelFloor?: number;
   hostelRoom?: string;
+  mentorYear?: string;
+  mentorPillar?: string;
+  mentorModules?: string[];
+  mentorHelpStyle?: string[];
 };
 
 // ─── Notification model ───────────────────────────────────────────────────────
@@ -1833,7 +1838,7 @@ async function loadProfile(email: string): Promise<StudentProfile | null> {
         timeout,
       ]);
       if (snap && typeof (snap as { exists?: unknown }).exists === 'function' && (snap as { exists: () => boolean }).exists()) {
-        const data = (snap as { data: () => Omit<StudentProfile, 'pfpDataUrl'> }).data();
+        const data = (snap as unknown as { data: () => Omit<StudentProfile, 'pfpDataUrl'> }).data();
         return { ...data, pfpDataUrl: loadPfpLocal(email) };
       }
     } catch (e) {
@@ -1870,6 +1875,7 @@ function initials(name: string) {
 const toneNames: Record<EventItem['tone'], string> = {
   social: 'Social',
   study: 'Study',
+  academic: 'Academic',
   arrival: 'Arrival',
   sports: 'Sports',
   culture: 'Culture',
@@ -1949,7 +1955,12 @@ const SUTD_DOMAINS = ['sutd.edu.sg', 'mymail.sutd.edu.sg'];
 const STATIC_DEMO_CODE = '123456';
 
 function isStaticHostedDemo(): boolean {
-  return typeof window !== 'undefined' && (import.meta.env.PROD || window.location.hostname.endsWith('github.io'));
+  return typeof window !== 'undefined' && (
+    import.meta.env.PROD ||
+    window.location.hostname.endsWith('github.io') ||
+    window.location.hostname === 'localhost' ||
+    window.location.hostname === '127.0.0.1'
+  );
 }
 
 function emailIsSUTD(email: string): boolean {
@@ -2217,20 +2228,20 @@ function LandingScreen({
           <span className="landing-badge">SUTD</span>
         </div>
         <div className="landing-nav-right">
-          <span className="landing-live-pill">Live</span>
-          <span className="landing-join-count">812 students joined</span>
+          <span className="landing-live-pill">Verified access</span>
+          <span className="landing-join-count">Student, mentor, and staff demos</span>
         </div>
       </nav>
 
       <div className="landing-hero">
         <div className="landing-hero-left">
           <span className="landing-eyebrow-tag">
-            <Sparkles size={12} /> SUTD · Class of 2029
+            <Sparkles size={12} /> Verified SUTD community
           </span>
-          <h1>Your campus,<br /><em>before Day 1.</em></h1>
+          <h1>Meet your verified SUTD community before Day 1.</h1>
           <p>
-            Find classmates, get module help from verified seniors, and join events —
-            all before orientation week starts.
+            Find classmates, get module help from verified seniors, join small-group plans,
+            and settle into campus with fewer unknowns.
           </p>
 
           <div className="landing-trust-row">
@@ -2239,19 +2250,9 @@ function LandingScreen({
             <span className="landing-trust-chip"><GraduationCap size={13} /> Built for Freshmores</span>
           </div>
 
-          <div className="landing-stat-row">
-            <div className="landing-stat-block">
-              <strong>812</strong>
-              <span>students verified</span>
-            </div>
-            <div className="landing-stat-block">
-              <strong>91%</strong>
-              <span>questions answered</span>
-            </div>
-            <div className="landing-stat-block">
-              <strong>126</strong>
-              <span>events created</span>
-            </div>
+          <div className="landing-story-panel">
+            <strong>One calm place for the first weeks of university.</strong>
+            <span>Students see the next useful action, mentors see who needs help, and staff see privacy-safe support signals.</span>
           </div>
 
           <div className="sso-primary-block">
@@ -2274,80 +2275,36 @@ function LandingScreen({
               <span className="path-card-arrow"><ArrowRight size={18} /></span>
             </button>
 
-            <button className="path-card mentor-path" onClick={() => onSelectRole('student')}>
+            <button className="path-card mentor-path" onClick={() => onSelectRole('mentor')}>
               <div className="path-card-icon"><HeartHandshake size={20} /></div>
               <div className="path-card-text">
-                <strong>I'm a returning student</strong>
-                <span>Year 2 · Year 3 · Year 4</span>
+                <strong>I'm a senior mentor</strong>
+                <span>Year 2, 3 or 4 · answer module questions</span>
               </div>
               <span className="path-card-arrow"><ArrowRight size={18} /></span>
+            </button>
+          </div>
+
+          <div className="landing-demo-inline" aria-label="Open demo modes">
+            <span>Try a demo:</span>
+            <button className="demo-btn student-demo" onClick={() => onDemoLogin('student')}>
+              <GraduationCap size={14} /> Student
+            </button>
+            <button className="demo-btn mentor-demo" onClick={() => onDemoLogin('mentor')}>
+              <HeartHandshake size={14} /> Mentor
+            </button>
+            <button className="demo-btn admin-demo" onClick={onAdminDemo}>
+              <Building2 size={14} /> Admin
             </button>
           </div>
         </div>
 
         <div className="landing-hero-right">
-          <div className="preview-bento">
-            <div className="preview-chrome">
-              <span className="preview-chrome-dots"><i /><i /><i /></span>
-              <span className="preview-chrome-tab ct-active">Messages</span>
-              <span className="preview-chrome-tab">Events</span>
-              <span className="preview-chrome-tab">People</span>
-            </div>
-            <div className="preview-card">
-              <div className="preview-event">
-                <span className="preview-tone-dot social" />
-                <div className="preview-event-body">
-                  <strong>First Friday food crawl</strong>
-                  <span>Dover MRT → Ghim Moh · 7:30 PM</span>
-                </div>
-                <span className="preview-event-badge">42 going</span>
-              </div>
-            </div>
-
-            <div className="preview-people-row">
-              <div className="preview-person-card">
-                <div className="preview-person-top">
-                  <Avatar name="Aarav Menon" color="teal" />
-                  <span className="preview-match-badge">94%</span>
-                </div>
-                <span className="preview-person-name">Aarav Menon</span>
-                <span className="preview-person-role">Year 3 · ISTD</span>
-              </div>
-              <div className="preview-person-card">
-                <div className="preview-person-top">
-                  <Avatar name="Tan Mei Lin" color="coral" />
-                  <span className="preview-match-badge">91%</span>
-                </div>
-                <span className="preview-person-name">Tan Mei Lin</span>
-                <span className="preview-person-role">Freshmore · ASD</span>
-              </div>
-            </div>
-
-            <div className="preview-card">
-              <div className="preview-class">
-                <span className="preview-class-code">10.014</span>
-                <div className="preview-class-body">
-                  <strong>Computational Thinking</strong>
-                  <span>28 Q&amp;A this week · 4 seniors active</span>
-                </div>
-                <span className="preview-active-dot" />
-              </div>
-            </div>
-
-            <div className="preview-card preview-message-card">
-              <div className="preview-msg-row">
-                <Avatar name="Vanika" color="blue" />
-                <div className="preview-msg-bubble received">
-                  I'm nervous about the coding labs 😅
-                </div>
-              </div>
-              <div className="preview-msg-row sent">
-                <Avatar name="Aarav" color="teal" />
-                <div className="preview-msg-bubble sent">
-                  Drop by Building 5 Level 3 study area this week — happy to walk through it together.
-                </div>
-              </div>
-              <span className="preview-msg-meta">Matched on 10.014 · SUTD verified</span>
+          <div className="product-preview-frame">
+            <img src={productPreview} alt="Cohortly student Today view showing next actions, events, mentors, and module help" />
+            <div className="product-preview-caption">
+              <span>Real student workspace</span>
+              <strong>Today, people, events, classes, messages, hostel and support in one flow.</strong>
             </div>
           </div>
         </div>
@@ -2385,6 +2342,9 @@ function LandingScreen({
           <span>Try without verifying:</span>
           <button className="demo-btn student-demo" onClick={() => onDemoLogin('student')}>
             <GraduationCap size={14} /> Student
+          </button>
+          <button className="demo-btn mentor-demo" onClick={() => onDemoLogin('mentor')}>
+            <HeartHandshake size={14} /> Mentor
           </button>
 <button className="demo-btn admin-demo" onClick={onAdminDemo}>
             <Building2 size={14} /> Admin view
@@ -2481,8 +2441,8 @@ function AuthScreen({
         </div>
 
         <div className="auth-role-hint">
-          <GraduationCap size={16} />
-          Joining as a SUTD student
+          {role === 'mentor' ? <HeartHandshake size={16} /> : <GraduationCap size={16} />}
+          {role === 'mentor' ? 'Joining as a senior mentor' : 'Joining as a SUTD student'}
         </div>
 
         {step === 'identity' && (
@@ -2723,7 +2683,7 @@ function ProfileOnboarding({
 }) {
   const institution = institutionFor(user.institutionId, institutions);
   const [onboardStep, setOnboardStep] = useState<'role' | 'major' | 'profile'>(
-    initialRole === 'student' ? 'major' : 'role',
+    initialRole === 'student' ? 'major' : initialRole === 'mentor' ? 'profile' : 'role',
   );
   const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole ?? 'student');
   const [pillar, setPillar] = useState('');
@@ -2832,18 +2792,18 @@ function ProfileOnboarding({
             </button>
             <button
               className="role-card mentor-role-card"
-              onClick={() => { setSelectedRole('student'); setOnboardStep('major'); }}
+              onClick={() => { setSelectedRole('mentor'); setOnboardStep('profile'); }}
             >
               <div className="role-card-icon mentor"><Users size={28} /></div>
-              <strong>Returning Student</strong>
-              <em>Year 2, 3 or 4 · Already enrolled</em>
+              <strong>Senior Mentor</strong>
+              <em>Year 2, 3 or 4 · Help freshmores</em>
               <ul>
-                <li><Check size={14} /> Connect with your year group and pillar</li>
-                <li><Check size={14} /> Find people in your modules</li>
-                <li><Check size={14} /> Join events and hostel jios</li>
-                <li><Check size={14} /> Help newer students in the module rooms</li>
+                <li><Check size={14} /> See student questions requiring attention</li>
+                <li><Check size={14} /> Cover modules you already know well</li>
+                <li><Check size={14} /> Host study rooms and answer fast</li>
+                <li><Check size={14} /> Keep helping visible to staff</li>
               </ul>
-              <span className="role-card-cta">Set up your profile <ArrowRight size={15} /></span>
+              <span className="role-card-cta">Set up mentor profile <ArrowRight size={15} /></span>
             </button>
           </div>
         </div>
@@ -3899,21 +3859,33 @@ function NotificationPanel({
 
 // ─── Mobile Bottom Nav ────────────────────────────────────────────────────────
 
-function MobileBottomNav({ active, setActive }: { active: View; setActive: (v: View) => void }) {
+function MobileBottomNav({ active, setActive, role = 'student' }: { active: View; setActive: (v: View) => void; role?: UserRole }) {
   const [moreOpen, setMoreOpen] = useState(false);
-  const primaryItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
-    { id: 'today',    label: 'Today',   icon: Home },
-    { id: 'events',   label: 'Events',  icon: CalendarCheck },
-    { id: 'people',   label: 'People',  icon: Users },
-    { id: 'classes',  label: 'Classes', icon: BookOpen },
-    { id: 'messages', label: 'Chats',   icon: MessageCircle },
-  ];
-  const moreItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
-    { id: 'launchpad', label: 'Launchpad', icon: Rocket },
-    { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
-    { id: 'hostel',    label: 'Hostel',    icon: Building2 },
-    { id: 'kb',        label: 'Knowledge', icon: BookMarked },
-  ];
+  const primaryItems: Array<{ id: View; label: string; icon: LucideIcon }> = role === 'mentor'
+    ? [
+        { id: 'mentor-home', label: 'Home', icon: LayoutDashboard },
+        { id: 'mentor-help', label: 'Help', icon: HeartHandshake },
+        { id: 'people', label: 'Students', icon: Users },
+        { id: 'messages', label: 'Chats', icon: MessageCircle },
+      ]
+    : [
+        { id: 'today', label: 'Today', icon: Home },
+        { id: 'people', label: 'People', icon: Users },
+        { id: 'events', label: 'Events', icon: CalendarCheck },
+        { id: 'classes', label: 'Classes', icon: BookOpen },
+      ];
+  const moreItems: Array<{ id: View; label: string; icon: LucideIcon }> = role === 'mentor'
+    ? [
+        { id: 'events', label: 'Events', icon: CalendarCheck },
+        { id: 'classes', label: 'Classes', icon: BookOpen },
+      ]
+    : [
+        { id: 'messages', label: 'Messages', icon: MessageCircle },
+        { id: 'launchpad', label: 'Launchpad', icon: Rocket },
+        { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
+        { id: 'hostel', label: 'Hostel', icon: Building2 },
+        { id: 'kb', label: 'Resources', icon: BookMarked },
+      ];
   return (
     <>
       {moreOpen && (
@@ -3980,7 +3952,9 @@ function StudentApp({
   onProfileUpdate: (p: StudentProfile) => void;
   onResetDemo: () => void;
 }) {
-  const [activeView, setActiveView] = useState<View>('today');
+  const isMentor = profile.role === 'mentor';
+  const appNavItems = isMentor ? mentorNavItems : navItems;
+  const [activeView, setActiveView] = useState<View>(isMentor ? 'mentor-home' : 'today');
   const [dmTarget, setDmTarget] = useState<string | null>(null);
   const openDm = (name: string) => { setDmTarget(name); setActiveView('messages'); };
   const [showSearch, setShowSearch] = useState(false);
@@ -4068,12 +4042,13 @@ function StudentApp({
 
   // Realtime Firestore events listener — seeds starter events on first run
   useEffect(() => {
-    if (!db) return;
-    const q = query(collection(db, 'events'), orderBy('date'));
+    const firestore = db;
+    if (!firestore) return;
+    const q = query(collection(firestore, 'events'), orderBy('date'));
     const unsub = onSnapshot(q, (snap) => {
       if (snap.empty) {
-        const batch = writeBatch(db);
-        starterEvents.forEach((ev) => batch.set(doc(db, 'events', ev.id), ev));
+        const batch = writeBatch(firestore);
+        starterEvents.forEach((ev) => batch.set(doc(firestore, 'events', ev.id), ev));
         batch.commit();
       } else {
         setEvents(snap.docs.map((d) => d.data() as EventItem));
@@ -4120,7 +4095,7 @@ function StudentApp({
     <>
     {showSearch && <GlobalSearch onClose={() => setShowSearch(false)} onNavigate={(v) => { setActiveView(v); setShowSearch(false); }} />}
     {showNotifPanel && <NotificationPanel notifs={notifs} onClose={() => setShowNotifPanel(false)} onMarkAll={markAllRead} onMarkRead={markRead} onNavigate={(v) => { setActiveView(v); setShowNotifPanel(false); }} />}
-    <MobileBottomNav active={activeView} setActive={setActiveView} />
+    <MobileBottomNav active={activeView} setActive={setActiveView} role={profile.role} />
     {showPulse && <WeeklyPulseModal onClose={() => setShowPulse(false)} userEmail={user.email} />}
     {showEditProfile && (
       <EditProfileSheet
@@ -4145,16 +4120,16 @@ function StudentApp({
     )}
     <div className="student-shell">
       <aside className="app-rail">
-        <button className="brand-button" onClick={() => setActiveView('today')}>
+        <button className="brand-button" onClick={() => setActiveView(isMentor ? 'mentor-home' : 'today')}>
           <span className="brand-mark">C</span>
           <span>
             <strong>Cohortly</strong>
-            <small>{institution.shortName} · Student</small>
+            <small>{institution.shortName} · {isMentor ? 'Mentor' : 'Student'}</small>
           </span>
         </button>
 
         <nav className="rail-nav">
-          {navItems.map((item) => {
+          {appNavItems.map((item) => {
             const Icon = item.icon;
             return (
               <button
@@ -4201,8 +4176,8 @@ function StudentApp({
       <div className="student-main">
         <header className="app-topbar">
           <div>
-            <span className="eyebrow">Student-led campus network</span>
-            <h1>{activeView === 'privacy' ? 'Privacy & Data' : activeView === 'notifications' ? 'Notifications & Bots' : (navItems.find((item) => item.id === activeView)?.label ?? 'Cohortly')}</h1>
+            <span className="eyebrow">{isMentor ? 'Mentor service workspace' : 'Student-led campus network'}</span>
+            <h1>{activeView === 'privacy' ? 'Privacy & Data' : activeView === 'notifications' ? 'Notifications & Bots' : (appNavItems.find((item) => item.id === activeView)?.label ?? 'Cohortly')}</h1>
           </div>
           <div className="topbar-actions">
             <button className="topbar-search-btn" aria-label="Search (⌘K)" onClick={() => setShowSearch(true)}>
@@ -4277,7 +4252,15 @@ function StudentApp({
             </div>
           )}
           <div key={activeView} className="view-wrapper">
-            {activeView === 'today' && (
+            {activeView === 'mentor-home' && (
+              <MentorDashboardView
+                user={user}
+                profile={profile}
+                setActiveView={setActiveView}
+              />
+            )}
+            {activeView === 'mentor-help' && <MentorHelpView profile={profile} />}
+            {activeView === 'today' && !isMentor && (
               <TodayView
                 user={user}
                 profile={profile}
@@ -4287,15 +4270,15 @@ function StudentApp({
                 onOpenPulse={() => setShowPulse(true)}
               />
             )}
-            {activeView === 'launchpad' && (
+            {activeView === 'launchpad' && !isMentor && (
               <LaunchpadView
                 userEmail={user.email}
                 userName={user.name}
                 setActiveView={setActiveView}
               />
             )}
-            {activeView === 'fifth-row' && <FifthRowView />}
-            {activeView === 'kb' && <KnowledgeBaseView />}
+            {activeView === 'fifth-row' && !isMentor && <FifthRowView />}
+            {activeView === 'kb' && !isMentor && <KnowledgeBaseView />}
             {activeView === 'events' && (
               <EventsView
                 events={events}
@@ -4316,8 +4299,8 @@ function StudentApp({
             )}
             {activeView === 'people' && <PeopleView userEmail={user.email} onMessage={openDm} />}
             {activeView === 'classes' && <ClassesView enrolledClasses={profile.classes} onEnroll={(updated) => onProfileUpdate({ ...profile, classes: updated })} />}
-            {activeView === 'messages' && <MessagesView openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
-            {activeView === 'hostel' && <HostelView profile={profile} onProfileUpdate={onProfileUpdate} userEmail={user.email} userName={user.name} />}
+            {activeView === 'messages' && <MessagesView isMentor={isMentor} openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
+            {activeView === 'hostel' && !isMentor && <HostelView profile={profile} onProfileUpdate={onProfileUpdate} userEmail={user.email} userName={user.name} />}
             {activeView === 'privacy' && <PrivacySettingsView userEmail={user.email} userName={user.name} onBack={() => setActiveView('today')} onLogout={logout} />}
             {activeView === 'notifications' && <NotificationsView userEmail={user.email} />}
           </div>
@@ -5601,13 +5584,14 @@ function ClassesView({
 
   // Firestore Q&A listener — loads and seeds per-class threads
   useEffect(() => {
-    if (!db || !selectedCode) return;
-    const colRef = collection(db, 'qa', selectedCode, 'threads');
+    const firestore = db;
+    if (!firestore || !selectedCode) return;
+    const colRef = collection(firestore, 'qa', selectedCode, 'threads');
     const unsub = onSnapshot(
       query(colRef, orderBy('createdAt', 'desc')),
       (snap) => {
         if (snap.empty && seedQA[selectedCode]) {
-          const batch = writeBatch(db);
+          const batch = writeBatch(firestore);
           (seedQA[selectedCode] ?? []).forEach((t) =>
             batch.set(doc(colRef, t.id), { ...t, createdAt: new Date() }),
           );
@@ -6623,6 +6607,10 @@ function Avatar({ name, color, pfpUrl, size = 38 }: { name: string; color: strin
 function AdminApp({ onClose, onResetDemo }: { onClose: () => void; onResetDemo: () => void }) {
   const [view, setView] = useState<AdminView>('overview');
 
+  useEffect(() => {
+    window.scrollTo({ top: 0, left: 0 });
+  }, []);
+
   const adminNav: Array<{ id: AdminView; label: string; icon: LucideIcon; badge?: number }> = [
     { id: 'overview', label: 'Overview', icon: LayoutDashboard },
     { id: 'outcomes', label: 'Outcomes', icon: TrendingUp },
@@ -6768,10 +6756,10 @@ function AdminStudentTable({ students }: { students: typeof adminStudents }) {
 
 function AdminOverview() {
   return (
-    <div className="admin-overview">
-      <div className="admin-preview-banner">
-        <Zap size={16} />
-        Admin preview — this view is for SUTD Student Life staff. Track cohort adoption, class health, and student wellbeing signals in one place.
+      <div className="admin-overview">
+        <div className="admin-preview-banner">
+          <Zap size={16} />
+        Admin preview: this view is for SUTD Student Life staff. Track cohort adoption, class health, and student wellbeing signals in one place.
       </div>
 
       <div className="admin-health-card">
@@ -8686,7 +8674,7 @@ function HostelView({ profile, onProfileUpdate, userEmail = '', userName = 'Stud
   const [showSetup, setShowSetup]     = useState(!profile.hostelBlock);
   const [activeBlock, setActiveBlock] = useState(profile.hostelBlock ?? '1N');
   const [selectedRoom, setSelectedRoom] = useState<HostelResident | null>(null);
-  const [activeTab, setActiveTab]     = useState<'building'|'campus'|'jios'>('building');
+  const [activeTab, setActiveTab]     = useState<'building'|'campus'|'jios'>('jios');
   const [joinedJios, setJoinedJios]   = useState<Set<string>>(new Set());
   const [settlingHelpRequested, setSettlingHelpRequested] = useState(false);
 
@@ -8714,15 +8702,51 @@ function HostelView({ profile, onProfileUpdate, userEmail = '', userName = 'Stud
 
         {/* ── Left: hostel directory ──────────────────────────────────────── */}
         <div className="hostel-3d-left">
+          <section className="hostel-homebase-card">
+            <div>
+              <span className="eyebrow">Hostel home base</span>
+              <h2>{myBlock ? `Block ${myBlock}, Floor ${myFloor}` : 'Set up your room when you are ready'}</h2>
+              <p>
+                Coordinate meals, study rooms, packing questions, and settling-in support without exposing your exact room beyond verified residents.
+              </p>
+            </div>
+            <div className="hostel-homebase-actions">
+              <button className="primary-button" onClick={() => setActiveTab('jios')}>
+                <Users size={16} /> See nearby jios
+              </button>
+              <button className="secondary-button" onClick={() => setShowSetup(true)}>
+                <Home size={16} /> {myBlock ? 'Update room' : 'Set up room'}
+              </button>
+            </div>
+          </section>
+
+          <div className="hostel-practical-grid">
+            <article className="hostel-practical-card">
+              <span>Tonight</span>
+              <strong>Laundry room walk-through</strong>
+              <small>Block {activeBlock} lobby · 8:00 PM · seniors present</small>
+            </article>
+            <article className="hostel-practical-card">
+              <span>Packing</span>
+              <strong>Bring LAN cable, slippers, and drying rack</strong>
+              <small>Saved to Resources · useful before move-in weekend</small>
+            </article>
+            <article className="hostel-practical-card">
+              <span>Privacy</span>
+              <strong>Your room is hidden until you opt in</strong>
+              <small>People see block/floor proximity, not exact room by default</small>
+            </article>
+          </div>
+
           <div className="hostel-tab-bar">
+            <button className={activeTab==='jios'?'active':''} onClick={() => setActiveTab('jios')}>
+              <Users size={13}/> Nearby jios
+            </button>
             <button className={activeTab==='building'?'active':''} onClick={() => setActiveTab('building')}>
-              <Building2 size={13}/> Floor directory
+              <Building2 size={13}/> Directory
             </button>
             <button className={activeTab==='campus'?'active':''} onClick={() => setActiveTab('campus')}>
-              <MapPinned size={13}/> Campus Map
-            </button>
-            <button className={activeTab==='jios'?'active':''} onClick={() => setActiveTab('jios')}>
-              <Users size={13}/> Jios
+              <MapPinned size={13}/> Campus map
             </button>
             {myBlock && (
               <span className="hostel-room-tag">

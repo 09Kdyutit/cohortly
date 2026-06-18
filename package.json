@@ -9,7 +9,8 @@
     "build": "vite build",
     "start": "node server/production-server.mjs",
     "preview": "vite preview --host 0.0.0.0",
-    "lint": "vite build --emptyOutDir false"
+    "lint": "vite build --emptyOutDir false",
+    "visual:qa": "node scripts/visual-qa.mjs"
   },
   "dependencies": {
     "@fontsource-variable/manrope": "^5.2.8",
@@ -23,6 +24,7 @@
     "@types/react": "^18.3.18",
     "@types/react-dom": "^18.3.5",
     "@vitejs/plugin-react-swc": "^4.3.1",
+    "playwright": "^1.61.0",
     "typescript": "^5.7.2",
     "vite": "^6.0.7"
   }

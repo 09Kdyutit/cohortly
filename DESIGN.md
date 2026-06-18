@@ -7,9 +7,9 @@ Cohortly is a verified campus community product: warm enough for new students, c
 ## Brand System
 
 - Primary mark: cobalt `C` with a protected inner student/connection gesture, derived from the provided logo reference.
-- Assets: `src/assets/cohortly-mark.svg`, `src/assets/cohortly-mark-mono.svg`, `src/assets/cohortly-lockup.svg`, and `public/favicon.svg`.
-- Logo reference: `src/assets/cohortly-logo-reference.jpeg`.
-- Usage: the compact mark is used in the app rail, landing nav, loading/auth states, and favicon. The mark sits on a white rounded square with a restrained cobalt shadow.
+- Assets: `src/assets/cohortly-logo-original.png`, `src/assets/cohortly-logo-transparent.png`, `src/assets/cohortly-logo-mono.png`, `src/assets/cohortly-logo-reversed.png`, `src/assets/cohortly-app-icon-192.png`, `src/assets/cohortly-app-icon-512.png`, and `public/favicon.png`.
+- Logo reference: `src/assets/cohortly-logo-reference.jpeg` and the original user-provided WhatsApp image.
+- Usage: the compact production mark uses the cleaned transparent PNG in the app rail, landing nav, loading/auth states, favicon, and app icons. The mark sits on a white rounded square with a restrained cobalt shadow.
 
 ## Color
 
