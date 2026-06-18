@@ -1,9 +1,9 @@
-const CACHE = 'cohortly-v1';
+const CACHE = 'cohortly-v2';
 const OFFLINE_URL = './index.html';
 
 self.addEventListener('install', (e) => {
   e.waitUntil(
-    caches.open(CACHE).then((c) => c.addAll([OFFLINE_URL, './', './src/styles.css']))
+    caches.open(CACHE).then((c) => c.addAll([OFFLINE_URL, './']))
       .then(() => self.skipWaiting())
   );
 });
