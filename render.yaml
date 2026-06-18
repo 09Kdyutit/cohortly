@@ -11,10 +11,40 @@ services:
         value: production
       - key: COHORTLY_SESSION_SECRET
         generateValue: true
+      - key: COHORTLY_ALLOWED_ORIGIN
+        value: https://09kdyutit.github.io
+      - key: COHORTLY_NOTIFICATIONS_STORE
+        value: /var/data/notifications.json
+      - key: COHORTLY_NOTIFICATIONS_ADMIN_TOKEN
+        generateValue: true
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM
         value: "Cohortly <noreply@yourdomain.com>"
+      # Telegram notifications — add token from BotFather and run `npm run notifications:webhooks`
+      - key: TELEGRAM_BOT_TOKEN
+        sync: false
+      - key: TELEGRAM_BOT_USERNAME
+        value: CohortlyBot
+      - key: TELEGRAM_WEBHOOK_URL
+        value: https://cohortly.onrender.com/api/notifications/telegram/webhook
+      - key: TELEGRAM_WEBHOOK_SECRET
+        generateValue: true
+      # WhatsApp Cloud API notifications — fill these in from Meta Business settings
+      - key: WHATSAPP_CLOUD_TOKEN
+        sync: false
+      - key: WHATSAPP_PHONE_NUMBER_ID
+        sync: false
+      - key: WHATSAPP_VERIFY_TOKEN
+        sync: false
+      - key: WHATSAPP_APP_SECRET
+        sync: false
+      - key: WHATSAPP_BUSINESS_PHONE
+        sync: false
+      - key: WHATSAPP_GRAPH_VERSION
+        value: v23.0
+      - key: WHATSAPP_TEMPLATE_NAME
+        sync: false
       # Firebase — fill these in on the Render dashboard (needed at build time)
       - key: VITE_FIREBASE_API_KEY
         sync: false
@@ -32,3 +62,7 @@ services:
         sync: false
       - key: VITE_MICROSOFT_TENANT_ID
         sync: false
+    disk:
+      name: cohortly-notifications
+      mountPath: /var/data
+      sizeGB: 1

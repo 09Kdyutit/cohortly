@@ -1,3 +1,4 @@
+import { createHmac, timingSafeEqual } from 'node:crypto';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -16,16 +17,26 @@ const emptyStore = () => ({
 let store = emptyStore();
 let loaded = false;
 
-function readJson(req) {
+function readRawBody(req) {
   return new Promise((resolve, reject) => {
     let raw = '';
-    req.on('data', (chunk) => { raw += chunk; });
-    req.on('end', () => {
-      if (!raw) return resolve({});
-      try { resolve(JSON.parse(raw)); } catch (error) { reject(error); }
+    req.on('data', (chunk) => {
+      raw += chunk;
+      if (raw.length > 200_000) reject(new Error('Request body too large.'));
     });
+    req.on('end', () => resolve(raw));
     req.on('error', reject);
   });
+}
+
+async function readJson(req) {
+  const raw = await readRawBody(req);
+  if (!raw) return {};
+  try {
+    return JSON.parse(raw);
+  } catch {
+    throw new Error('Invalid JSON payload.');
+  }
 }
 
 function sendJson(res, status, payload) {
@@ -94,12 +105,28 @@ function telegramConfigured() {
   return Boolean(process.env.TELEGRAM_BOT_TOKEN);
 }
 
+function telegramWebhookSecured() {
+  return Boolean(process.env.TELEGRAM_WEBHOOK_SECRET);
+}
+
 function whatsappConfigured() {
   return Boolean(process.env.WHATSAPP_CLOUD_TOKEN && process.env.WHATSAPP_PHONE_NUMBER_ID);
 }
 
+function whatsappWebhookSecured() {
+  return Boolean(process.env.WHATSAPP_APP_SECRET);
+}
+
+function whatsappTemplateConfigured() {
+  return Boolean(process.env.WHATSAPP_TEMPLATE_NAME);
+}
+
+function adminDispatchConfigured() {
+  return Boolean(process.env.COHORTLY_NOTIFICATIONS_ADMIN_TOKEN);
+}
+
 function graphVersion() {
-  return process.env.WHATSAPP_GRAPH_VERSION || 'v20.0';
+  return process.env.WHATSAPP_GRAPH_VERSION || 'v23.0';
 }
 
 function botUsername() {
@@ -125,6 +152,43 @@ function safeProviderPayload(payload) {
   const clone = JSON.parse(JSON.stringify(payload));
   if (clone?.error?.fbtrace_id) delete clone.error.fbtrace_id;
   return clone;
+}
+
+function safeEqual(actual = '', expected = '') {
+  const actualBuffer = Buffer.from(String(actual));
+  const expectedBuffer = Buffer.from(String(expected));
+  return actualBuffer.length === expectedBuffer.length && timingSafeEqual(actualBuffer, expectedBuffer);
+}
+
+function verifyTelegramWebhook(req) {
+  const secret = process.env.TELEGRAM_WEBHOOK_SECRET;
+  if (!secret) return true;
+  return safeEqual(req.headers['x-telegram-bot-api-secret-token'] || '', secret);
+}
+
+function verifyWhatsAppSignature(req, rawBody) {
+  const secret = process.env.WHATSAPP_APP_SECRET;
+  if (!secret) return true;
+  const header = String(req.headers['x-hub-signature-256'] || '');
+  const expected = `sha256=${createHmac('sha256', secret).update(rawBody).digest('hex')}`;
+  return safeEqual(header, expected);
+}
+
+function requireDispatchToken(req, res) {
+  const token = process.env.COHORTLY_NOTIFICATIONS_ADMIN_TOKEN;
+  if (!token) {
+    sendJson(res, 503, {
+      ok: false,
+      message: 'Notification dispatch is disabled. Set COHORTLY_NOTIFICATIONS_ADMIN_TOKEN on the server.',
+    });
+    return false;
+  }
+  const header = String(req.headers.authorization || '').replace(/^Bearer\s+/i, '');
+  if (!safeEqual(header, token)) {
+    sendJson(res, 401, { ok: false, message: 'Invalid notification dispatch token.' });
+    return false;
+  }
+  return true;
 }
 
 async function sendTelegram(chatId, text) {
@@ -177,6 +241,7 @@ function statusForEmail(email) {
       configured: telegramConfigured(),
       botUsername: botUsername(),
       webhookUrlConfigured: Boolean(process.env.TELEGRAM_WEBHOOK_URL),
+      webhookSecretConfigured: telegramWebhookSecured(),
       connected: Boolean(prefs.telegramChatId && telegramConfigured()),
       username: prefs.telegramUsername ? `@${prefs.telegramUsername}` : '',
       chatRegistered: Boolean(prefs.telegramUsername && store.telegramChats[prefs.telegramUsername]),
@@ -185,10 +250,15 @@ function statusForEmail(email) {
       configured: whatsappConfigured(),
       phoneNumberIdConfigured: Boolean(process.env.WHATSAPP_PHONE_NUMBER_ID),
       verifyTokenConfigured: Boolean(process.env.WHATSAPP_VERIFY_TOKEN),
+      appSecretConfigured: whatsappWebhookSecured(),
+      templateConfigured: whatsappTemplateConfigured(),
       businessPhone: whatsappBusinessPhone(),
       connected: Boolean(prefs.whatsappNumber && prefs.whatsappVerifiedAt && whatsappConfigured()),
       optedIn: Boolean(prefs.whatsappNumber && store.whatsappOptIns[phoneForWhatsApp(prefs.whatsappNumber)]),
       phone: prefs.whatsappNumber || '',
+    },
+    dispatch: {
+      configured: adminDispatchConfigured(),
     },
     preferences: {
       onAnswer: prefs.onAnswer ?? true,
@@ -227,8 +297,7 @@ async function handleTelegramWebhook(req, res) {
   return sendJson(res, 200, { ok: true, registered: Boolean(username && chatId), linkedEmail: Boolean(emailFromStart) });
 }
 
-async function handleWhatsAppWebhook(req, res) {
-  const update = await readJson(req);
+async function handleWhatsAppWebhook(update, res) {
   const messages = update?.entry?.flatMap((entry) => entry?.changes || [])
     .flatMap((change) => change?.value?.messages || []) || [];
 
@@ -281,6 +350,9 @@ export function createNotificationsHandler() {
       }
 
       if (req.method === 'POST' && url.pathname === '/api/notifications/telegram/webhook') {
+        if (!verifyTelegramWebhook(req)) {
+          return sendJson(res, 401, { ok: false, message: 'Telegram webhook secret token mismatch.' });
+        }
         return await handleTelegramWebhook(req, res);
       }
 
@@ -298,7 +370,17 @@ export function createNotificationsHandler() {
       }
 
       if (req.method === 'POST' && url.pathname === '/api/notifications/whatsapp/webhook') {
-        return await handleWhatsAppWebhook(req, res);
+        const rawBody = await readRawBody(req);
+        if (!verifyWhatsAppSignature(req, rawBody)) {
+          return sendJson(res, 401, { ok: false, message: 'WhatsApp webhook signature mismatch.' });
+        }
+        let update = {};
+        try {
+          update = rawBody ? JSON.parse(rawBody) : {};
+        } catch {
+          return sendJson(res, 400, { ok: false, message: 'Invalid WhatsApp webhook JSON.' });
+        }
+        return await handleWhatsAppWebhook(update, res);
       }
 
       if (req.method === 'POST' && url.pathname === '/api/notifications/telegram/connect') {
@@ -405,6 +487,43 @@ export function createNotificationsHandler() {
         return sendJson(res, 200, { ok: true, status: statusForEmail(email) });
       }
 
+      if (req.method === 'POST' && url.pathname === '/api/notifications/dispatch') {
+        if (!requireDispatchToken(req, res)) return true;
+        const body = await readJson(req);
+        const email = normalizeEmail(body.email);
+        const prefs = store.notificationPrefs[email];
+        const type = String(body.type || 'system').trim().toLowerCase();
+        const text = String(body.text || body.message || '').trim();
+        if (!email || !text) return sendJson(res, 400, { ok: false, message: 'Email and text are required.' });
+        if (!prefs) return sendJson(res, 404, { ok: false, message: 'No notification preferences found for this email.' });
+
+        const disabled =
+          (type === 'answer' || type === 'qa_answer') && prefs.onAnswer === false
+            ? 'Q&A answer alerts are disabled for this user.'
+            : type === 'event' && prefs.onEvent === false
+              ? 'Event alerts are disabled for this user.'
+              : type === 'connection' && prefs.onConnection === false
+                ? 'Connection alerts are disabled for this user.'
+                : '';
+
+        if (disabled) return sendJson(res, 200, { ok: true, skipped: true, message: disabled });
+
+        const results = {};
+        if (prefs.telegramChatId && telegramConfigured()) results.telegram = await sendTelegram(prefs.telegramChatId, text);
+        if (prefs.whatsappNumber && prefs.whatsappVerifiedAt && whatsappConfigured()) results.whatsapp = await sendWhatsApp(prefs.whatsappNumber, text);
+
+        const resultValues = Object.values(results);
+        if (resultValues.length === 0) {
+          return sendJson(res, 409, { ok: false, message: 'No connected channels are ready for dispatch.', results });
+        }
+        const accepted = resultValues.every((result) => result.ok);
+        return sendJson(res, accepted ? 200 : 502, {
+          ok: accepted,
+          message: accepted ? 'Notification accepted by configured providers.' : 'One or more providers rejected the notification.',
+          results,
+        });
+      }
+
       if (req.method === 'POST' && url.pathname === '/api/notifications/test') {
         const body = await readJson(req);
         const email = normalizeEmail(body.email);
@@ -423,7 +542,7 @@ export function createNotificationsHandler() {
         const delivered = resultValues.every((result) => result.ok);
         return sendJson(res, delivered ? 200 : 502, {
           ok: delivered,
-          message: delivered ? 'Test alert delivered.' : 'One or more providers rejected the test alert.',
+          message: delivered ? 'Test alert accepted by configured providers.' : 'One or more providers rejected the test alert.',
           results,
         });
       }

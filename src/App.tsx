@@ -1832,6 +1832,7 @@ type NotificationStatus = {
     configured: boolean;
     botUsername: string;
     webhookUrlConfigured: boolean;
+    webhookSecretConfigured?: boolean;
     connected: boolean;
     username: string;
     chatRegistered: boolean;
@@ -1840,10 +1841,15 @@ type NotificationStatus = {
     configured: boolean;
     phoneNumberIdConfigured: boolean;
     verifyTokenConfigured: boolean;
+    appSecretConfigured?: boolean;
+    templateConfigured?: boolean;
     businessPhone: string;
     connected: boolean;
     optedIn: boolean;
     phone: string;
+  };
+  dispatch?: {
+    configured: boolean;
   };
   preferences: Pick<NotifPrefs, 'onAnswer' | 'onEvent' | 'onConnection'>;
 };
@@ -8426,21 +8432,25 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
     }
   };
 
-  const togglePref = (key: keyof NotifPrefs) => {
+  const togglePref = async (key: keyof NotifPrefs) => {
     const updated = { ...prefs, [key]: !prefs[key as keyof typeof prefs] } as NotifPrefs;
     setPrefs(updated);
     saveNotifPrefs(userEmail, updated);
-    setPrefSaved(true);
-    setTimeout(() => setPrefSaved(false), 1800);
-    notificationJson('/api/notifications/preferences', {
-      method: 'POST',
-      body: JSON.stringify({
-        email: userEmail,
-        onAnswer: updated.onAnswer,
-        onEvent: updated.onEvent,
-        onConnection: updated.onConnection,
-      }),
-    }).catch(() => undefined);
+    try {
+      await notificationJson('/api/notifications/preferences', {
+        method: 'POST',
+        body: JSON.stringify({
+          email: userEmail,
+          onAnswer: updated.onAnswer,
+          onEvent: updated.onEvent,
+          onConnection: updated.onConnection,
+        }),
+      });
+      setPrefSaved(true);
+      setTimeout(() => setPrefSaved(false), 1800);
+    } catch (error) {
+      setChannelNotice(error instanceof Error ? error.message : 'Preference update did not reach the notification server.');
+    }
   };
 
   const sendTestAlert = async () => {
@@ -8457,7 +8467,7 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
         .filter(([, result]) => result?.ok)
         .map(([name]) => name)
         .join(' + ');
-      setChannelNotice(delivered ? `Test alert delivered via ${delivered}.` : (payload.message || 'Test alert sent.'));
+      setChannelNotice(delivered ? `Test alert accepted by ${delivered}.` : (payload.message || 'Test alert sent.'));
       await refreshStatus();
     } catch (error) {
       setChannelNotice(error instanceof Error ? error.message : 'Test alert failed.');
@@ -8470,8 +8480,11 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
     { label: 'API server', ok: Boolean(status), detail: apiLabel },
     { label: 'Telegram token', ok: Boolean(status?.telegram.configured), detail: status?.telegram.configured ? `@${botName}` : 'Missing TELEGRAM_BOT_TOKEN' },
     { label: 'Telegram webhook', ok: Boolean(status?.telegram.webhookUrlConfigured), detail: status?.telegram.webhookUrlConfigured ? 'Webhook URL configured' : 'Set webhook to /api/notifications/telegram/webhook' },
+    { label: 'Telegram secret', ok: Boolean(status?.telegram.webhookSecretConfigured), detail: status?.telegram.webhookSecretConfigured ? 'Webhook secret token enforced' : 'Add TELEGRAM_WEBHOOK_SECRET' },
     { label: 'WhatsApp Cloud API', ok: Boolean(status?.whatsapp.configured), detail: status?.whatsapp.configured ? 'Token and phone number ID configured' : 'Missing WHATSAPP_CLOUD_TOKEN / WHATSAPP_PHONE_NUMBER_ID' },
     { label: 'WhatsApp webhook', ok: Boolean(status?.whatsapp.verifyTokenConfigured), detail: status?.whatsapp.verifyTokenConfigured ? 'Verify token configured' : 'Missing WHATSAPP_VERIFY_TOKEN' },
+    { label: 'WhatsApp signature', ok: Boolean(status?.whatsapp.appSecretConfigured), detail: status?.whatsapp.appSecretConfigured ? 'Meta signature validation enforced' : 'Add WHATSAPP_APP_SECRET' },
+    { label: 'Alert dispatch', ok: Boolean(status?.dispatch?.configured), detail: status?.dispatch?.configured ? 'Server dispatch token configured' : 'Add COHORTLY_NOTIFICATIONS_ADMIN_TOKEN' },
   ];
 
   return (
