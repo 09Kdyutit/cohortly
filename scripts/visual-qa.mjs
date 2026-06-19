@@ -21,7 +21,7 @@ const studentLabels = new Map([
   ['messages', 'Messages'],
   ['launchpad', 'Launchpad'],
   ['fifth-row', 'Fifth Row'],
-  ['hostel', 'Hostel'],
+  ['campus-life', 'Campus Life'],
   ['kb', 'Resources'],
 ]);
 
@@ -133,7 +133,7 @@ async function studentScreens(viewportName) {
   await loginDemo(page, 'student');
   await capture(page, `student-today-${viewportName}`);
 
-  for (const id of ['people', 'events', 'classes', 'messages', 'launchpad', 'fifth-row', 'hostel', 'kb']) {
+  for (const id of ['people', 'events', 'classes', 'messages', 'launchpad', 'fifth-row', 'campus-life', 'kb']) {
     await navigateStudent(page, id, viewportName);
     await capture(page, `student-${id}-${viewportName}`);
   }

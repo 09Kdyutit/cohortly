@@ -6,11 +6,11 @@ product
 
 ## Users
 
-Incoming SUTD students, returning students, and SUTD student-life staff use Cohortly around orientation and the first weeks of term. Freshmen need confidence before Day 1: who to meet, what to attend, where to get help, how to settle into hostel, and how to understand modules without feeling lost. Returning students need a calm way to find classmates by year, pillar, modules, Fifth Row interests, and hostel floor. Staff need credible operational visibility into adoption, readiness, wellbeing signals, events, classes, and support risks.
+Incoming SUTD students, returning students, and SUTD student-life staff use Cohortly around orientation and the first weeks of term. Freshmen need confidence before Day 1: who to meet, what to attend, where to get help, how to settle into campus life, and how to understand modules without feeling lost. Returning students need a calm way to find classmates by year, pillar, modules, Fifth Row interests, and broad campus-life context. Staff need credible operational visibility into adoption, readiness, wellbeing signals, events, classes, and support risks.
 
 ## Product Purpose
 
-Cohortly is a verified university community product for helping students find their cohort before arrival. It brings people, module help, events, Fifth Row culture, hostel life, onboarding tasks, messaging, and support signals into one trusted experience. Success means a student can understand what matters next in seconds, take one useful action, and feel that the university community is already waiting for them.
+Cohortly is a verified university community product for helping students find their cohort before arrival. It brings people, module help, events, Fifth Row culture, campus life, onboarding tasks, messaging, and support signals into one trusted experience. Success means a student can understand what matters next in seconds, take one useful action, and feel that the university community is already waiting for them.
 
 ## Brand Personality
 

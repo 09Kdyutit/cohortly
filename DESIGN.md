@@ -33,7 +33,7 @@ Cohortly is a verified campus community product: warm enough for new students, c
 - People: compatibility directory with explicit featured variants, search, and year/module filters.
 - Events: plan-first calendar plus selected-day detail rail.
 - Classes: module-room list plus Q&A workspace, styled controls, answer states, anonymous posting, and import flow.
-- Hostel: light floor directory and block selector, not a game-like dark simulation.
+- Campus Life: privacy-safe home base, first-week jios, move-in guidance, and broad student communities. No room directory, floor map, resident roster, or live occupancy UI.
 
 ## Components
 
@@ -51,4 +51,4 @@ Cohortly is a verified campus community product: warm enough for new students, c
 
 ## Verification
 
-Screenshots were captured for landing, Today, People, Events, Classes, Messages, Launchpad, Fifth Row, and Hostel on desktop and mobile into `.agents/shots/rebuild-final/`. Build and TypeScript checks are part of the delivery contract.
+Screenshots should be captured for landing, Today, People, Events, Classes, Messages, Launchpad, Fifth Row, and Campus Life on desktop and mobile before any public demo deploy. Build, TypeScript, and visual checks are part of the delivery contract.

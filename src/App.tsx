@@ -86,7 +86,7 @@ type LucideIcon = ForwardRefExoticComponent<
 
 type UserRole = 'student' | 'mentor';
 type DemoMode = 'freshman' | 'returning';
-type View = 'today' | 'launchpad' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'hostel' | 'mentor-home' | 'mentor-help' | 'privacy' | 'notifications';
+type View = 'today' | 'launchpad' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'campus-life' | 'mentor-home' | 'mentor-help' | 'privacy' | 'notifications';
 type InstitutionId = 'sutd';
 type BelongingEntry = { week: string; score: number; at: number };
 type InterventionStage = 'flagged' | 'contacted' | 're-measured' | 'resolved' | 'escalated';
@@ -162,9 +162,8 @@ type StudentProfile = {
   pillar?: string;
   term?: string;
   year?: string;
-  hostelBlock?: string;
-  hostelFloor?: number;
-  hostelRoom?: string;
+  campusHomeBase?: string;
+  campusCommunity?: string;
   mentorYear?: string;
   mentorPillar?: string;
   mentorModules?: string[];
@@ -204,7 +203,7 @@ const navItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
   { id: 'people', label: 'People', icon: Users },
   { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
   { id: 'classes', label: 'Classes', icon: BookOpen },
-  { id: 'hostel', label: 'Hostel', icon: Building2 },
+  { id: 'campus-life', label: 'Campus Life', icon: MapPinned },
   { id: 'kb', label: 'Knowledge Base', icon: BookMarked },
   { id: 'messages', label: 'Messages', icon: MessageCircle },
 ];
@@ -261,7 +260,7 @@ const starterEvents: EventItem[] = [
     location: 'Campus Bistro, Building 3',
     audience: 'Exchange students',
     meta: '23 going · housing Q&A',
-    description: 'Arrival questions, Hostel 2 / UniLodge tips, SIM cards, and how to navigate SUTD\'s campus before orientation week.',
+    description: 'Arrival questions, campus-life tips, SIM cards, and how to navigate SUTD before orientation week.',
     tone: 'arrival',
   },
   {
@@ -312,7 +311,7 @@ const people: Person[] = [
     color: 'teal',
       pillar: 'ISTD',
     year: 'Year 3',
-    bio: "Hey! I'm a Y3 ISTD student who loves helping freshmores crack computational thinking. I run weekly coding prep sessions for 10.014 and I'm always down to chat about anything SUTD — modules, hostels, or which hawker to hit before 8 AM.",
+    bio: "Hey! I'm a Y3 ISTD student who loves helping freshmores crack computational thinking. I run weekly coding prep sessions for 10.014 and I'm always down to chat about anything SUTD — modules, campus life, or which hawker to hit before 8 AM.",
     modules: ['10.014 Computational Thinking', '50.007 Machine Learning', '10.009 The Digital World'],
     availability: 'Weekday evenings 8–10 PM · Saturday mornings',
     helpStyle: ['Live coding walkthroughs', 'Drop-in prep sessions', 'Async Q&A'],
@@ -342,7 +341,7 @@ const people: Person[] = [
   {
     name: 'Noah Richter',
     role: 'Exchange · EPD pillar',
-    detail: 'Mapping hostel setup, maker-space bookings, and the Dover area for first-timers.',
+    detail: 'Mapping move-in basics, maker-space bookings, and the Dover area for first-timers.',
     match: '87%',
     tags: ['Exchange', 'FabLab', 'Robotics'],
     color: 'blue',
@@ -384,21 +383,21 @@ const launchpadPhases: LaunchpadPhase[] = [
       { id: 'offer', label: 'Accept your offer letter', desc: 'Via SUTD portal — confirm your place before the deadline.' },
       { id: 'cohortly', label: 'Join Cohortly', desc: "You're here — SUTD email verified." },
       { id: 'modules-review', label: 'Review Freshmore module list', desc: 'Term 1: 10.001, 10.002, 10.003, 10.009, 10.014. Know what\'s coming.' },
-      { id: 'hostel-app', label: 'Submit hostel application', desc: 'Compulsory for Terms 1–3 (AY2026). Apply via the SUTD housing portal.' },
+      { id: 'housing-app', label: 'Submit housing application', desc: 'Compulsory for Terms 1-3 (AY2026). Apply via the official SUTD housing portal.' },
       { id: 'visa', label: 'Settle visa / entry requirements', desc: 'International students — check with OSA for the correct pass type.' },
-      { id: 'packing', label: 'Pack essentials for hostel', desc: 'Bedsheet, laptop, NRIC/passport, Singpass setup. No kettle (fire hazard).' },
+      { id: 'packing', label: 'Pack move-in essentials', desc: 'Bedsheet, laptop, NRIC/passport, Singpass setup, toiletries, and approved appliances only.' },
       { id: 'connect3', label: 'Connect with 3 incoming Freshmores', desc: 'Find your first-week circle before you land.', link: { label: 'Go to People', view: 'people' } },
     ],
   },
   {
-    id: 'hostel', label: 'Move into hostel', icon: 'hostel',
+    id: 'campus-life', label: 'Move into campus life', icon: 'community',
     tasks: [
-      { id: 'move-in', label: 'Move into your room', desc: 'Collect keys from Housing. Bring your student ID photo printout.' },
+      { id: 'move-in', label: 'Complete official move-in', desc: 'Collect keys from Housing. Use official channels for exact room and facilities information.' },
       { id: 'wifi', label: 'Connect to campus Wi-Fi', desc: 'eduroam or SUTD-Student using your student account credentials.' },
       { id: 'card', label: 'Collect your student card', desc: 'Needed for labs, library, printing, and building access after hours.' },
-      { id: 'neighbour', label: 'Say hi to your floor neighbours', desc: 'Find people on your floor in People → Hostel tab.', link: { label: 'Find floor mates', view: 'people' } },
-      { id: 'meal-jio', label: 'Join a meal jio', desc: 'Breakfast, dinner, or supper run — check the Hostel tab.', link: { label: 'Find meal jio', view: 'people' } },
-      { id: 'hostel-brief', label: 'Attend hostel orientation briefing', desc: 'Quiet hours, facilities, emergency contacts, visitor policy.' },
+      { id: 'community', label: 'Join your campus home base', desc: 'Choose a broad residential or commuter community so people can include you without exposing exact rooms.', link: { label: 'Open Campus Life', view: 'campus-life' } },
+      { id: 'meal-jio', label: 'Join a first-week jio', desc: 'Breakfast, dinner, study, and sports plans are grouped by broad campus community.', link: { label: 'Find jios', view: 'campus-life' } },
+      { id: 'housing-brief', label: 'Read official housing guidance', desc: 'Quiet hours, facilities, emergency contacts, visitor policy, and safety rules belong in official housing guidance.' },
     ],
   },
   {
@@ -426,7 +425,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     tasks: [
       { id: 'p1', label: 'Connect with someone in your module', desc: 'Find a 10.014 or 10.009 coursemate.', link: { label: 'Find people', view: 'people' } },
       { id: 'p2', label: 'Connect with a returning student', desc: 'Someone who has done your exact modules already.', link: { label: 'Find returning students', view: 'people' } },
-      { id: 'p3', label: 'Connect with a floor neighbour', desc: 'From your hostel floor or block.' },
+      { id: 'p3', label: 'Connect with a campus-life buddy', desc: 'From your Freshmore, returning-student, commuter, or broad residential community.' },
       { id: 'p4', label: 'Connect with someone from a different pillar', desc: 'SUTD is cross-disciplinary — start meeting across pillars early.', link: { label: 'Browse everyone', view: 'people' } },
       { id: 'p5', label: 'Connect with an international student', desc: 'Exchange or international Freshmore — build a global circle.' },
     ],
@@ -727,7 +726,7 @@ const campusZones = [
 
 // ─── Knowledge Base data ─────────────────────────────────────────────────────
 
-type KBCategory = 'Academics' | 'Hostel & Housing' | 'Admin & Registration' | 'Fifth Row' | 'Wellbeing' | 'Technology';
+type KBCategory = 'Academics' | 'Campus Life & Housing' | 'Admin & Registration' | 'Fifth Row' | 'Wellbeing' | 'Technology';
 type KBArticle = { id: string; category: KBCategory; title: string; summary: string; content: string; views: number; helpful: number };
 
 const kbArticles: KBArticle[] = [
@@ -747,23 +746,23 @@ const kbArticles: KBArticle[] = [
     views: 290, helpful: 68,
   },
   {
-    id: 'kh1', category: 'Hostel & Housing', title: 'Freshmore housing — what to expect', summary: 'All Freshmores live on campus for Terms 1–3. Here\'s the full breakdown.',
-    content: `<p>SUTD has compulsory on-campus housing for Freshmore students (Terms 1–3, AY2026). You'll be assigned a room in one of the hostel blocks — most Freshmores are in Block 1N or 1S.</p><p><strong>Key things to know on arrival:</strong></p><ul><li>Bring your student ID photo (for key collection at Housing)</li><li>Bedsheet set, pillow, and toiletries — the room has a bed frame and desk</li><li>Wi-Fi: connect to eduroam using your SUTD student account</li><li>No kettles or high-wattage appliances (fire regulations)</li><li>Visitor policy: guests must sign in at security</li></ul><p>Quiet hours are 11 PM to 8 AM on weekdays. The student lounge on each floor is the social hub — it's where most floor friendships start.</p>`,
+    id: 'kh1', category: 'Campus Life & Housing', title: 'Freshmore housing — what to expect', summary: 'What to handle through official Housing and what Cohortly helps with socially.',
+    content: `<p>SUTD has compulsory on-campus housing for Freshmore students (Terms 1-3, AY2026). Your exact assignment, key collection, maintenance, and policy questions should always be handled through the official Housing channel.</p><p><strong>Key things to know on arrival:</strong></p><ul><li>Bring your student ID photo and required documents for key collection</li><li>Pack bedding, toiletries, chargers, laundry basics, and approved appliances only</li><li>Wi-Fi: connect to eduroam using your SUTD student account</li><li>Keep emergency, visitor, and quiet-hour rules from official Housing guidance bookmarked</li><li>Use Cohortly for broad student support: meal jios, campus walks, study circles, and returning-student advice</li></ul><p>Cohortly does not publish room, floor, resident, or live occupancy directories.</p>`,
     views: 621, helpful: 112,
   },
   {
-    id: 'kh2', category: 'Hostel & Housing', title: 'Hostel jios — how to find people to eat and study with', summary: 'The unofficial guide to meal jios, supper runs, and study groups in the hostel.',
-    content: `<p>A "jio" (Singapore slang for "invite") is how hostel life runs. Someone posts in the floor chat that they're heading to the canteen — anyone who wants to join, joins.</p><p>On Cohortly, the <strong>Hostel tab</strong> shows active jios near you: food runs, study sessions, sports bookings. You can join or post your own.</p><ul><li>Breakfast plans usually start from the housing lobby path toward the campus food areas</li><li>Late supper runs are grouped by block so nobody walks alone</li><li>Study sessions around Building 5 and FabLab are linked back to the relevant module room</li><li>Laundry and move-in questions stay inside verified block/floor groups</li></ul>`,
+    id: 'kh2', category: 'Campus Life & Housing', title: 'Campus jios — how to find people to eat and study with', summary: 'Meal jios, supper runs, study groups, and sports plans without room-level feeds.',
+    content: `<p>A "jio" (Singapore slang for "invite") is a simple plan people can join: breakfast, dinner, study prep, sports, or a campus walk.</p><p>On Cohortly, <strong>Campus Life</strong> shows active jios grouped by broad student context: Freshmore arrival, returning-student guides, commuter students, modules, and interests.</p><ul><li>Breakfast plans usually start from common campus meeting points</li><li>Late supper runs are public enough that nobody has to walk alone</li><li>Study sessions around Building 5 and FabLab link back to module rooms</li><li>Move-in questions stay in broad housing guidance and official Housing channels</li></ul>`,
     views: 407, helpful: 88,
   },
   {
-    id: 'kh3', category: 'Hostel & Housing', title: 'Campus housing map — blocks 51, 55, 57 and 59', summary: 'A practical guide to the public SUTD housing cluster map without guessing private room counts.',
-    content: `<p>The public SUTD campus maps show the academic buildings on the west side, the recreational centre and sports facilities on the south-east side, and the housing cluster around <strong>Blocks 51, 55, 57, and 59</strong> near Changi South Avenue 1.</p><p>Cohortly's map redraws that layout as an interactive campus atlas: Building 1, Building 2, Building 3 / One-Stop Centre, Building 5, the recreational centre, track, pool, pedestrian paths, and the housing blocks are positioned to match the provided reference maps.</p><ul><li><strong>Block 51</strong>: north-west housing marker on the public map</li><li><strong>Block 55</strong>: northern housing marker near the internal paths</li><li><strong>Block 57</strong>: central housing marker closest to the sports/recreation route</li><li><strong>Block 59</strong>: east housing marker; the public map notes management/security office at this block</li></ul><p>Exact internal room rosters and floor-by-floor occupancy are not published in public sources. Cohortly therefore treats room counts as <strong>Housing Office roster data</strong>: admins can import the official room list, and students only reveal their exact room after opting in.</p>`,
+    id: 'kh3', category: 'Campus Life & Housing', title: 'Getting around campus during move-in week', summary: 'A practical guide to finding core campus zones without turning housing into a room map.',
+    content: `<p>During move-in week, students mostly need to know four things: where official Housing support is, where to meet groups, where to study, and where to get food.</p><ul><li><strong>Official Housing support</strong>: use the move-in desk, Housing emails, or staff instructions for exact assignment questions</li><li><strong>Common meeting points</strong>: main campus walkways, Building 5 study areas, campus food areas, and sports facilities</li><li><strong>Academic anchors</strong>: Building 5 for library/computer labs, Building 2 for FabLab, and module rooms for class-specific plans</li><li><strong>Support</strong>: use Cohortly Campus Life if you want a peer check-in without posting publicly</li></ul><p>Cohortly intentionally avoids room maps, floor-by-floor occupancy, and resident lookup.</p>`,
     views: 684, helpful: 146,
   },
   {
-    id: 'kh4', category: 'Hostel & Housing', title: 'Setting up your room without exposing your privacy', summary: 'How room setup works, who can see what, and why exact room sharing is opt-in.',
-    content: `<p>Room setup is designed around proximity, not public exposure. Your block and floor help the app show floor jios, move-in help, laundry reminders, and nearby classmates. Your exact room is shown only inside verified hostel contexts.</p><ul><li><strong>Before opt-in</strong>: people can see that you are in the hostel community, but not your room</li><li><strong>After opt-in</strong>: verified floor/block residents can see room proximity and message you</li><li><strong>Admin view</strong>: staff see aggregate readiness and support signals, not casual room browsing</li><li><strong>Change anytime</strong>: update or remove your room from the Hostel tab</li></ul><p>If your assigned room changes during move-in, update it immediately so jios and floor contacts stay accurate.</p>`,
+    id: 'kh4', category: 'Campus Life & Housing', title: 'Privacy rules for campus-life matching', summary: 'What Cohortly will and will not collect for student housing-related support.',
+    content: `<p>Campus Life is designed around broad belonging, not exact location. Cohortly helps students find jios, guides, study circles, and support signals without asking them to publish a room.</p><ul><li><strong>Visible to students</strong>: year, pillar, modules, interests, broad home base, and opted-in plans</li><li><strong>Not shown</strong>: room number, floor number, live occupancy, floor maps, or resident rosters</li><li><strong>Admin view</strong>: staff see aggregate readiness and support signals, not casual location browsing</li><li><strong>Change anytime</strong>: update your broad home base from Campus Life or profile settings</li></ul><p>If your official room assignment changes, update it only through the official Housing channel.</p>`,
     views: 512, helpful: 119,
   },
   {
@@ -871,30 +870,30 @@ const COHORTLY_KB: AIEntry[] = [
     response: `For **10.014**, get this set up before Week 1:\n\n- **Python 3.11+**: download from python.org or install Anaconda (includes Jupyter, numpy, etc.)\n- **VS Code**: add the Python and Jupyter extensions from the Extensions marketplace\n- **Git**: create a GitHub account with your **SUTD email** — unlocks GitHub Education (free Copilot, private repos, etc.)\n- **Jupyter**: either via Anaconda or \`pip install jupyter\` in your terminal\n\nDon't stress if setup breaks — **lab machines in Building 5** have everything pre-installed and are open 24h with your student card. Post in the 10.014 module room if you're stuck.`,
     followUps: ['What is the 10.014 module?', 'Where is Building 5?', 'How do I use module rooms on Cohortly?'],
   },
-  // ── Hostel ───────────────────────────────────────────────────────────────
+  // ── Campus Life & Housing ────────────────────────────────────────────────
   {
-    id: 'hostel-overview',
+    id: 'housing-overview',
     triggers: ['hostel', 'housing', 'on campus housing', 'on-campus housing', 'dorm', 'dormitory', 'block 1n', 'block 1s', 'move in', 'move-in', 'compulsory housing', 'stay on campus'],
-    response: `**All Freshmores live on campus for Terms 1–3** — it's compulsory for AY2026. Most of you will be in **Block 1N or 1S**.\n\n**Move-in checklist:**\n- Bring a printed student ID photo for key collection at the Housing office\n- Pack: bedsheet set (single bed), pillow, towel, toiletries, laptop charger\n- **No kettles or high-wattage appliances** — fire regulations, strictly enforced\n- Wifi: connect to **eduroam** using your SUTD student account credentials\n- Visitor policy: all guests must sign in at the security desk\n\nThe **student lounge on each floor** is where most first-week friendships happen — go there.`,
-    followUps: ['What food is near the hostel?', 'How does the jio system work?', 'What are hostel quiet hours?'],
+    response: `**All Freshmores live on campus for Terms 1-3** — use official SUTD Housing channels for exact assignment, key collection, maintenance, and policy details.\n\n**Move-in checklist:**\n- Bring the documents requested by Housing for key collection\n- Pack bedding, pillow, towel, toiletries, laptop charger, and approved adapters\n- Follow official fire-safety guidance on appliances\n- Wifi: connect to **eduroam** using your SUTD student account credentials\n- Visitor and quiet-hour policies should be checked against official Housing guidance\n\nCohortly's **Campus Life** area helps with broad student support: jios, first-week plans, returning-student guides, and private settling-in help. It does not show rooms, floors, resident rosters, or live occupancy.`,
+    followUps: ['What food options are nearby?', 'How does the jio system work?', 'What is Campus Life?'],
   },
   {
-    id: 'hostel-rules',
+    id: 'housing-rules',
     triggers: ['quiet hours', 'hostel rules', 'hostel regulations', 'visitor policy', 'noise', 'overnight guests', 'hostel policy', 'kettle ban', 'no kettle'],
     response: `Key hostel rules to know:\n\n- **Quiet hours**: 11 PM – 8 AM weekdays, midnight – 9 AM weekends\n- **No kettles, rice cookers, or high-wattage appliances** — fire safety, room inspections do happen\n- **Overnight guests**: need to be registered at security and can only stay a limited number of nights\n- **Visitor sign-in**: all guests (including other SUTD students from different blocks) sign in at security\n- **Laundry**: book machines via the campus housing app — peak time is Sunday 2–6 PM, avoid it\n- Floor RAs (Resident Advisors) are your first point of contact for any issues`,
-    followUps: ['What food options are nearby?', 'How do I meet my floor neighbours?', 'Where is the student lounge?'],
+    followUps: ['What food options are nearby?', 'How do I meet people?', 'What is Campus Life?'],
   },
   {
-    id: 'hostel-food',
+    id: 'campus-food',
     triggers: ['food', 'eat', 'canteen', 'jio', 'lunch', 'dinner', 'breakfast', 'supper', 'makan', 'meal', 'hungry', 'koufu', 'bistro', 'mcdonald', 'pgp canteen', 'campus food', 'hawker'],
-    response: `Campus and nearby food options:\n\n- **Koufu at 1N**: opens 7:30 AM — good for quick breakfast before 8 AM lectures\n- **Campus Bistro**: opens 8 AM, more variety, slightly pricier\n- **Sports Complex Canteen**: lunch crowd, affordable\n- **PGP Canteen** (short walk): popular for dinner with more options\n- **McDonald's Dover**: 12 min walk, open 24h — the go-to for late supper runs\n- **Ghim Moh hawker centre**: 15 min walk or short Grab ride — legendary char kway teow and wonton mee\n\nCheck the **Hostel tab → active jios** for people heading out — no need to eat alone!`,
-    followUps: ['How do I join a meal jio?', 'What is the Hostel tab?', 'What are hostel quiet hours?'],
+    response: `Campus and nearby food options:\n\n- **Koufu at 1N**: opens 7:30 AM — good for quick breakfast before 8 AM lectures\n- **Campus Bistro**: opens 8 AM, more variety, slightly pricier\n- **Sports Complex Canteen**: lunch crowd, affordable\n- **PGP Canteen** (short walk): popular for dinner with more options\n- **McDonald's Dover**: 12 min walk, open 24h — the go-to for late supper runs\n- **Ghim Moh hawker centre**: 15 min walk or short Grab ride\n\nCheck **Campus Life → First-week jios** for people heading out. Plans are grouped by broad student context, not exact rooms.`,
+    followUps: ['How do I join a meal jio?', 'What is Campus Life?', 'What are quiet hours?'],
   },
   {
     id: 'jio-culture',
     triggers: ['jio', 'meal jio', 'supper run', 'join jio', 'post jio', 'food run', 'going to eat'],
-    response: `A **jio** is Singapore slang for "invite" — someone posts they're heading somewhere and anyone can join.\n\nOn Cohortly: go to **People → Hostel tab** to see active jios near you (meal runs, study sessions, sports). You can also join if someone on your floor posts in the floor chat.\n\n**How to post a jio:**\n- Go to People → Hostel → "Post a jio" (coming soon via Events)\n- Or just message your floor group — "heading to Koufu, anyone want to come?"\n\nJios are genuinely how most hostel friendships start. Say yes to the first few, even if you're tired.`,
-    followUps: ['What food is available near hostel?', 'How do I meet my floor neighbours?', 'How does the Hostel tab work?'],
+    response: `A **jio** is Singapore slang for "invite" — someone posts they're heading somewhere and anyone can join.\n\nOn Cohortly: go to **Campus Life** to see meal, study, sports, and campus-walk plans. The groups are broad: Freshmore arrival, returning-student guides, commuter students, modules, and interests.\n\n**How to join:**\n- Open Campus Life\n- Pick a jio that fits your timing\n- Tap Join jio\n\nJios are how many first-week friendships start. Say yes to the first few, even if you're tired.`,
+    followUps: ['What food is available near campus?', 'How do I meet people?', 'What is Campus Life?'],
   },
   // ── Admin & Registration ──────────────────────────────────────────────────
   {
@@ -994,19 +993,19 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'launchpad-feature',
     triggers: ['launchpad', 'freshmore launchpad', 'checklist', 'task checklist', '8 phases', 'phase', 'orientation tasks', 'launchpad tasks', 'what is launchpad'],
-    response: `The **Freshmore Launchpad** is your guided checklist for the whole first year — 8 phases, ~38 tasks.\n\n**The 8 phases:**\n1. Before I arrive (visa, modules review, hostel app)\n2. Move into hostel\n3. Week 0 orientation\n4. Week 1 academic setup\n5. Find my first 5 people\n6. Join one Fifth Row club\n7. Ask my first module question\n8. Ask my first returning-student question\n\nEach task has 4 states: **todo → doing → done → need-help**. Click the circle to cycle through. Progress is saved — your completions stay across sessions.\n\nFind it on the main nav as **Launchpad**.`,
+    response: `The **Freshmore Launchpad** is your guided checklist for the whole first year — 8 phases, ~38 tasks.\n\n**The 8 phases:**\n1. Before I arrive (visa, module review, housing application)\n2. Move into campus life\n3. Week 0 orientation\n4. Week 1 academic setup\n5. Find my first 5 people\n6. Join one Fifth Row club\n7. Ask my first module question\n8. Ask my first returning-student question\n\nEach task has 4 states: **todo → doing → done → need-help**. Click the circle to cycle through. Progress is saved — your completions stay across sessions.\n\nFind it on the main nav as **Launchpad**.`,
     followUps: ['How do I connect with people?', 'How do I join a Fifth Row club?', 'How do I ask a question?'],
   },
   {
     id: 'people-feature',
     triggers: ['people tab', 'people feature', 'connect with people', 'compatibility', 'compatibility score', 'how to connect', 'request intro', 'find students', 'network', 'people section'],
-    response: `The **People tab** is where you build your network on Cohortly.\n\n- **Everyone**: all verified SUTD students\n- **Year 1**: freshmen, exchange students, and new arrivals\n- **Year 2** and **Year 3+**: returning students grouped by year and pillar\n- **My Modules**: people in your same modules\n- **Hostel**: your floor and nearby — with meal jio cards\n\nEach card shows a **% compatibility score** based on shared interests, modules, and goals — the higher the %, the more you have in common.\n\nClick any card to see their full profile. Hit "Request intro" to connect.`,
-    followUps: ['How is compatibility calculated?', 'How do I find returning students?', 'What is the Hostel tab?'],
+    response: `The **People tab** is where you build your network on Cohortly.\n\n- **Everyone**: all verified SUTD students\n- **Year 1**: freshmen, exchange students, and new arrivals\n- **Year 2** and **Year 3+**: returning students grouped by year and pillar\n- **My Modules**: people in your same modules\n- **Campus Life**: broad home-base and interest context without room-level lookup\n\nEach card shows a **% compatibility score** based on shared interests, modules, and goals — the higher the %, the more you have in common.\n\nClick any card to see key highlights first, then open the full profile for detail. Hit "Request intro" to connect.`,
+    followUps: ['How is compatibility calculated?', 'How do I find returning students?', 'What is Campus Life?'],
   },
   {
     id: 'returning-students',
     triggers: ['mentor', 'senior mentor', 'find mentor', 'get a mentor', 'aarav', 'sara halim', 'wei jian', 'mentor profile', 'connect mentor', 'mentor match', 'senior student', 'returning student', 'year 2', 'year 3'],
-    response: `Cohortly no longer uses a separate mentor concept. Returning students are grouped by year, pillar, module, hostel block, and activity.\n\nUseful returning students right now:\n\n- **Aarav Menon** (Y3 ISTD): active in 10.014, 50.007, and 10.009; runs weekly coding prep sessions\n- **Sara Binte Halim** (Y2 DAI): active in 10.014 and 10.009; good for Python and data questions\n- **Wei Jian Lim** (Y3 ISTD): active in 10.009 and systems design; runs Sunday study crams\n\n**How to connect:** People → Year 2 or Year 3+ → click a card → Request intro. You can also post in the module room so everyone benefits from the answer.`,
+    response: `Cohortly no longer uses a separate mentor concept. Returning students are grouped by year, pillar, module, and activity.\n\nUseful returning students right now:\n\n- **Aarav Menon** (Y3 ISTD): active in 10.014, 50.007, and 10.009; runs weekly coding prep sessions\n- **Sara Binte Halim** (Y2 DAI): active in 10.014 and 10.009; good for Python and data questions\n- **Wei Jian Lim** (Y3 ISTD): active in 10.009 and systems design; runs Sunday study crams\n\n**How to connect:** People → Year 2 or Year 3+ → click a card → Request intro. You can also post in the module room so everyone benefits from the answer.`,
     followUps: ['How do I use module rooms?', 'What events are running?', 'How does compatibility work?'],
   },
   {
@@ -1030,21 +1029,21 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'knowledge-base',
     triggers: ['knowledge base', 'kb', 'articles', 'faq', 'help articles', 'how do i find info', 'information', 'guides'],
-    response: `The **Knowledge Base** (in the nav bar) is a searchable library of articles on everything SUTD:\n\n- **Academics**: how modules work, grading, Canvas, pillar selection\n- **Hostel & Housing**: move-in checklist, food guide, hostel rules\n- **Admin & Registration**: student card, SUTD email, international student passes\n- **Fifth Row**: what it is, how to join\n- **Wellbeing**: mental health resources, managing workload\n- **Technology**: Python setup, dev environment guide\n\nEach article is short and actionable. If you can't find what you need there, ask me!`,
+    response: `The **Knowledge Base** (in the nav bar) is a searchable library of articles on everything SUTD:\n\n- **Academics**: how modules work, grading, Canvas, pillar selection\n- **Campus Life & Housing**: move-in checklist, food guide, official housing guidance, privacy rules\n- **Admin & Registration**: student card, SUTD email, international student passes\n- **Fifth Row**: what it is, how to join\n- **Wellbeing**: mental health resources, managing workload\n- **Technology**: Python setup, dev environment guide\n\nEach article is short and actionable. If you can't find what you need there, ask me!`,
     followUps: ['What is the Launchpad?', 'How do I use module rooms?', 'What is Fifth Row?'],
   },
   {
-    id: 'hostel-tab',
-    triggers: ['hostel tab', 'people hostel', 'floor mates', 'floor neighbors', 'floor neighbours', 'block community', 'hostel community', 'find floor mate'],
-    response: `The **Hostel tab** is inside People on Cohortly.\n\nIt shows:\n- **Active jios near you**: meal runs, study sessions, and sports outings posted by people on your floor and block — tap "Join jio" to get in on them\n- **Your floor**: see who lives near you in Blocks 51, 55, 57, or 59, their year, pillar, and interests. Say hi directly from the app.\n\nIt's the quickest way to stop eating alone in Week 1. Check it morning and evening.`,
+    id: 'campus-life-feature',
+    triggers: ['campus life', 'campus life tab', 'housing community', 'block community', 'hostel community', 'find first week people'],
+    response: `**Campus Life** shows:\n\n- **First-week jios**: meal runs, study sessions, sports outings, and campus walks\n- **Broad communities**: Freshmore arrival, returning-student guides, commuter groups, and settling-in support\n- **Privacy-first matching**: no room numbers, no floor maps, no resident rosters, and no live occupancy\n\nOpen Campus Life when you want a plan or a low-pressure way to meet people before Week 1.`,
     followUps: ['How do jios work?', 'What food is nearby?', 'How do I meet people?'],
   },
   // ── Making Friends & Social ────────────────────────────────────────────────
   {
     id: 'making-friends',
     triggers: ['make friends', 'making friends', 'meet people', 'lonely', 'dont know anyone', 'no friends yet', 'how to meet', 'first week social', 'feel alone', 'social anxiety'],
-    response: `It's completely normal to feel this way in Week 1 — everyone does, even if they don't show it.\n\n**Highest-ROI things you can do:**\n- **Say yes to everything in Week 0**: orientation events, jios, floor hangouts — even if you're tired\n- **Go to the floor lounge**: don't hide in your room. The lounge is where floor friendships form\n- **Join a module study group**: instant shared struggle, instant bond\n- **Attend a Fifth Row trial** you're even slightly curious about\n- **Use the Cohortly People tab**: send a connection request to 3 people in your modules — low pressure, high upside\n\nThe first 2 weeks set the social trajectory. Be a little uncomfortable — it pays off.`,
-    followUps: ['What is Fifth Row?', 'How do I find a study group?', 'What is the Hostel tab?'],
+    response: `It's completely normal to feel this way in Week 1 — everyone does, even if they don't show it.\n\n**Highest-ROI things you can do:**\n- **Say yes to everything in Week 0**: orientation events, jios, campus walks — even if you're tired\n- **Join one Campus Life plan**: a meal, study circle, or sports booking gives you a natural first group\n- **Join a module study group**: instant shared struggle, instant bond\n- **Attend a Fifth Row trial** you're even slightly curious about\n- **Use the Cohortly People tab**: send a connection request to 3 people in your modules — low pressure, high upside\n\nThe first 2 weeks set the social trajectory. Be a little uncomfortable — it pays off.`,
+    followUps: ['What is Fifth Row?', 'How do I find a study group?', 'What is Campus Life?'],
   },
   {
     id: 'orientation-camp',
@@ -1056,7 +1055,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'about-cohortly',
     triggers: ['what is cohortly', 'about cohortly', 'how does cohortly work', 'cohortly features', 'what can cohortly do', 'explain cohortly', 'cohortly app'],
-    response: `**Cohortly** is SUTD's verified student network — built for Freshmore belonging and connection.\n\n**What it does:**\n- **Launchpad**: guided checklist from pre-arrival to first-week readiness\n- **People**: find and connect with freshmen, returning students, module mates, and floor neighbours\n- **Events**: discover and join campus events, create your own\n- **Fifth Row**: browse and track interest in 80+ clubs\n- **Classes**: Q&A module rooms where classmates and returning students answer questions\n- **Knowledge Base**: searchable articles on everything SUTD\n- **Messages**: 1-on-1 and group threads\n- **Weekly Pulse**: anonymous wellbeing check-in\n- **Cohortly AI** (that's me!): ask anything, any time\n\nAll profiles are verified against SUTD email — so everyone you see is real.`,
+    response: `**Cohortly** is SUTD's verified student network — built for Freshmore belonging and connection.\n\n**What it does:**\n- **Launchpad**: guided checklist from pre-arrival to first-week readiness\n- **People**: find and connect with freshmen, returning students, and module mates\n- **Campus Life**: first-week jios, broad student communities, housing guidance, and settling-in support\n- **Events**: discover and join campus events, create your own\n- **Fifth Row**: browse and track interest in 80+ clubs\n- **Classes**: Q&A module rooms where classmates and returning students answer questions\n- **Knowledge Base**: searchable articles on everything SUTD\n- **Messages**: 1-on-1 and group threads\n- **Weekly Pulse**: anonymous wellbeing check-in\n- **Cohortly AI** (that's me!): ask anything, any time\n\nAll profiles are verified against SUTD email — so everyone you see is real.`,
     followUps: ['How do I use the Launchpad?', 'How do I connect with people?', 'What module rooms are available?'],
   },
   {
@@ -1117,13 +1116,13 @@ const COHORTLY_KB: AIEntry[] = [
     followUps: ['How do I get to Clementi Mall?', 'What food is near campus?', 'How do I receive packages at hostel?'],
   },
   {
-    id: 'hostel-laundry',
+    id: 'housing-laundry',
     triggers: ['laundry', 'washing machine', 'dryer', 'wash clothes', 'iron', 'ironing board', 'laundry room', 'laundry cost', 'laundry booking', 'how to wash clothes', 'laundry machine'],
     response: `**Hostel laundry at SUTD:**\n\n- **Machines per floor**: typically 2–3 washers and dryers per block floor\n- **Cost**: ~S$1.50–2.00 per wash, ~S$1.00–1.50 per dry cycle — pay via the campus laundry app or coins\n- **Booking**: use the **SUTD Housing app** to see which machines are free in real time — especially useful during peak hours\n- **Peak time**: Sunday 2–6 PM is the worst. Thursday/Friday mornings are nearly empty.\n- **Cycle time**: Wash is ~35–40 min, dry is ~45–50 min. Don't leave clothes in machines — others will move them.\n- **Ironing**: Ironing boards are in the laundry room. Bring your own iron (low-wattage, under 1000W allowed)\n- **Hang-drying**: Clothes racks are available on the balcony area of each floor. Don't hang outside windows — against the rules.`,
     followUps: ['What are hostel rules?', 'What should I pack for hostel?', 'What are nearby amenities?'],
   },
   {
-    id: 'hostel-packages',
+    id: 'housing-packages',
     triggers: ['package', 'parcel', 'delivery', 'receive parcel', 'mail', 'courier', 'shopee', 'lazada', 'amazon', 'carousell', 'postal address', 'hostel address', 'where to receive package'],
     response: `**Receiving parcels and mail at SUTD hostel:**\n\n**Your hostel postal address:**\n8 Dover Road, [Block Number], Room [Room Number], Singapore 138682\n(e.g., "Block 1N, Room 04-12, 8 Dover Road, Singapore 138682")\n\n**How delivery works:**\n- Shopee/Lazada parcels: delivered to the **block mailroom or security counter** — you'll get an SMS or the delivery slip in your mailbox\n- For trackable couriers (DHL, FedEx, SingPost): check your tracking number; security desk holds oversized parcels\n- **Popstation lockers** at Clementi MRT (2 stops away) are great for Lazada/Shopee if you want control over pickup time\n\n**Mailbox**: Each room has a mailbox near the block lobby — check it weekly for letters from ICA, OSA, or banks.\n\n**Tip**: Set your default delivery address in Shopee/Lazada to the campus security address — they handle it well.`,
     followUps: ['What is the hostel address?', 'What nearby amenities are there?', 'What should I pack?'],
@@ -1275,13 +1274,13 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'chitchat-greeting',
     triggers: ['hello', 'hi', 'hey', 'hiya', 'yo', 'sup', 'good morning', 'good afternoon', 'good evening', 'howdy'],
-    response: `Hey! Welcome to Cohortly AI — I know everything about SUTD and this app.\n\nWhat can I help you with? You can ask about modules, hostel life, clubs, returning students, admin setup, or anything else about starting at SUTD.`,
-    followUps: ['Tell me about 10.014', 'What should I pack for hostel?', 'What is Fifth Row?', 'How does Pass/Fail work?'],
+    response: `Hey! Welcome to Cohortly AI — I know everything about SUTD and this app.\n\nWhat can I help you with? You can ask about modules, campus life, housing guidance, clubs, returning students, admin setup, or anything else about starting at SUTD.`,
+    followUps: ['Tell me about 10.014', 'What should I pack for move-in?', 'What is Fifth Row?', 'How does Pass/Fail work?'],
   },
   {
     id: 'chitchat-how-are-you',
     triggers: ['how are you', 'how are u', 'you ok', 'are you real', 'are you an ai', 'who made you', 'what are you'],
-    response: `I'm Cohortly AI — built right into this app to help SUTD Freshmores navigate university life. No external API, no data leaving your campus network.\n\nI know the SUTD curriculum, hostel, admin processes, Fifth Row clubs, Cohortly features, wellbeing resources, and more. What do you want to know?`,
+    response: `I'm Cohortly AI — built right into this app to help SUTD Freshmores navigate university life. No external API, no data leaving your campus network.\n\nI know the SUTD curriculum, campus life, official housing guidance, admin processes, Fifth Row clubs, Cohortly features, wellbeing resources, and more. What do you want to know?`,
     followUps: ['What is Cohortly?', 'What modules will I take?', 'What is Fifth Row?'],
   },
   {
@@ -1321,19 +1320,19 @@ const COHORTLY_KB: AIEntry[] = [
     followUps: ['How do I email a professor?', 'What happens if I fail a module?'],
   },
   {
-    id: 'hostel-room-details',
+    id: 'housing-room-guidance',
     triggers: ['hostel room size', 'room facilities', 'what is in my room', 'air conditioning', 'aircon hostel', 'ac hostel', 'hostel bed size', 'room amenities', 'hot water', 'shower hostel', 'how big is the room', 'bathroom shared', 'en suite'],
-    response: `**SUTD hostel room:**\n\n- ~12–15 sqm, single occupancy\n- Single bed (90×190cm) + mattress — **bring your own sheets**\n- Study desk + chair, wardrobe, bookshelf, mirror\n- **Individual air conditioning** (your own remote, any temperature you like)\n- Window, multiple power sockets (SG Type G 3-pin)\n- **Shared bathrooms**: ~1 per 3–4 students, hot water available\n- WiFi: eduroam, generally 50–100+ Mbps (slower 9–11 PM peak)`,
+    response: `For exact room dimensions, furnishing, air-conditioning, bathroom, and maintenance details, use official SUTD Housing guidance or your assignment email. Cohortly intentionally does not maintain a room database.\n\nWhat Cohortly can help with:\n- Move-in checklist and packing reminders\n- Campus Life jios so you can meet people early\n- Returning-student tips on what to bring\n- Private support if settling in feels difficult`,
     followUps: ['What should I pack?', 'What are hostel rules?', 'How does laundry work?'],
   },
   {
-    id: 'hostel-room-change',
+    id: 'housing-room-change',
     triggers: ['room change', 'change room', 'swap room', 'different room', 'hostel room issue', 'room problem', 'hostel maintenance', 'aircon not working', 'repair hostel', 'pest', 'bedbugs', 'cockroach', 'ants hostel'],
     response: `**Hostel room changes and maintenance:**\n\n**Room change**: Submit via the SUTD Housing portal or walk to the Housing office (Building 1). Changes are subject to availability — valid reasons (noise, health, defects) are required.\n\n**Maintenance**: Log via the campus e-Service portal or email housing@sutd.edu.sg with a photo. Response: 1–3 days for non-urgent; same day for AC or water issues.\n\n**Pests**: Report to Housing immediately — pest control arrives within 24–48h. Don't handle it yourself.`,
     followUps: ['Who is my RA?', 'What are hostel rules?'],
   },
   {
-    id: 'hostel-smoking-alcohol',
+    id: 'housing-smoking-alcohol',
     triggers: ['smoking', 'cigarette', 'vape', 'where to smoke', 'smoking area', 'can i smoke', 'alcohol hostel', 'drinking hostel', 'can i drink', 'alcohol rules', 'alcohol on campus', 'drugs sutd'],
     response: `**Smoking and alcohol at SUTD:**\n\n**Smoking**: Prohibited in all campus buildings and hostels including vaping. Designated outdoor smoking zones exist — marked areas near campus perimeter.\n\n**Alcohol**: Permitted in hostel rooms for students 18+ (Singapore's legal age). Not allowed in common areas. Being drunk and disruptive is a disciplinary matter.\n\n**Drugs**: Zero tolerance. Singapore has mandatory minimum sentences for drug offences. Non-negotiable.`,
     followUps: ['What are hostel rules?', 'What are quiet hours?'],
@@ -1347,7 +1346,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'telegram-groups',
     triggers: ['telegram group', 'whatsapp group', 'discord sutd', 'sutd telegram', 'student group chat', 'freshmore group', 'where to find group chat', 'sutd reddit', 'sutd social media', 'how to join group'],
-    response: `**SUTD student communication:**\n\n**Official**: Canvas announcements + SUTD email for all formal comms.\n\n**Student-run (you'll be added by peers):**\n- **Telegram**: Freshmore cohort group — OGLs share the link during Week 0. Module-specific groups and hostel block/floor groups also on Telegram.\n- **WhatsApp**: Floor and hostel block groups\n- **Instagram**: @sutd_sg official, plus club accounts\n- **Reddit**: r/SUTD — small but candid for real opinions\n\n**Finding groups**: Your OGL adds you to the main cohort group during orientation. Module groups appear in the first lecture — just ask classmates.`,
+    response: `**SUTD student communication:**\n\n**Official**: Canvas announcements + SUTD email for all formal comms.\n\n**Student-run (you'll be added by peers):**\n- **Telegram**: Freshmore cohort group — OGLs share the link during Week 0. Module-specific groups and class groups also on Telegram.\n- **WhatsApp**: small-group event, project, and friend-circle chats\n- **Instagram**: @sutd_sg official, plus club accounts\n- **Reddit**: r/SUTD — small but candid for real opinions\n\n**Finding groups**: Your OGL adds you to the main cohort group during orientation. Module groups appear in the first lecture — just ask classmates.`,
     followUps: ['What is the orientation camp?', 'How do I make friends?'],
   },
   {
@@ -1453,21 +1452,21 @@ const COHORTLY_KB: AIEntry[] = [
     followUps: ['How do I prepare for exams?', 'What are study spots?', 'What is the academic calendar?'],
   },
   {
-    id: 'hostel-guest-policy',
+    id: 'housing-guest-policy',
     triggers: ['can friends visit', 'hostel guest', 'overnight guest', 'visitor policy', 'can i have a guest', 'can family visit hostel', 'overnight stay friend', 'bring someone to hostel', 'guest in room', 'opposite gender guest', 'visitor rules'],
     response: `**Hostel guest policy:**\n\n**Daytime visitors**: Friends and family can visit campus and common areas. Visitors register at the security desk and get a visitor pass.\n\n**Hostel rooms**: Guests are generally permitted during daytime. **Overnight stays by non-residents are not permitted** as a general rule — check the current Housing handbook or ask your RA for exact current rules.\n\n**Family visits**: Visitors can eat at Koufu/Campus Bistro freely. If family is coming from abroad for orientation week, OSA runs a family orientation programme.\n\n**RA and floor norms**: Your RA briefs you on practical norms for your specific floor.`,
     followUps: ['What are hostel rules?', 'What are quiet hours?', 'Who is my RA?'],
   },
   {
-    id: 'hostel-cooking',
+    id: 'housing-cooking',
     triggers: ['can i cook', 'cooking hostel', 'hostel kitchen', 'cook in room', 'microwave hostel', 'kettle hostel', 'rice cooker hostel', 'communal kitchen', 'hostel pantry', 'cooking facilities', 'make food hostel', 'electric appliances hostel', 'can i bring rice cooker'],
     response: `**Cooking in the SUTD hostel:**\n\n**What's available**: Communal pantry on each floor with a microwave, electric kettle, and sink. Hot water dispenser for instant noodles and oats.\n\n**Allowed in your room**: Small electric kettle (check with Housing). Standard electronics.\n\n**NOT allowed in rooms**: Rice cookers, hot plates, induction cookers, toasters — fire risk. Use the communal pantry for these.\n\n**Common habits**: Cup noodles/oats with the floor kettle, reheating takeaway in the communal microwave, simple cooking (eggs, pasta) in the pantry.\n\n**Grocery runs**: FairPrice at Clementi Mall (2 MRT stops), Sheng Siong near Clementi (cheaper), Giant at Clementi — all 15–20 min from campus.`,
     followUps: ['What food is on campus?', 'Where can I buy groceries?', 'What are hostel rules?'],
   },
   {
-    id: 'hostel-move-in',
+    id: 'housing-move-in',
     triggers: ['move in day', 'move in tips', 'first day hostel', 'check in hostel', 'hostel check in', 'moving into hostel', 'arrival day', 'key collection', 'room key', 'how to move in', 'first day sutd', 'what to do when you arrive'],
-    response: `**Hostel move-in process:**\n\n**Arrival day:**\n1. Go to Housing office (Building 1, Level 2) or the designated move-in desk to collect your room key card\n2. Bring: student acceptance letter, passport/IC, any documents from your pre-arrival Housing email\n3. Sign hostel agreement form\n4. Key card = room access + hostel lifts and common areas\n\n**Practical tips:**\n- Use the goods lift (freight lift) for large luggage — ask security where it is\n- Room has mattress + pillow only — bring sheets, towels, toiletries\n- Meet your RA and floor neighbours on Day 1 — this sets the tone for the year\n\n**International students**: Student's Pass collection appointment coordinated by OSA within your first 2 weeks — attend when called.`,
+    response: `**Move-in process:**\n\n**Arrival day:**\n1. Follow the official Housing email for where to collect keys and what documents to bring\n2. Bring: student acceptance letter, passport/IC, and any documents requested by Housing\n3. Sign required housing forms through official channels\n4. Use official staff guidance for access-card, maintenance, safety, and visitor-policy questions\n\n**Practical tips:**\n- Pack bedding, towels, toiletries, charger, approved adapters, and laundry basics\n- Ask staff where to move large luggage safely\n- Join a Campus Life jio or campus walk on Day 1 so you are not settling in alone\n\n**International students**: Student's Pass collection appointment is coordinated by OSA within your first 2 weeks — attend when called.`,
     followUps: ['What should I pack?', 'Who is my RA?', 'What happens during orientation?'],
   },
   {
@@ -1495,7 +1494,7 @@ const COHORTLY_KB: AIEntry[] = [
     followUps: ['What is UROP?', 'What are research institutes?', 'What are career options after SUTD?'],
   },
   {
-    id: 'hostel-checkout',
+    id: 'housing-checkout',
     triggers: ['hostel checkout', 'check out hostel', 'vacate room', 'leave hostel', 'end of year hostel', 'room inspection', 'hostel room inspection', 'hostel deposit', 'deposit return', 'hostel move out', 'clear room', 'checkout process'],
     response: `**Hostel checkout / room inspection:**\n\n**Process:**\n1. Clear all belongings from the room\n2. Return any borrowed items\n3. Clean to a reasonable standard — wipe desk, take out rubbish\n4. Return room key/access card to Housing office\n5. Housing officer inspects for damage\n\n**Damage charges:**\n- Normal wear and tear: no charge\n- Damage beyond normal (wall damage, broken furniture, stains): deducted from your hostel deposit\n\n**Hostel deposit**: Paid at start of Year 1, refunded after checkout inspection if room is in good condition.\n\n**If returning next term**: Your room stays yours — no checkout needed.`,
     followUps: ['What is the hostel deposit?', 'How much does housing cost?'],
@@ -1704,7 +1703,7 @@ type EventApproval = { id: string; title: string; host: string; date: string; ti
 const initialPendingEvents: EventApproval[] = [
   { id: 'pa1', title: 'Late-night bouldering session @ Campus Wall', host: 'Sofia (1N-09)', date: '2026-09-12', time: '10:30 PM', audience: 'All students · Sports', tone: 'sports', status: 'pending' },
   { id: 'pa2', title: 'ASD Freshmore design studio warmup', host: 'Marcus (Y3 ASD)', date: '2026-09-10', time: '2:00 PM', audience: 'ASD students · all welcome', tone: 'academic', status: 'pending' },
-  { id: 'pa3', title: 'Supper run — Ghim Moh hawker', host: 'Jerome (1N-06)', date: '2026-09-09', time: '9:45 PM', audience: 'Block 1N hostel residents', tone: 'social', status: 'approved' },
+  { id: 'pa3', title: 'Supper run — Ghim Moh hawker', host: 'Jerome · Freshmore circle', date: '2026-09-09', time: '9:45 PM', audience: 'Freshmore campus-life community', tone: 'social', status: 'approved' },
   { id: 'pa4', title: '10.014 exam prep marathon', host: 'Aarav (Y3 ISTD)', date: '2026-09-11', time: '7:00 PM', audience: 'All Freshmores · 10.014', tone: 'academic', status: 'approved' },
   { id: 'pa5', title: 'Minecraft server launch party', host: 'Anonymous', date: '2026-09-13', time: '11:00 PM', audience: 'Gamers', tone: 'social', status: 'rejected' },
 ];
@@ -1756,13 +1755,12 @@ function getDemoProfile(mode: DemoMode): StudentProfile {
       interests: ['Startups & iCube', 'Robotics', 'Study groups'],
       goals: ['Find project teammates', 'Share module notes', 'Join a returning-student circle'],
       availability: 'Weekday evenings',
-      homeBase: 'Block 57 / ISTD pillar',
+      homeBase: 'Returning student home base',
       intro: 'Returning ISTD student looking for project teammates, class groups, and useful ways to help incoming students settle in.',
       pillar: 'ISTD',
       year: 'Year 3',
-      hostelBlock: '57',
-      hostelFloor: 6,
-      hostelRoom: '09',
+      campusHomeBase: 'Returning student home base',
+      campusCommunity: 'Year 3 ISTD / project circles',
     };
   }
   return {
@@ -1771,13 +1769,12 @@ function getDemoProfile(mode: DemoMode): StudentProfile {
     interests: ['Startups & iCube', 'Badminton', 'Food & Cafes'],
     goals: ['Find my first-week circle', 'Get module advice from returning students'],
     availability: 'Weekday evenings',
-    homeBase: 'Freshmore housing / East Coast',
+    homeBase: 'Freshmore campus-life community',
     intro: 'New to SUTD — looking for low-pressure events, coding help, and startup friends.',
     pillar: 'Freshmore',
     year: 'Year 1',
-    hostelBlock: '55',
-    hostelFloor: 4,
-    hostelRoom: '12',
+    campusHomeBase: 'Freshmore campus-life community',
+    campusCommunity: 'Freshmore arrival circle',
   };
 }
 
@@ -2517,7 +2514,7 @@ function LandingHero3D() {
     return () => {
       if (frame) window.cancelAnimationFrame(frame);
       observer.disconnect();
-      scene.traverse((object) => {
+      scene.traverse((object: THREE.Object3D) => {
         const mesh = object as THREE.Mesh;
         if (mesh.geometry) mesh.geometry.dispose();
       });
@@ -2536,10 +2533,10 @@ function LandingHero3D() {
         <small>Freshmen, returning students, rooms, events and module help moving in one campus graph.</small>
       </div>
       <div className="hero-3d-hud hero-3d-hud--bottom">
-        <span>Block 55 online</span>
+        <span>Freshmore jio live</span>
         <strong>10.014 room active</strong>
       </div>
-      <div className="hero-3d-chip hero-3d-chip--left">Hostel circles</div>
+      <div className="hero-3d-chip hero-3d-chip--left">Campus-life circles</div>
       <div className="hero-3d-chip hero-3d-chip--right">Fifth Row plans</div>
     </div>
   );
@@ -3160,7 +3157,7 @@ function ProfileOnboarding({
                 <li><Check size={14} /> Find students in your pillar and year</li>
                 <li><Check size={14} /> Join module rooms and project groups</li>
                 <li><Check size={14} /> Share useful campus plans with your cohort</li>
-                <li><Check size={14} /> Keep hostel, Fifth Row, and class circles together</li>
+                <li><Check size={14} /> Keep Campus Life, Fifth Row, and class circles together</li>
               </ul>
               <span className="role-card-cta">Set up returning profile <ArrowRight size={15} /></span>
             </button>
@@ -3526,7 +3523,7 @@ function ProfileOnboarding({
             </label>
             <label className="field">
               Home base
-              <input value={homeBase} onChange={(event) => setHomeBase(event.target.value)} placeholder="Hostel / East Coast / etc." />
+              <input value={homeBase} onChange={(event) => setHomeBase(event.target.value)} placeholder="Freshmore circle / commuter / etc." />
             </label>
           </div>
 
@@ -3652,7 +3649,7 @@ function EditProfileSheet({
           <div className="edit-profile-section">
             <strong>Home base</strong>
             <label className="field">
-              <input value={homeBase} onChange={(e) => setHomeBase(e.target.value)} placeholder="Hostel / East Coast / etc." />
+              <input value={homeBase} onChange={(e) => setHomeBase(e.target.value)} placeholder="Freshmore circle / commuter / etc." />
             </label>
           </div>
         </div>
@@ -3678,7 +3675,7 @@ function PrivacyConsentModal({ onAccept, onDecline }: { onAccept: () => void; on
       <div className="consent-modal">
         <div className="consent-modal-head">
           <strong>Before you continue</strong>
-          <p>Cohortly collects and processes your data to connect you with the right people, events, classes, and hostel groups at SUTD. Under the Singapore Personal Data Protection Act (PDPA), you have the right to know what we collect and why.</p>
+          <p>Cohortly collects and processes your data to connect you with the right people, events, classes, and campus-life groups at SUTD. Under the Singapore Personal Data Protection Act (PDPA), you have the right to know what we collect and why.</p>
         </div>
         <div className="consent-points">
           <div className="consent-point">
@@ -3775,7 +3772,7 @@ function renderMarkdown(text: string): React.ReactNode {
 
 const INITIAL_SUGGESTIONS = [
   'How does 10.014 work?',
-  'What should I bring to hostel?',
+  'What should I bring for move-in?',
   'How do I find returning students?',
   'How does Pass/Fail grading work?',
   'What is Fifth Row?',
@@ -3787,7 +3784,7 @@ function AICompanion() {
   const [messages, setMessages] = useState<ChatMsg[]>([
     {
       role: 'bot',
-      text: "Hi! I'm Cohortly AI — your SUTD campus guide.\n\nAsk me anything about modules, hostel, admin, Fifth Row clubs, wellbeing, careers, or Singapore life. I've got comprehensive answers on everything SUTD.",
+      text: "Hi! I'm Cohortly AI — your SUTD campus guide.\n\nAsk me anything about modules, campus life, housing guidance, admin, Fifth Row clubs, wellbeing, careers, or Singapore life. I've got comprehensive answers on everything SUTD.",
       followUps: INITIAL_SUGGESTIONS,
     },
   ]);
@@ -3908,11 +3905,11 @@ function AICompanion() {
 }
 
 function KnowledgeBaseView() {
-  const categories: Array<KBCategory | 'All'> = ['All', 'Academics', 'Hostel & Housing', 'Admin & Registration', 'Fifth Row', 'Wellbeing', 'Technology'];
+  const categories: Array<KBCategory | 'All'> = ['All', 'Academics', 'Campus Life & Housing', 'Admin & Registration', 'Fifth Row', 'Wellbeing', 'Technology'];
   const catIcons: Record<string, React.ReactNode> = {
     'All': <BookMarked size={15} />,
     'Academics': <BookOpen size={15} />,
-    'Hostel & Housing': <Home size={15} />,
+    'Campus Life & Housing': <Home size={15} />,
     'Admin & Registration': <ClipboardList size={15} />,
     'Fifth Row': <Trophy size={15} />,
     'Wellbeing': <HeartPulse size={15} />,
@@ -4242,7 +4239,7 @@ function MobileBottomNav({ active, setActive, role = 'student' }: { active: View
         { id: 'messages', label: 'Messages', icon: MessageCircle },
         { id: 'launchpad', label: 'Launchpad', icon: Rocket },
         { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
-        { id: 'hostel', label: 'Hostel', icon: Building2 },
+        { id: 'campus-life', label: 'Campus Life', icon: MapPinned },
         { id: 'kb', label: 'Resources', icon: BookMarked },
       ];
   return (
@@ -4659,7 +4656,7 @@ function StudentApp({
             {activeView === 'people' && <PeopleView userEmail={user.email} onMessage={openDm} />}
             {activeView === 'classes' && <ClassesView enrolledClasses={profile.classes} onEnroll={(updated) => onProfileUpdate({ ...profile, classes: updated })} />}
             {activeView === 'messages' && <MessagesView isMentor={isMentor} openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
-            {activeView === 'hostel' && !isMentor && <HostelView profile={profile} onProfileUpdate={onProfileUpdate} userEmail={user.email} userName={user.name} />}
+            {activeView === 'campus-life' && !isMentor && <CampusLifeView profile={profile} onProfileUpdate={onProfileUpdate} userEmail={user.email} userName={user.name} />}
             {activeView === 'privacy' && <PrivacySettingsView userEmail={user.email} userName={user.name} onBack={() => setActiveView('today')} onLogout={logout} />}
             {activeView === 'notifications' && <NotificationsView userEmail={user.email} />}
           </div>
@@ -4816,7 +4813,7 @@ function TodayView({
 
 const phaseDesc: Record<string, string> = {
   'pre-arrival': 'Everything to sort before you step on campus.',
-  'hostel': 'Get settled in your room and block.',
+  'campus-life': 'Move in, find first-week plans, and get campus support.',
   'week0': 'Orientation week — meet everyone, explore everything.',
   'week1': 'Academic setup, first lectures, and your first connections.',
   'people5': 'Your first 5 key relationships on campus.',
@@ -5679,113 +5676,118 @@ function PersonProfileModal({
   );
 }
 
-const hostelJios = [
-  { id: 'jio1', icon: 'food', title: 'Breakfast run · campus food court', time: 'Tomorrow 7:45 AM', desc: 'Walking from Block 55 before 8 AM lectures. 3 spots.', host: 'Mei Lin · Block 55' },
-  { id: 'jio2', icon: 'food', title: 'Dinner jio · Changi Business Park', time: 'Tonight 6:30 PM', desc: 'Heading out after class — returning students welcome freshmen.', host: 'Noah · Block 57' },
-  { id: 'jio3', icon: 'study', title: 'Study session · 10.014 lab', time: 'Wed 8 PM · Building 5', desc: 'Going through Lab 2 recursion. Bring your laptop.', host: 'Aarav · Block 57' },
-  { id: 'jio4', icon: 'sports', title: 'Late supper · Dover run', time: 'Tonight 11 PM', desc: 'Anyone for supper after training? Walking from the housing path.', host: 'Priya · Block 59' },
+type CampusLifeIcon = 'food' | 'study' | 'sports' | 'move' | 'support';
+type CampusLifeJio = {
+  id: string;
+  icon: CampusLifeIcon;
+  title: string;
+  time: string;
+  desc: string;
+  host: string;
+  scope: string;
+};
+
+type CampusLifeCommunity = {
+  id: string;
+  label: string;
+  scope: string;
+  count: string;
+  focus: string;
+  tone: 'freshman' | 'returning' | 'commuter' | 'support';
+};
+
+const campusLifeJios: CampusLifeJio[] = [
+  {
+    id: 'jio-breakfast',
+    icon: 'food',
+    title: 'Breakfast before 10.014',
+    time: 'Tomorrow 7:45 AM',
+    desc: 'Meet at the main campus walkway and head to breakfast before the first lecture block.',
+    host: 'Mei Lin · Freshmore arrival circle',
+    scope: 'Open to Freshmores and returning guides',
+  },
+  {
+    id: 'jio-dinner',
+    icon: 'food',
+    title: 'Dinner jio after orientation admin',
+    time: 'Tonight 6:30 PM',
+    desc: 'Small-group dinner for students who want a low-pressure first-week plan.',
+    host: 'Noah · Year 2 community',
+    scope: 'Freshman + returning students',
+  },
+  {
+    id: 'jio-study',
+    icon: 'study',
+    title: '10.014 lab prep circle',
+    time: 'Wed 8 PM · Building 5',
+    desc: 'Returning students walk through recursion mistakes and setup checks. Bring your laptop.',
+    host: 'Aarav · ISTD year circle',
+    scope: 'Module-based group',
+  },
+  {
+    id: 'jio-sports',
+    icon: 'sports',
+    title: 'Beginner badminton booking',
+    time: 'Thu 7 PM · Sports Complex',
+    desc: 'No tryout, no pressure. A first-week sports plan for people who do not know anyone yet.',
+    host: 'Priya · Sports interest circle',
+    scope: 'Interest-based group',
+  },
 ];
 
-const hostelFloorMates = [
-  { name: 'Mei Lin', room: '55-0412', pillar: 'ASD', tags: ['architecture', 'sketching'] },
-  { name: 'Jerome', room: '55-0406', pillar: 'ESD', tags: ['math', 'chess', 'badminton'] },
-  { name: 'Sofia', room: '55-0409', pillar: 'DAI', tags: ['ML', 'music', 'bouldering'] },
-  { name: 'Kai', room: '55-0411', pillar: 'ISTD', tags: ['hackathons', 'basketball'] },
+const campusLifeCommunities: CampusLifeCommunity[] = [
+  {
+    id: 'freshmore-arrival',
+    label: 'Freshmore arrival circle',
+    scope: 'Year 1 / incoming students',
+    count: '184 opted in',
+    focus: 'Move-in questions, first meals, admin reminders, and Week 0 plans.',
+    tone: 'freshman',
+  },
+  {
+    id: 'returning-guides',
+    label: 'Returning-student guides',
+    scope: 'Years 2-4 grouped by year and pillar',
+    count: '96 active',
+    focus: 'Module advice, pillar expectations, study groups, and class survival tips.',
+    tone: 'returning',
+  },
+  {
+    id: 'commuter-campus',
+    label: 'Commuter campus loop',
+    scope: 'Off-campus and exchange students',
+    count: '51 active',
+    focus: 'Transport timing, food plans, late study exits, and weekend meetups.',
+    tone: 'commuter',
+  },
+  {
+    id: 'settling-support',
+    label: 'Settling-in support',
+    scope: 'Private help route',
+    count: 'Staff-backed',
+    focus: 'Quiet check-ins for students who want help without posting publicly.',
+    tone: 'support',
+  },
 ];
 
-// ─── Campus map + hostel directory data ──────────────────────────────────────
-
-type CampusBuilding = {
-  id: string; name: string; sub: string;
-  vibe: 'academic' | 'social' | 'study' | 'makers' | 'sports' | 'wellness';
-  activity: number;
-  present: string[];
-  x: number; y: number; w: number; h: number;
-};
-
-const campusBuildings: CampusBuilding[] = [
-  { id: 'b1', name: 'Building 1', sub: 'Student Hub · LTs', vibe: 'academic', activity: 45, present: ['Wei Jian', 'Priya', '+23'], x: 18, y: 38, w: 115, h: 80 },
-  { id: 'b2', name: 'Building 2', sub: 'FabLab', vibe: 'makers', activity: 31, present: ['Aarav', '+12'], x: 148, y: 38, w: 90, h: 80 },
-  { id: 'b3', name: 'Building 3', sub: 'Campus Bistro', vibe: 'social', activity: 72, present: ['Mei Lin', 'Noah', '+43'], x: 253, y: 38, w: 95, h: 80 },
-  { id: 'bsports', name: 'Sports Hall', sub: 'Courts · MPSH', vibe: 'sports', activity: 26, present: ['+26'], x: 380, y: 38, w: 105, h: 175 },
-  { id: 'b4', name: 'Building 4', sub: 'Admin · Research', vibe: 'academic', activity: 14, present: ['+14'], x: 18, y: 135, w: 85, h: 65 },
-  { id: 'b5', name: 'Building 5', sub: 'Library · Computer Labs', vibe: 'study', activity: 81, present: ['Sara', 'Fabian', '+56'], x: 118, y: 135, w: 215, h: 65 },
-  { id: 'b54', name: 'Building 54', sub: 'Student Wellbeing', vibe: 'wellness', activity: 9, present: ['+9'], x: 348, y: 135, w: 105, h: 65 },
+const campusLifeGuides = [
+  {
+    title: 'Official housing first',
+    detail: 'Use SUTD Housing for exact assignments, key collection, policies, and maintenance. Cohortly only organizes broad student support.',
+  },
+  {
+    title: 'No room browsing',
+    detail: 'The app never shows room numbers, floors, live occupancy, or room-level maps. Community matching stays broad by year, module, and interest.',
+  },
+  {
+    title: 'First-week anchors',
+    detail: 'Join one meal, one study circle, one Fifth Row trial, and one campus walk before Week 1 ends.',
+  },
+  {
+    title: 'Move-in essentials',
+    detail: 'Pack bedding, toiletries, student card documents, laptop charger, approved adapters, and weather-safe shoes.',
+  },
 ];
-
-type HostelResident = {
-  block: string; floor: number; room: string;
-  name: string; pillar: string; year: string; online: boolean;
-};
-
-const hostelResidents: HostelResident[] = [
-  // Public SUTD housing map labels: Blocks 51, 55, 57 and 59. Room data is roster/sample-driven.
-  { block: '55', floor: 1, room: '01', name: 'Mei Lin', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '55', floor: 1, room: '03', name: 'Jerome', pillar: 'ESD', year: 'Y1', online: true },
-  { block: '55', floor: 1, room: '06', name: 'Sofia', pillar: 'DAI', year: 'Y1', online: false },
-  { block: '55', floor: 1, room: '09', name: 'Kai', pillar: 'ISTD', year: 'Y1', online: true },
-  { block: '55', floor: 1, room: '11', name: 'Rui', pillar: 'EPD', year: 'Y1', online: false },
-  { block: '55', floor: 2, room: '02', name: 'Layla', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '55', floor: 2, room: '04', name: 'Marcus', pillar: 'EPD', year: 'Y1', online: false },
-  { block: '55', floor: 2, room: '07', name: 'Aisha', pillar: 'ISTD', year: 'Y1', online: true },
-  { block: '55', floor: 2, room: '10', name: 'Jin', pillar: 'ESD', year: 'Y1', online: true },
-  { block: '55', floor: 3, room: '01', name: 'Fabian', pillar: 'ESD', year: 'Y1', online: false },
-  { block: '55', floor: 3, room: '05', name: 'Riana', pillar: 'DAI', year: 'Y1', online: true },
-  { block: '55', floor: 3, room: '08', name: 'Soren', pillar: 'ASD', year: 'Y1', online: false },
-  { block: '55', floor: 4, room: '03', name: 'Hana', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '55', floor: 4, room: '07', name: 'Leon', pillar: 'ISTD', year: 'Y1', online: false },
-  { block: '55', floor: 5, room: '02', name: 'Yuki', pillar: 'DAI', year: 'Y1', online: true },
-  { block: '55', floor: 5, room: '09', name: 'Andre', pillar: 'EPD', year: 'Y1', online: true },
-  { block: '59', floor: 1, room: '02', name: 'Priya', pillar: 'ESD', year: 'Y1', online: true },
-  { block: '59', floor: 1, room: '05', name: 'Noah', pillar: 'EPD', year: 'Y1', online: true },
-  { block: '59', floor: 1, room: '08', name: 'Zara', pillar: 'ISTD', year: 'Y1', online: false },
-  { block: '59', floor: 1, room: '10', name: 'Ben', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '59', floor: 2, room: '03', name: 'Daniel', pillar: 'ASD', year: 'Y1', online: true },
-  { block: '59', floor: 2, room: '06', name: 'Leila', pillar: 'DAI', year: 'Y1', online: true },
-  { block: '59', floor: 2, room: '09', name: 'Tariq', pillar: 'ESD', year: 'Y1', online: false },
-  { block: '59', floor: 3, room: '01', name: 'Tommy', pillar: 'ESD', year: 'Y1', online: false },
-  { block: '59', floor: 3, room: '07', name: 'Min', pillar: 'ISTD', year: 'Y1', online: true },
-  { block: '59', floor: 4, room: '04', name: 'Lena', pillar: 'ASD', year: 'Y1', online: false },
-  { block: '59', floor: 4, room: '11', name: 'Aryan', pillar: 'EPD', year: 'Y1', online: true },
-  { block: '57', floor: 1, room: '03', name: 'Aarav Menon', pillar: 'ISTD', year: 'Y3', online: true },
-  { block: '57', floor: 2, room: '07', name: 'Sara Binte Halim', pillar: 'DAI', year: 'Y2', online: false },
-  { block: '57', floor: 4, room: '09', name: 'Wei Jian Lim', pillar: 'ISTD', year: 'Y3', online: true },
-  { block: '57', floor: 3, room: '05', name: 'Kevin', pillar: 'ISTD', year: 'Y4', online: true },
-  { block: '57', floor: 5, room: '11', name: 'Daryl', pillar: 'EPD', year: 'Y3', online: false },
-  { block: '57', floor: 6, room: '02', name: 'Cass', pillar: 'ASD', year: 'Y2', online: true },
-  { block: '51', floor: 1, room: '04', name: 'Priscilla', pillar: 'ASD', year: 'Y2', online: true },
-  { block: '51', floor: 2, room: '08', name: 'Haruto', pillar: 'EPD', year: 'Y2', online: false },
-  { block: '51', floor: 3, room: '06', name: 'Aanya', pillar: 'DAI', year: 'Y2', online: true },
-  { block: '51', floor: 4, room: '03', name: 'Felix', pillar: 'ISTD', year: 'Y2', online: true },
-  { block: '51', floor: 5, room: '09', name: 'Nadia', pillar: 'ESD', year: 'Y3', online: false },
-];
-
-const PILLAR_COLOR: Record<string, string> = {
-  ASD: '#f472b6', ESD: '#34d399', EPD: '#fbbf24', ISTD: '#38bdf8', DAI: '#a78bfa',
-};
-const VIBE_STROKE: Record<string, string> = {
-  academic: 'rgba(56,189,248,0.35)', social: 'rgba(245,158,11,0.4)',
-  study: 'rgba(56,189,248,0.5)', makers: 'rgba(52,211,153,0.4)',
-  sports: 'rgba(239,68,68,0.4)', wellness: 'rgba(167,139,250,0.4)',
-};
-function activityDot(n: number) {
-  if (n >= 60) return '#34d399';
-  if (n >= 30) return '#fbbf24';
-  return '#6b7280';
-}
-
-const hostelBlockInfo: Record<string, { desc: string; sub: string; color: string; floors: number; group: string }> = {
-  '51': { desc: 'Housing north-west', sub: 'Public campus map block 51 · roster import required', color: '#38bdf8', floors: 11, group: 'Returning students' },
-  '55': { desc: 'Housing north', sub: 'Public campus map block 55 · roster import required', color: '#34d399', floors: 11, group: 'Freshmen' },
-  '57': { desc: 'Housing central', sub: 'Public campus map block 57 · roster import required', color: '#a78bfa', floors: 11, group: 'Returning students' },
-  '59': { desc: 'Housing east', sub: 'Public map notes management/security office here', color: '#fbbf24', floors: 11, group: 'Freshmen' },
-};
-
-const hostelBlockIds = Object.keys(hostelBlockInfo);
-
-function hostelFloorCount(block: string) {
-  return hostelBlockInfo[block]?.floors ?? 11;
-}
 
 function PeopleView({ userEmail, onMessage }: { userEmail?: string; onMessage?: (name: string) => void }) {
   const [connected, setConnected] = useState<Set<string>>(new Set());
@@ -7791,7 +7793,7 @@ function AdminIsolationView() {
   const [noteInput, setNoteInput] = useState<Record<string, string>>({});
   const [expandedCard, setExpandedCard] = useState<string | null>(null);
 
-  // Student self-reported cases (from Launchpad "Need help", Hostel "settling in", etc.)
+  // Student self-reported cases (from Launchpad "Need help", Campus Life "settling in", etc.)
   const [cases, setCases] = useState<InterventionCase[]>(() => loadInterventionCases());
   const [caseFilter, setCaseFilter] = useState<'all' | 'new' | 'contacted' | 'resolved'>('all');
 
@@ -9026,650 +9028,178 @@ function AdminRosterView() {
   );
 }
 
-// ─── Hostel Setup Modal ──────────────────────────────────────────────────────
+// ─── Campus Life View ────────────────────────────────────────────────────────
 
-function HostelSetupModal({ onSave, onSkip }: { onSave: (block: string, floor: string, room: string) => void; onSkip: () => void }) {
-  const [step, setStep] = useState(0);
-  const [block, setBlock] = useState('');
-  const [floor, setFloor] = useState('');
-  const [room, setRoom] = useState('');
-  const roomCode = block && floor && room ? `${block}-${floor.padStart(2,'0')}${room.padStart(2,'0')}` : null;
-
-  return (
-    <div className="hostel-setup-overlay">
-      <div className="hostel-setup-modal">
-        <div className="hostel-setup-progress">
-          {[0,1,2].map(i => <div key={i} className={`setup-step-dot${i <= step ? ' active' : ''}`} />)}
-        </div>
-
-        {step === 0 && (
-          <>
-            <div className="hostel-setup-icon"><Building2 size={30} /></div>
-            <h2>Set up your room</h2>
-            <p>Pin yourself to the hostel directory and let floor mates find you</p>
-            <div className="hostel-block-picker">
-              {Object.entries(hostelBlockInfo).map(([b, info]) => (
-                <button key={b} className={`block-pick-card${block === b ? ' selected' : ''}`}
-                  onClick={() => setBlock(b)} style={{ '--block-color': info.color } as React.CSSProperties}>
-                  <span className="block-pick-id">Block {b}</span>
-                  <span className="block-pick-label">{info.desc}</span>
-                  <span className="block-pick-desc">{info.sub}</span>
-                </button>
-              ))}
-            </div>
-            <button className="primary-button wide" disabled={!block} onClick={() => setStep(1)}>
-              Continue <ArrowRight size={14} />
-            </button>
-            <button className="hostel-setup-skip" onClick={onSkip}>Skip for now</button>
-          </>
-        )}
-
-        {step === 1 && (
-          <>
-            <div className="hostel-setup-icon" style={{ background: `${hostelBlockInfo[block]?.color}22`, color: hostelBlockInfo[block]?.color }}>
-              <Home size={26} />
-            </div>
-            <h2>Block {block} · Your room</h2>
-            <p>Enter your floor and room number. Exact room visibility stays opt-in.</p>
-            <div className="hostel-room-inputs">
-              <div className="hostel-input-group">
-                <label>Floor</label>
-                <select value={floor} onChange={e => setFloor(e.target.value)}>
-                  <option value="">Select floor</option>
-                  {Array.from({ length: hostelFloorCount(block) }, (_, i) => i + 1).map(n => (
-                    <option key={n} value={String(n)}>Floor {n}</option>
-                  ))}
-                </select>
-              </div>
-              <div className="hostel-input-group">
-                <label>Room</label>
-                <select value={room} onChange={e => setRoom(e.target.value)}>
-                  <option value="">Select room</option>
-                  {Array.from({ length: 14 }, (_, i) => String(i+1).padStart(2,'0')).map(r => (
-                    <option key={r} value={r}>Room {r}</option>
-                  ))}
-                </select>
-              </div>
-            </div>
-            {roomCode && (
-              <div className="room-code-preview">
-                <Home size={13} />
-                <strong>{roomCode}</strong>
-                <span>your room code</span>
-              </div>
-            )}
-            <div className="hostel-setup-actions">
-              <button className="secondary-button" onClick={() => setStep(0)}>Back</button>
-              <button className="primary-button" disabled={!floor || !room} onClick={() => setStep(2)}>Confirm</button>
-            </div>
-          </>
-        )}
-
-        {step === 2 && (
-          <>
-            <div className="hostel-setup-done-icon"><CheckCircle2 size={40} style={{ color: '#34d399' }} /></div>
-            <h2>You're on the map</h2>
-            <p><strong>Block {block}</strong> · Floor {floor} · Room {room}</p>
-            <div className="room-code-preview large"><Home size={14} /><strong>{roomCode}</strong></div>
-            <button className="primary-button wide" onClick={() => onSave(block, floor, room)}>View my building</button>
-          </>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ─── Building 3D SVG ─────────────────────────────────────────────────────────
-
-function Building3DSVG({
-  block, myFloor, myRoom, onSelectRoom,
+function CampusLifeView({
+  profile,
+  onProfileUpdate,
+  userEmail = '',
+  userName = 'Student',
 }: {
-  block: string; myFloor?: number; myRoom?: string;
-  onSelectRoom: (r: HostelResident | null) => void;
+  profile: StudentProfile;
+  onProfileUpdate: (p: StudentProfile) => void;
+  userEmail?: string;
+  userName?: string;
 }) {
-  const [hovered, setHovered] = useState<string | null>(null);
-
-  const N_FLOORS = hostelFloorCount(block);
-  const N_ROOMS  = 7;
-  const BLD_W    = 322;
-  const FLOOR_H  = 42;
-  const DEPTH_DX = 92;
-  const DEPTH_DY = -38;
-  const BASE_X   = 68;
-  const BASE_Y   = 450;
-  const ROOM_W   = BLD_W / N_ROOMS;
-  const BLD_H    = N_FLOORS * FLOOR_H;
-  const bldgTop  = BASE_Y - BLD_H;
-  const SVG_W    = BASE_X + BLD_W + DEPTH_DX + 55;
-  const SVG_H    = BASE_Y + 35;
-
-  // Corner coordinates
-  const rfTL = [BASE_X + BLD_W, bldgTop];
-  const rfTR = [BASE_X + BLD_W + DEPTH_DX, bldgTop + DEPTH_DY];
-  const rfBL = [BASE_X + BLD_W, BASE_Y];
-  const rfBR = [BASE_X + BLD_W + DEPTH_DX, BASE_Y + DEPTH_DY];
-  const tfFL = [BASE_X, bldgTop];
-  const tfFR = [BASE_X + BLD_W, bldgTop];
-  const tfBR = [BASE_X + BLD_W + DEPTH_DX, bldgTop + DEPTH_DY];
-  const tfBL = [BASE_X + DEPTH_DX, bldgTop + DEPTH_DY];
-
-  const onlineCount = hostelResidents.filter(r => r.block === block && r.online).length;
-  const totalCount  = hostelResidents.filter(r => r.block === block).length;
-
-  return (
-    <svg viewBox={`0 0 ${SVG_W} ${SVG_H}`} className="building-3d-svg" xmlns="http://www.w3.org/2000/svg">
-      <defs>
-        <filter id="g-sky"><feGaussianBlur in="SourceGraphic" stdDeviation="4" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <filter id="g-grn"><feGaussianBlur in="SourceGraphic" stdDeviation="5" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
-        <filter id="g-bld"><feDropShadow dx="0" dy="12" stdDeviation="16" floodColor="rgba(28,49,80,0.18)"/></filter>
-        <linearGradient id="ff-grad" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="#f7faff"/>
-          <stop offset="100%" stopColor="#dfe9f8"/>
-        </linearGradient>
-        <linearGradient id="rf-grad" x1="0" x2="1" y1="0" y2="0">
-          <stop offset="0%" stopColor="#cbd9ec"/>
-          <stop offset="100%" stopColor="#b7c8de"/>
-        </linearGradient>
-        <linearGradient id="roof-grad" x1="0" x2="0" y1="1" y2="0">
-          <stop offset="0%" stopColor="#d7e4f5"/>
-          <stop offset="100%" stopColor="#f4f8ff"/>
-        </linearGradient>
-        <linearGradient id="sky-ambient" x1="0" x2="0" y1="0" y2="1">
-          <stop offset="0%" stopColor="rgba(49,85,212,0.12)"/>
-          <stop offset="60%" stopColor="rgba(49,85,212,0)"/>
-        </linearGradient>
-      </defs>
-
-      {/* Ground glow halo */}
-      <ellipse cx={BASE_X + BLD_W/2 + DEPTH_DX/2} cy={BASE_Y + 18} rx={BLD_W/2 + 65} ry={24} fill="rgba(49,85,212,0.08)"/>
-      <ellipse cx={BASE_X + BLD_W/2 + DEPTH_DX/2} cy={BASE_Y + 18} rx={BLD_W/2 + 30} ry={15} fill="rgba(28,49,80,0.10)"/>
-
-      {/* Right depth face */}
-      <polygon points={`${rfTL[0]},${rfTL[1]} ${rfTR[0]},${rfTR[1]} ${rfBR[0]},${rfBR[1]} ${rfBL[0]},${rfBL[1]}`}
-        fill="url(#rf-grad)" stroke="rgba(49,85,212,0.18)" strokeWidth="0.5"/>
-      {Array.from({length: N_FLOORS - 1}, (_, i) => (
-        <line key={i} x1={BASE_X+BLD_W} y1={bldgTop+(i+1)*FLOOR_H}
-          x2={BASE_X+BLD_W+DEPTH_DX} y2={bldgTop+(i+1)*FLOOR_H+DEPTH_DY}
-          stroke="rgba(49,85,212,0.12)" strokeWidth="0.5"/>
-      ))}
-      {/* Right face mini-windows (rooms 08-10) */}
-      {Array.from({length: N_FLOORS}, (_, fi) => {
-        const floorNum = N_FLOORS - fi;
-        const rfy = bldgTop + fi * FLOOR_H + DEPTH_DY * 0.45 + FLOOR_H/2;
-        return [0,1,2].map((ri) => {
-          const res = hostelResidents.find(r => r.block === block && r.floor === floorNum && r.room === String(ri+8).padStart(2,'0'));
-          const rfx = BASE_X + BLD_W + DEPTH_DX*(0.22 + ri*0.26);
-          return <rect key={ri} x={rfx-5} y={rfy-7} width={9} height={12} rx="2"
-            fill={res?.online ? 'rgba(49,85,212,0.68)' : res ? 'rgba(108,128,156,0.45)' : 'rgba(180,195,216,0.35)'}
-          />;
-        });
-      })}
-
-      {/* Front face */}
-      <rect x={BASE_X} y={bldgTop} width={BLD_W} height={BLD_H}
-        fill="url(#ff-grad)" stroke="rgba(49,85,212,0.22)" strokeWidth="0.75"
-        filter="url(#g-bld)"/>
-      <rect x={BASE_X} y={bldgTop} width={BLD_W} height={BLD_H * 0.45}
-        fill="url(#sky-ambient)" pointerEvents="none"/>
-
-      {/* Floor + room grid lines */}
-      {Array.from({length: N_FLOORS - 1}, (_, i) => (
-        <line key={i} x1={BASE_X} y1={bldgTop+(i+1)*FLOOR_H}
-          x2={BASE_X+BLD_W} y2={bldgTop+(i+1)*FLOOR_H}
-          stroke="rgba(102,122,154,0.18)" strokeWidth="0.5"/>
-      ))}
-      {Array.from({length: N_ROOMS - 1}, (_, j) => (
-        <line key={j} x1={BASE_X+(j+1)*ROOM_W} y1={bldgTop}
-          x2={BASE_X+(j+1)*ROOM_W} y2={BASE_Y}
-          stroke="rgba(102,122,154,0.14)" strokeWidth="0.5"/>
-      ))}
-
-      {/* Room windows */}
-      {Array.from({length: N_FLOORS}, (_, fi) => {
-        const floorNum = N_FLOORS - fi;
-        const winY = bldgTop + fi * FLOOR_H + 6;
-        const winH = FLOOR_H - 10;
-        return Array.from({length: N_ROOMS}, (_, ri) => {
-          const roomNum = String(ri + 1).padStart(2, '0');
-          const key = `${fi}-${ri}`;
-          const res = hostelResidents.find(r => r.block === block && r.floor === floorNum && r.room === roomNum);
-          const isMyRoom  = floorNum === myFloor && roomNum === myRoom;
-          const isOnline  = res?.online ?? false;
-          const isHovered = hovered === key;
-          const winX = BASE_X + ri * ROOM_W + 4;
-          const winW = ROOM_W - 7;
-          let fill = '#f3f7fd';
-          let gFilter: string | undefined;
-          let stroke = 'rgba(102,122,154,0.22)';
-          if (isMyRoom)            { fill = '#b8ead8'; gFilter = 'url(#g-grn)'; stroke = '#1f8f68'; }
-          else if (isHovered && res){ fill = isOnline ? '#dce7ff' : '#e7eef8'; stroke = '#3155d4'; }
-          else if (isOnline)        { fill = '#e8efff';  gFilter = 'url(#g-sky)';  stroke = '#3155d4'; }
-          else if (res)             { fill = '#e7edf6';   stroke = 'rgba(102,122,154,0.32)'; }
-          return (
-            <g key={key} onClick={() => onSelectRoom(res ?? null)}
-              onMouseEnter={() => setHovered(key)} onMouseLeave={() => setHovered(null)}
-              style={{ cursor: res ? 'pointer' : 'default' }}>
-              {(isOnline || isMyRoom) && <rect x={winX-2} y={winY-2} width={winW+4} height={winH+4} rx="5"
-                fill={isMyRoom ? 'rgba(31,143,104,0.14)' : 'rgba(49,85,212,0.10)'} pointerEvents="none"/>}
-              <rect x={winX} y={winY} width={winW} height={winH} rx="3"
-                fill={fill} stroke={stroke} strokeWidth="0.75" filter={gFilter}/>
-              <rect x={winX+2} y={winY+2} width={winW*0.42} height={winH*0.4} rx="1.5"
-                fill="rgba(255,255,255,0.70)" pointerEvents="none"/>
-              {res ? (
-                <>
-                  <text x={winX+winW/2} y={winY+winH/2+2.5} textAnchor="middle"
-                    fill={isMyRoom ? '#064e3b' : isOnline ? '#1f3aa3' : '#4b5f78'}
-                    fontSize="7" fontWeight="700" pointerEvents="none">
-                    {res.name.split(' ')[0].slice(0,6)}
-                  </text>
-                  <circle cx={winX+winW-5} cy={winY+5} r={3}
-                    fill={PILLAR_COLOR[res.pillar] ?? '#6b7280'} opacity={isOnline ? 1 : 0.45}/>
-                </>
-              ) : (
-                <text x={winX+winW/2} y={winY+winH/2+2.5} textAnchor="middle"
-                  fill="rgba(75,95,120,0.40)" fontSize="6.5" pointerEvents="none">{roomNum}</text>
-              )}
-            </g>
-          );
-        });
-      })}
-
-      {/* Roof */}
-      <polygon points={`${tfFL[0]},${tfFL[1]} ${tfFR[0]},${tfFR[1]} ${tfBR[0]},${tfBR[1]} ${tfBL[0]},${tfBL[1]}`}
-        fill="url(#roof-grad)" stroke="rgba(49,85,212,0.22)" strokeWidth="0.75"/>
-      <line x1={tfFL[0]} y1={tfFL[1]} x2={tfFR[0]} y2={tfFR[1]} stroke="rgba(49,85,212,0.35)" strokeWidth="1.5"/>
-      <line x1={tfFR[0]} y1={tfFR[1]} x2={tfBR[0]} y2={tfBR[1]} stroke="rgba(49,85,212,0.28)" strokeWidth="1"/>
-
-      {/* Floor numbers (left side) */}
-      {Array.from({length: N_FLOORS}, (_, fi) => (
-        <text key={fi} x={BASE_X-10} y={bldgTop + fi*FLOOR_H + FLOOR_H/2 + 3.5}
-          textAnchor="middle" fill="rgba(75,95,120,0.58)" fontSize="8" fontWeight="700">
-          {N_FLOORS - fi}
-        </text>
-      ))}
-
-      {/* Block label + online count */}
-      <text x={BASE_X+BLD_W/2} y={bldgTop-20} textAnchor="middle"
-        fill="#1f3aa3" fontSize="13" fontWeight="800" letterSpacing="4">BLOCK {block}</text>
-      <rect x={BASE_X+BLD_W/2-52} y={bldgTop-38} width={104} height={16} rx="8"
-        fill="rgba(52,211,153,0.1)" stroke="rgba(52,211,153,0.28)" strokeWidth="0.75"/>
-      <circle cx={BASE_X+BLD_W/2-36} cy={bldgTop-30} r={3.5} fill="#1f8f68" />
-      <text x={BASE_X+BLD_W/2-26} y={bldgTop-25.5} fill="#1f8f68" fontSize="9" fontWeight="600">
-        {onlineCount} online · {totalCount} residents
-      </text>
-
-      {/* "You" pointer for my room */}
-      {myFloor !== undefined && myRoom !== undefined && (() => {
-        const fi = N_FLOORS - myFloor;
-        const ri = parseInt(myRoom) - 1;
-        if (fi < 0 || fi >= N_FLOORS || ri < 0 || ri >= N_ROOMS) return null;
-        const cx = BASE_X + ri * ROOM_W + ROOM_W / 2;
-        const cy = bldgTop + fi * FLOOR_H;
-        return (
-          <>
-            <circle cx={cx} cy={cy - 10} r={4} fill="#1f8f68" />
-            <line x1={cx} y1={cy-6} x2={cx} y2={cy+1} stroke="#1f8f68" strokeWidth="1.5" opacity="0.7"/>
-            <text x={cx} y={cy-17} textAnchor="middle" fill="#1f8f68" fontSize="8" fontWeight="800">You</text>
-          </>
-        );
-      })()}
-    </svg>
-  );
-}
-
-// ─── Hostel View ──────────────────────────────────────────────────────────────
-
-function HostelView({ profile, onProfileUpdate, userEmail = '', userName = 'Student' }: { profile: StudentProfile; onProfileUpdate: (p: StudentProfile) => void; userEmail?: string; userName?: string }) {
-  const [showSetup, setShowSetup]     = useState(!profile.hostelBlock);
-  const [activeBlock, setActiveBlock] = useState(profile.hostelBlock ?? '55');
-  const [selectedRoom, setSelectedRoom] = useState<HostelResident | null>(null);
-  const [activeTab, setActiveTab]     = useState<'building'|'campus'|'jios'>('jios');
-  const [joinedJios, setJoinedJios]   = useState<Set<string>>(new Set());
+  const currentCommunity = profile.campusCommunity ?? 'freshmore-arrival';
+  const [selectedCommunity, setSelectedCommunity] = useState(currentCommunity);
+  const [joinedJios, setJoinedJios] = useState<Set<string>>(new Set());
   const [settlingHelpRequested, setSettlingHelpRequested] = useState(false);
 
+  const selected = campusLifeCommunities.find((community) => community.id === selectedCommunity) ?? campusLifeCommunities[0];
+  const homeBase = profile.campusHomeBase ?? profile.homeBase ?? selected.label;
+
+  const saveCommunity = (community: CampusLifeCommunity) => {
+    setSelectedCommunity(community.id);
+    onProfileUpdate({
+      ...profile,
+      homeBase: community.label,
+      campusHomeBase: community.label,
+      campusCommunity: community.id,
+    });
+  };
+
   const requestSettlingHelp = () => {
-    addInterventionCase(userEmail || 'self', userName, 'Requested help settling into hostel', 'hostel');
+    addInterventionCase(userEmail || 'self', userName, 'Requested help settling into campus life', 'campus-life');
     setSettlingHelpRequested(true);
   };
 
-  const myBlock = profile.hostelBlock;
-  const myFloor = profile.hostelFloor;
-  const myRoom  = profile.hostelRoom;
-
-  const saveRoom = (block: string, floor: string, room: string) => {
-    onProfileUpdate({ ...profile, hostelBlock: block, hostelFloor: parseInt(floor), hostelRoom: room.padStart(2,'0') });
-    setActiveBlock(block);
-    setShowSetup(false);
+  const renderJioIcon = (icon: CampusLifeIcon) => {
+    if (icon === 'food') return <Utensils size={16} />;
+    if (icon === 'study') return <BookOpen size={16} />;
+    if (icon === 'sports') return <Dumbbell size={16} />;
+    if (icon === 'support') return <LifeBuoy size={16} />;
+    return <MapPinned size={16} />;
   };
 
-  const onlineInBlock = hostelResidents.filter(r => r.block === activeBlock && r.online);
-
   return (
-    <>
-      {showSetup && <HostelSetupModal onSave={saveRoom} onSkip={() => setShowSetup(false)} />}
-      <div className="hostel-3d-layout">
-
-        {/* ── Left: hostel directory ──────────────────────────────────────── */}
-        <div className="hostel-3d-left">
-          <section className="hostel-homebase-card">
-            <div>
-              <span className="eyebrow">Hostel home base</span>
-              <h2>{myBlock ? `Block ${myBlock}, Floor ${myFloor}` : 'Set up your room when you are ready'}</h2>
-              <p>
-                Coordinate meals, study rooms, packing questions, and settling-in support without exposing your exact room beyond verified residents.
-              </p>
-            </div>
-            <div className="hostel-homebase-actions">
-              <button className="primary-button" onClick={() => setActiveTab('jios')}>
-                <Users size={16} /> See nearby jios
-              </button>
-              <button className="secondary-button" onClick={() => setShowSetup(true)}>
-                <Home size={16} /> {myBlock ? 'Update room' : 'Set up room'}
-              </button>
-            </div>
-          </section>
-
-          <div className="hostel-practical-grid">
-            <article className="hostel-practical-card">
-              <span>Tonight</span>
-              <strong>Laundry room walk-through</strong>
-              <small>Block {activeBlock} lobby · 8:00 PM · returning students present</small>
-            </article>
-            <article className="hostel-practical-card">
-              <span>Packing</span>
-              <strong>Bring LAN cable, slippers, and drying rack</strong>
-              <small>Saved to Resources · useful before move-in weekend</small>
-            </article>
-            <article className="hostel-practical-card">
-              <span>Privacy</span>
-              <strong>Your room is hidden until you opt in</strong>
-              <small>People see block/floor proximity, not exact room by default</small>
-            </article>
-          </div>
-
-          <div className="hostel-tab-bar">
-            <button className={activeTab==='jios'?'active':''} onClick={() => setActiveTab('jios')}>
-              <Users size={13}/> Nearby jios
+    <div className="campus-life-view">
+      <section className="campus-life-hero">
+        <div>
+          <span className="eyebrow">Campus Life</span>
+          <h2>Settle into SUTD without exposing private room details.</h2>
+          <p>
+            Cohortly now treats housing as a broad community layer: Freshmore arrival circles,
+            returning-student guides, commuter groups, jios, official housing guidance, and private support routes.
+          </p>
+          <div className="campus-life-hero-actions">
+            <button className="primary-button" onClick={() => saveCommunity(selected)}>
+              <Check size={15} /> Save home base
             </button>
-            <button className={activeTab==='building'?'active':''} onClick={() => setActiveTab('building')}>
-              <Building2 size={13}/> Directory
+            <button className="secondary-button" onClick={requestSettlingHelp} disabled={settlingHelpRequested}>
+              <LifeBuoy size={15} /> {settlingHelpRequested ? 'Support requested' : 'I need settling-in help'}
             </button>
-            <button className={activeTab==='campus'?'active':''} onClick={() => setActiveTab('campus')}>
-              <MapPinned size={13}/> Campus map
-            </button>
-            {myBlock && (
-              <span className="hostel-room-tag">
-                <Home size={11}/> Block {myBlock} · Fl.{myFloor} · Rm.{myRoom}
-              </span>
-            )}
-          </div>
-
-          {activeTab === 'building' && (
-            <div className="hostel-building-container">
-              <Building3DSVG block={activeBlock} myFloor={myFloor} myRoom={myRoom} onSelectRoom={setSelectedRoom}/>
-            </div>
-          )}
-
-          {activeTab === 'campus' && (
-            <div className="hostel-campus-wrap">
-              <div className="campus-map-topbar">
-                <div>
-                  <span className="eyebrow">SUTD campus atlas</span>
-                  <strong>SUTD Changi · public housing blocks 51, 55, 57, 59</strong>
-                  <p>Drawn from the supplied campus references; exact room rosters come from Housing/Admin import.</p>
-                </div>
-                <div className="campus-live-pill"><span className="live-dot"/>
-                  {campusBuildings.reduce((s,b)=>s+b.activity,0) + hostelResidents.filter(r=>r.online).length} on campus
-                </div>
-              </div>
-              <div className="campus-atlas-wrap">
-                <svg viewBox="0 0 900 560" className="campus-atlas-svg" xmlns="http://www.w3.org/2000/svg" aria-label="SUTD campus atlas with academic buildings, recreation centre and housing blocks">
-                  <defs>
-                    <linearGradient id="campusGrass" x1="0" y1="0" x2="1" y2="1">
-                      <stop offset="0%" stopColor="#eef7e8"/>
-                      <stop offset="100%" stopColor="#dcefd5"/>
-                    </linearGradient>
-                    <linearGradient id="buildingFace" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="0%" stopColor="#ffffff"/>
-                      <stop offset="100%" stopColor="#dfe7f2"/>
-                    </linearGradient>
-                    <filter id="mapShadow" x="-20%" y="-20%" width="140%" height="140%">
-                      <feDropShadow dx="0" dy="8" stdDeviation="7" floodColor="rgba(33, 52, 76, 0.18)" />
-                    </filter>
-                  </defs>
-                  <rect x="0" y="0" width="900" height="560" rx="28" fill="url(#campusGrass)" />
-                  <path d="M32 438 C180 394 255 420 380 374 C510 327 620 328 862 286" className="campus-road" />
-                  <path d="M42 508 C184 460 286 474 416 426 C566 371 674 378 872 340" className="campus-road campus-road--minor" />
-                  <path d="M38 70 L154 24" className="campus-road campus-road--edge" />
-                  <text x="92" y="74" transform="rotate(-22 92 74)" className="campus-road-label">Upper Changi Road East</text>
-                  <text x="258" y="508" className="campus-road-label">Somapah Road</text>
-                  <text x="726" y="454" transform="rotate(-33 726 454)" className="campus-road-label">Changi South Ave 1</text>
-
-                  <path d="M170 302 C275 286 340 230 430 230 C514 230 560 276 646 256 C724 238 778 204 842 206" className="campus-path" />
-                  <path d="M486 270 C540 318 604 314 666 344" className="campus-path" />
-                  <path d="M626 198 C590 232 560 250 514 268" className="campus-path" />
-
-                  <g className="campus-main-zone" filter="url(#mapShadow)">
-                    <path d="M130 318 L324 294 L336 238 L150 262 Z" className="campus-building-shape" />
-                    <text x="231" y="282" className="campus-label">Building 1</text>
-                    <path d="M112 238 L346 212 L354 152 L136 170 Z" className="campus-building-shape" />
-                    <text x="235" y="198" className="campus-label">Building 2</text>
-                    <path d="M356 255 L478 228 L456 170 L340 194 Z" className="campus-building-shape campus-building-shape--accent" />
-                    <text x="408" y="212" className="campus-label">Building 3</text>
-                    <text x="408" y="226" className="campus-label-sub">One-Stop Centre</text>
-                    <path d="M182 144 L366 124 L398 72 L234 84 Z" className="campus-building-shape" />
-                    <text x="294" y="116" className="campus-label">Building 5</text>
-                    <text x="248" y="60" className="campus-map-note">Main Campus</text>
-                  </g>
-
-                  <g className="campus-rec-zone" filter="url(#mapShadow)">
-                    <ellipse cx="680" cy="388" rx="118" ry="58" className="campus-track" />
-                    <rect x="591" y="356" width="178" height="58" rx="18" className="campus-field" />
-                    <rect x="760" y="280" width="96" height="62" rx="16" className="campus-pool" />
-                    <rect x="596" y="286" width="126" height="48" rx="14" className="campus-court" />
-                    <text x="678" y="470" className="campus-map-note">Recreational Centre</text>
-                  </g>
-
-                  <g className="campus-housing-zone">
-                    <path d="M520 82 C628 34 760 48 836 124 C780 178 674 196 554 174 Z" className="campus-water" />
-                    <text x="690" y="70" className="campus-map-note">Student Housing</text>
-                    {[
-                      { blk: '51', x: 518, y: 136, label: 'north-west' },
-                      { blk: '55', x: 626, y: 78, label: 'north' },
-                      { blk: '57', x: 676, y: 176, label: 'central' },
-                      { blk: '59', x: 774, y: 122, label: 'east / security' },
-                    ].map(({ blk, x, y, label }) => {
-                      const isActive = activeBlock === blk;
-                      const online = hostelResidents.filter(r=>r.block===blk&&r.online).length;
-                      const total = hostelResidents.filter(r=>r.block===blk).length;
-                      const info = hostelBlockInfo[blk];
-                      return (
-                        <g key={blk} className="campus-hostel-node" onClick={() => { setActiveBlock(blk); setActiveTab('building'); }} role="button" tabIndex={0}>
-                          {isActive && <rect x={x-10} y={y-10} width="96" height="78" rx="18" className="campus-hostel-selected" />}
-                          <rect x={x} y={y} width="76" height="58" rx="13" className="campus-hostel-block" style={{ '--block-color': info.color } as React.CSSProperties} />
-                          <rect x={x+8} y={y+8} width="18" height="42" rx="5" className="campus-window-strip" />
-                          <rect x={x+32} y={y+8} width="18" height="42" rx="5" className="campus-window-strip" />
-                          <text x={x+38} y={y+28} className="campus-hostel-label">Block {blk}</text>
-                          <text x={x+38} y={y+43} className="campus-hostel-sub">{online}/{total} online</text>
-                          <text x={x+38} y={y+71} className="campus-hostel-context">{label}</text>
-                          {blk === myBlock && <circle cx={x+68} cy={y+10} r="7" className="campus-you-dot" />}
-                        </g>
-                      );
-                    })}
-                    <text x="768" y="214" className="campus-label-sub">Management & security office at Block 59</text>
-                  </g>
-
-                  <g>
-                    <rect x="58" y="386" width="56" height="40" rx="10" className="campus-bus" />
-                    <text x="86" y="411" className="campus-label">Bus</text>
-                    <text x="88" y="438" className="campus-label-sub">2 · 5 · 24</text>
-                    <text x="836" y="36" className="campus-north">N</text>
-                    <path d="M836 48 L836 72" className="campus-north-line" />
-                  </g>
-                </svg>
-              </div>
-            </div>
-          )}
-
-          {activeTab === 'jios' && (
-            <div className="hostel-jios-wrap">
-              <div className="jio-grid">
-                {hostelJios.map(jio => (
-                  <div key={jio.id} className="jio-card">
-                    <div className="jio-card-top">
-                      <div className={`jio-icon ${jio.icon}`}>
-                        {jio.icon==='food'?<Utensils size={16}/>:jio.icon==='study'?<BookOpen size={16}/>:<Dumbbell size={16}/>}
-                      </div>
-                      <div><h4>{jio.title}</h4><span className="jio-card-meta">{jio.time}</span></div>
-                    </div>
-                    <p>{jio.desc}</p>
-                    <span className="jio-card-meta">by {jio.host}</span>
-                    <button
-                      className={joinedJios.has(jio.id)?'primary-button wide joined':'secondary-button wide'}
-                      onClick={() => setJoinedJios(p => new Set([...p, jio.id]))}
-                      disabled={joinedJios.has(jio.id)}
-                    >{joinedJios.has(jio.id) ? <><Check size={14}/> Joined</> : 'Join jio'}</button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* ── Right: side panel ───────────────────────────────────────────── */}
-        <div className="hostel-3d-right">
-          {/* Block selector */}
-          <div className="hostel-panel-card">
-            <span className="eyebrow" style={{ display:'block', marginBottom:12 }}>Select block</span>
-            <div className="hostel-block-selector">
-              {hostelBlockIds.map(blk => {
-                const online = hostelResidents.filter(r=>r.block===blk&&r.online).length;
-                const total  = hostelResidents.filter(r=>r.block===blk).length;
-                const pct    = Math.round(online/Math.max(total,1)*100);
-                const info = hostelBlockInfo[blk];
-                return (
-                  <button key={blk} className={`block-select-btn${blk===activeBlock?' active':''}`} onClick={() => setActiveBlock(blk)}>
-                    <div className="bsb-head">
-                      <strong>Block {blk}</strong>
-                      {blk===myBlock && <span className="bsb-yours">You</span>}
-                    </div>
-                    <div className="bsb-sub">{info?.desc ?? 'Housing block'} · {info?.group ?? 'Students'}</div>
-                    <div className="bsb-bar"><div className="bsb-fill" style={{ width:`${pct}%` }}/></div>
-                    <div className="bsb-counts"><span style={{color:'#34d399'}}>{online} online</span><span>{total} total</span></div>
-                  </button>
-                );
-              })}
-            </div>
-            {!myBlock && (
-              <button className="secondary-button wide" style={{marginTop:10}} onClick={() => setShowSetup(true)}>
-                <Home size={13}/> Set up your room
-              </button>
-            )}
-          </div>
-
-          {/* Room detail */}
-          {selectedRoom && (
-            <div className="hostel-panel-card room-detail-card">
-              <div className="rdc-header">
-                <span className="eyebrow">Room {selectedRoom.block}-{String(selectedRoom.floor).padStart(2,'0')}{selectedRoom.room}</span>
-                <button className="icon-button" onClick={() => setSelectedRoom(null)}><X size={14}/></button>
-              </div>
-              <div className="rdc-avatar-wrap">
-                <div className="rdc-avatar" style={{ background:`${PILLAR_COLOR[selectedRoom.pillar]}22` }}>
-                  <span style={{ color:PILLAR_COLOR[selectedRoom.pillar], fontSize:'1.3rem', fontWeight:800 }}>
-                    {selectedRoom.name.split(' ').map((w:string)=>w[0]).join('').slice(0,2)}
-                  </span>
-                </div>
-                <div className={`rdc-online-ring${selectedRoom.online?' online':''}`}/>
-              </div>
-              <h3 className="rdc-name">{selectedRoom.name}</h3>
-              <div className="rdc-meta">
-                <span className="rdc-pillar" style={{ color:PILLAR_COLOR[selectedRoom.pillar], background:`${PILLAR_COLOR[selectedRoom.pillar]}18` }}>
-                  {selectedRoom.pillar}
-                </span>
-                <span className="rdc-year">{selectedRoom.year}</span>
-              </div>
-              <div className={`rdc-status${selectedRoom.online?' online':''}`}>
-                <span className="rdc-dot"/>{selectedRoom.online?'Online now':'Away'}
-              </div>
-              <div className="rdc-actions">
-                <button className="primary-button" style={{flex:1, justifyContent:'center'}}><MessageCircle size={13}/> Message</button>
-              </div>
-            </div>
-          )}
-
-          {/* Online now */}
-          <div className="hostel-panel-card">
-            <div style={{display:'flex',alignItems:'center',justifyContent:'space-between',marginBottom:12}}>
-              <span className="eyebrow">Online now · Block {activeBlock}</span>
-              <span style={{fontSize:'0.73rem',color:'#34d399',fontWeight:600}}>{onlineInBlock.length} active</span>
-            </div>
-            <div className="online-residents-list">
-              {onlineInBlock.length === 0 && (
-                <p style={{color:'var(--muted)',fontSize:'0.8rem',textAlign:'center',padding:'8px 0'}}>Nobody online right now</p>
-              )}
-              {onlineInBlock.map(r => (
-                <button key={r.name} className="online-resident-row" onClick={() => setSelectedRoom(r)}>
-                  <div className="orr-avatar" style={{ background:`${PILLAR_COLOR[r.pillar]}22`, color:PILLAR_COLOR[r.pillar] }}>
-                    {r.name.split(' ')[0][0]}
-                  </div>
-                  <div className="orr-info">
-                    <span className="orr-name">{r.name.split(' ')[0]}</span>
-                    <span className="orr-room">Fl.{r.floor} · Rm.{r.room}</span>
-                  </div>
-                  <span className="orr-pillar" style={{color:PILLAR_COLOR[r.pillar]}}>{r.pillar}</span>
-                  <span className="orr-live-dot"/>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Settling-in support */}
-          <div className="hostel-panel-card">
-            <span className="eyebrow" style={{display:'block',marginBottom:8}}>New here?</span>
-            {settlingHelpRequested ? (
-              <div className="launchpad-task-help-msg" style={{ marginTop: 0 }}>
-                <HeartHandshake size={12}/> A student support advisor will check in with you soon.
-              </div>
-            ) : (
-              <>
-                <p style={{ fontSize:'0.79rem', color:'var(--muted)', margin:'0 0 10px', lineHeight:1.5 }}>
-                  Moving in can feel overwhelming. If you'd like a hand settling in, we'll connect you with someone.
-                </p>
-                <button className="secondary-button wide" onClick={requestSettlingHelp}>
-                  <LifeBuoy size={13}/> I need help settling in
-                </button>
-              </>
-            )}
-          </div>
-
-          {/* Legend */}
-          <div className="hostel-panel-card">
-            <span className="eyebrow" style={{display:'block',marginBottom:10}}>Window legend</span>
-            <div className="hostel-legend">
-              {[
-                {cls:'sky',label:'Online now'},
-                {cls:'green',label:'Your room'},
-                {cls:'dim',label:'Resident (away)'},
-                {cls:'empty',label:'Empty room'},
-              ].map(l => (
-                <div key={l.cls} className="legend-row">
-                  <div className={`legend-win ${l.cls}`}/>
-                  <span>{l.label}</span>
-                </div>
-              ))}
-            </div>
-            <div className="pillar-legend" style={{marginTop:12}}>
-              {Object.entries(PILLAR_COLOR).map(([p,col]) => (
-                <span key={p} className="legend-item">
-                  <span className="legend-dot" style={{background:col}}/>{p}
-                </span>
-              ))}
-            </div>
           </div>
         </div>
+        <div className="campus-life-privacy-card">
+          <ShieldCheck size={22} />
+          <strong>No room directory. No floor map. No live occupancy.</strong>
+          <span>Exact room, floor, resident, and occupancy data stay outside Cohortly. Students connect by year, module, interest, and broad campus-life community.</span>
+        </div>
+      </section>
+
+      <div className="campus-life-overview-grid">
+        <article className="campus-life-home-card">
+          <span className="eyebrow">Your home base</span>
+          <h3>{homeBase}</h3>
+          <p>{selected.focus}</p>
+          <div className="campus-life-home-meta">
+            <span>{selected.scope}</span>
+            <span>{selected.count}</span>
+          </div>
+        </article>
+        <article className="campus-life-home-card muted">
+          <span className="eyebrow">Official source of truth</span>
+          <h3>SUTD Housing handles exact assignments.</h3>
+          <p>Use official housing portals and staff guidance for key collection, room changes, maintenance, safety rules, and emergency procedures.</p>
+        </article>
       </div>
-    </>
+
+      <section className="campus-life-section">
+        <div className="section-heading compact">
+          <div>
+            <span className="eyebrow">Communities</span>
+            <h3>Pick a broad campus-life circle</h3>
+          </div>
+          <p>These are intentionally not room-level groups.</p>
+        </div>
+        <div className="campus-life-community-grid">
+          {campusLifeCommunities.map((community) => (
+            <button
+              key={community.id}
+              className={'campus-life-community-card ' + (selectedCommunity === community.id ? 'active' : '')}
+              onClick={() => saveCommunity(community)}
+            >
+              <span className={'community-dot ' + community.tone} />
+              <strong>{community.label}</strong>
+              <small>{community.scope}</small>
+              <p>{community.focus}</p>
+              <span>{community.count}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="campus-life-section">
+        <div className="section-heading compact">
+          <div>
+            <span className="eyebrow">First-week jios</span>
+            <h3>Join useful plans without needing a room feed</h3>
+          </div>
+          <p>Meal, study, sports, and campus-walk plans are grouped by broad student context.</p>
+        </div>
+        <div className="campus-life-jio-grid">
+          {campusLifeJios.map((jio) => (
+            <article key={jio.id} className="campus-life-jio-card">
+              <div className="jio-card-top">
+                <div className={'jio-icon ' + jio.icon}>{renderJioIcon(jio.icon)}</div>
+                <div>
+                  <h4>{jio.title}</h4>
+                  <span className="jio-card-meta">{jio.time}</span>
+                </div>
+              </div>
+              <p>{jio.desc}</p>
+              <div className="campus-life-jio-meta">
+                <span>by {jio.host}</span>
+                <span>{jio.scope}</span>
+              </div>
+              <button
+                className={joinedJios.has(jio.id) ? 'primary-button wide joined' : 'secondary-button wide'}
+                onClick={() => setJoinedJios((previous) => new Set([...previous, jio.id]))}
+                disabled={joinedJios.has(jio.id)}
+              >
+                {joinedJios.has(jio.id) ? <><Check size={14} /> Joined</> : <><Users size={14} /> Join jio</>}
+              </button>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section className="campus-life-section campus-life-guide-section">
+        <div className="section-heading compact">
+          <div>
+            <span className="eyebrow">Move-in guidance</span>
+            <h3>What students actually need before Week 1</h3>
+          </div>
+        </div>
+        <div className="campus-life-guide-grid">
+          {campusLifeGuides.map((guide) => (
+            <article key={guide.title} className="campus-life-guide-card">
+              <CheckCircle2 size={18} />
+              <strong>{guide.title}</strong>
+              <p>{guide.detail}</p>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      {settlingHelpRequested && (
+        <div className="campus-life-support-banner">
+          <HeartHandshake size={16} />
+          <span>A support signal was created for {userName}. Staff see only that help was requested from Campus Life, not any room-level location.</span>
+        </div>
+      )}
+    </div>
   );
 }
 
