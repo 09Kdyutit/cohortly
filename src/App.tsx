@@ -9136,11 +9136,13 @@ function CampusLifeView({
   const currentCommunity = profile.campusCommunity ?? 'freshmore-arrival';
   const [selectedCommunity, setSelectedCommunity] = useState(currentCommunity);
   const [selectedStopId, setSelectedStopId] = useState('housing');
+  const [selectedRouteId, setSelectedRouteId] = useState('arrival');
   const [joinedJios, setJoinedJios] = useState<Set<string>>(new Set());
   const [settlingHelpRequested, setSettlingHelpRequested] = useState(false);
 
   const selected = campusLifeCommunities.find((community) => community.id === selectedCommunity) ?? campusLifeCommunities[0];
   const selectedStop = campusLifeMapStops.find((stop) => stop.id === selectedStopId) ?? campusLifeMapStops[0];
+  const selectedRoute = campusLifeRoutes.find((route) => route.id === selectedRouteId) ?? campusLifeRoutes[0];
   const homeBase = profile.campusHomeBase ?? profile.homeBase ?? selected.label;
 
   const saveCommunity = (community: CampusLifeCommunity) => {
@@ -9212,52 +9214,116 @@ function CampusLifeView({
       <section className="campus-life-section campus-life-map-section">
         <div className="section-heading compact">
           <div>
-            <span className="eyebrow">Hostel & campus map</span>
-            <h3>Use housing as a waypoint, not a directory</h3>
+            <span className="eyebrow">Housing & campus map</span>
+            <h3>Move around without a room directory</h3>
           </div>
-          <p>Useful routes for move-in week, with no room, floor, resident, or occupancy display.</p>
+          <p>Useful first-week routes, with no room, floor, resident, or occupancy display.</p>
         </div>
         <div className="campus-life-map-layout">
           <div className="campus-life-map-card" aria-label="SUTD campus wayfinding map">
+            <div className="campus-life-map-toolbar">
+              <div>
+                <span>Live orientation board</span>
+                <strong>{selectedRoute.title}</strong>
+              </div>
+              <div className="campus-life-map-legend" aria-label="Map legend">
+                <span><i className="legend-route" />Active route</span>
+                <span><i className="legend-stop" />Waypoint</span>
+              </div>
+            </div>
             <div className="campus-life-map-canvas">
               <svg viewBox="0 0 100 100" role="img" aria-label="Schematic campus routes from housing to main campus, food, sports, and transit">
-                <path className="map-route main" d="M18 74 C28 62 35 53 30 46 C36 36 42 31 38 26 C50 27 62 27 72 28" />
-                <path className="map-route secondary" d="M72 28 C66 38 62 47 56 52 C60 60 63 66 66 72" />
-                <path className="map-route secondary" d="M30 46 C42 48 50 50 56 52" />
-                <path className="map-zone main-campus" d="M19 36 L43 30 L48 51 L24 57 Z" />
-                <path className="map-zone housing" d="M63 14 L86 18 L84 38 L62 40 Z" />
-                <ellipse className="map-zone recreation" cx="66" cy="74" rx="16" ry="9" />
+                <defs>
+                  <linearGradient id="mapRouteGradient" x1="16" y1="74" x2="76" y2="24" gradientUnits="userSpaceOnUse">
+                    <stop offset="0" stopColor="#3d93d8" />
+                    <stop offset="0.55" stopColor="#2846d8" />
+                    <stop offset="1" stopColor="#8bd8c1" />
+                  </linearGradient>
+                  <filter id="mapSoftShadow" x="-20%" y="-20%" width="140%" height="140%">
+                    <feDropShadow dx="0" dy="2" stdDeviation="2.2" floodColor="#102033" floodOpacity="0.16" />
+                  </filter>
+                </defs>
+                <path className="map-road perimeter" d="M13 77 C22 63 28 55 33 48 C42 36 52 27 72 25 C82 24 88 29 87 40 C86 53 78 66 68 74 C56 84 35 86 18 80" />
+                <path className="map-road covered" d="M22 72 C31 61 39 49 37 38 C47 34 57 32 72 28" />
+                <path className="map-road covered secondary" d="M31 47 C42 50 48 51 56 52 C62 57 64 65 66 72" />
+                <path className={'map-route route-arrival ' + (selectedRouteId === 'arrival' ? 'active' : '')} d="M18 74 C27 62 34 54 30 46 C38 36 47 29 72 28" />
+                <path className={'map-route route-breakfast ' + (selectedRouteId === 'breakfast' ? 'active' : '')} d="M72 28 C66 37 61 45 56 52 C47 51 38 49 30 46" />
+                <path className={'map-route route-study ' + (selectedRouteId === 'study' ? 'active' : '')} d="M72 28 C61 27 50 26 38 26" />
+                <g className="map-building main-campus" filter="url(#mapSoftShadow)">
+                  <path d="M20 39 L34 34 L37 49 L23 54 Z" />
+                  <path d="M36 30 L49 28 L51 41 L39 43 Z" />
+                  <path d="M25 57 L43 54 L45 65 L27 68 Z" />
+                </g>
+                <g className="map-building building-five" filter="url(#mapSoftShadow)">
+                  <path d="M34 19 L49 18 L49 26 L34 27 Z" />
+                  <path d="M37 22 L46 22" />
+                  <path d="M37 25 L46 25" />
+                </g>
+                <g className="map-building housing" filter="url(#mapSoftShadow)">
+                  <path d="M64 12 L69 13 L68 33 L63 32 Z" />
+                  <path d="M71 11 L76 12 L76 33 L70 32 Z" />
+                  <path d="M78 14 L83 15 L82 34 L77 33 Z" />
+                  <path d="M62 36 L84 38" />
+                </g>
+                <g className="map-building food" filter="url(#mapSoftShadow)">
+                  <path d="M50 46 L60 44 L63 52 L53 55 Z" />
+                </g>
+                <g className="map-building sports" filter="url(#mapSoftShadow)">
+                  <ellipse cx="66" cy="74" rx="15" ry="8" />
+                  <path d="M56 74 L76 74" />
+                  <path d="M66 66 L66 82" />
+                </g>
+                <g className="map-building transit" filter="url(#mapSoftShadow)">
+                  <path d="M10 69 L22 69 L24 75 L13 78 Z" />
+                </g>
+                <text className="map-text main" x="24" y="62">MAIN CAMPUS</text>
+                <text className="map-text housing" x="62" y="42">HOUSING</text>
+                <text className="map-text b5" x="34" y="16">B5</text>
+                <text className="map-text sports" x="57" y="88">SPORTS</text>
               </svg>
+              <span className="campus-life-map-compass">N</span>
               {campusLifeMapStops.map((stop) => (
                 <button
                   key={stop.id}
-                  className={'campus-life-map-pin ' + stop.kind + (selectedStopId === stop.id ? ' active' : '')}
+                  className={'campus-life-map-pin stop-' + stop.id + ' ' + stop.kind + (selectedStopId === stop.id ? ' active' : '')}
                   style={{ left: `${stop.x}%`, top: `${stop.y}%` }}
                   onClick={() => setSelectedStopId(stop.id)}
                   aria-label={stop.label}
                 >
-                  <span />
+                  <span className="campus-life-map-pin-dot" />
+                  <span className="campus-life-map-pin-label">{stop.label}</span>
                 </button>
               ))}
             </div>
             <div className="campus-life-map-focus">
               <MapPinned size={17} />
               <div>
+                <span>Selected waypoint</span>
                 <strong>{selectedStop.label}</strong>
                 <p>{selectedStop.detail}</p>
+                <div className="campus-life-map-focus-meta">
+                  <small>{selectedRoute.title}</small>
+                  <small>{selectedRoute.time}</small>
+                </div>
               </div>
             </div>
           </div>
           <div className="campus-life-route-list">
             {campusLifeRoutes.map((route) => (
-              <article key={route.id} className="campus-life-route-card">
+              <button
+                key={route.id}
+                type="button"
+                className={'campus-life-route-card ' + (selectedRouteId === route.id ? 'active' : '')}
+                onClick={() => setSelectedRouteId(route.id)}
+                aria-pressed={selectedRouteId === route.id}
+              >
                 <div>
                   <strong>{route.title}</strong>
                   <span>{route.time}</span>
                 </div>
                 <p>{route.detail}</p>
                 <small>{route.stops}</small>
-              </article>
+              </button>
             ))}
           </div>
         </div>

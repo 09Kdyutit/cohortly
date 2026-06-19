@@ -2759,39 +2759,99 @@ textarea::placeholder { color: #718196; opacity: 1; }
   padding: 18px;
 }
 .campus-life-map-section {
-  background: #fbfdff;
+  background: #fff;
 }
 .campus-life-map-layout {
   display: grid;
-  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.65fr);
   gap: 14px;
   margin-top: 14px;
+  align-items: stretch;
 }
 .campus-life-map-card,
 .campus-life-route-card {
-  border: 1px solid var(--line);
+  border: 1px solid #dce6f3;
   border-radius: var(--radius-lg);
   background: #fff;
-  box-shadow: var(--shadow-sm);
 }
 .campus-life-map-card {
   display: grid;
   gap: 12px;
   padding: 14px;
 }
+.campus-life-map-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 2px 2px 0;
+}
+.campus-life-map-toolbar span,
+.campus-life-map-focus > div > span {
+  display: block;
+  color: var(--muted-strong);
+  font-size: 0.72rem;
+  font-weight: 850;
+}
+.campus-life-map-toolbar strong {
+  display: block;
+  margin-top: 2px;
+  color: var(--ink);
+  font-size: 1rem;
+}
+.campus-life-map-legend {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px 12px;
+  color: var(--muted-strong);
+  font-size: 0.76rem;
+  font-weight: 800;
+}
+.campus-life-map-legend span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.campus-life-map-legend i {
+  display: inline-block;
+  flex: 0 0 auto;
+}
+.legend-route {
+  width: 22px;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, #3d93d8, #2846d8, #8bd8c1);
+}
+.legend-stop {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  background: var(--cobalt-600);
+  box-shadow: 0 0 0 4px #eef4ff;
+}
 .campus-life-map-canvas {
   position: relative;
-  min-height: 320px;
-  border: 1px solid #d8e3f1;
+  min-height: 390px;
+  border: 1px solid #d6e3f2;
   border-radius: 16px;
   overflow: hidden;
   background:
-    linear-gradient(90deg, rgba(35, 70, 199, 0.045) 1px, transparent 1px),
-    linear-gradient(0deg, rgba(35, 70, 199, 0.045) 1px, transparent 1px),
-    radial-gradient(circle at 72% 28%, rgba(35, 70, 199, 0.11), transparent 11rem),
-    radial-gradient(circle at 64% 74%, rgba(31, 143, 104, 0.10), transparent 10rem),
-    #f7fbff;
-  background-size: 42px 42px, 42px 42px, auto, auto, auto;
+    radial-gradient(circle at 74% 24%, rgba(35, 70, 199, 0.12), transparent 14rem),
+    radial-gradient(circle at 60% 74%, rgba(31, 143, 104, 0.12), transparent 13rem),
+    linear-gradient(180deg, #f9fcff 0%, #edf5ff 100%);
+}
+.campus-life-map-canvas::before {
+  content: "8 Dover Road orientation";
+  position: absolute;
+  left: 14px;
+  top: 12px;
+  z-index: 1;
+  color: rgba(35, 54, 82, 0.52);
+  font-size: 0.68rem;
+  font-weight: 900;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
 }
 .campus-life-map-canvas svg {
   position: absolute;
@@ -2799,66 +2859,181 @@ textarea::placeholder { color: #718196; opacity: 1; }
   width: 100%;
   height: 100%;
 }
+.campus-life-map-compass {
+  position: absolute;
+  right: 14px;
+  top: 12px;
+  z-index: 1;
+  width: 30px;
+  height: 30px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(102, 122, 154, 0.24);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.82);
+  color: var(--ink-soft);
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+.map-road {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+  vector-effect: non-scaling-stroke;
+}
+.map-road.perimeter {
+  stroke: rgba(98, 119, 148, 0.24);
+  stroke-width: 5;
+}
+.map-road.covered {
+  stroke: rgba(126, 147, 176, 0.34);
+  stroke-width: 2.8;
+}
+.map-road.covered.secondary {
+  stroke-dasharray: 2.2 4;
+}
 .map-route {
   fill: none;
   stroke-linecap: round;
   stroke-linejoin: round;
+  stroke: url(#mapRouteGradient);
+  stroke-width: 4.2;
+  opacity: 0;
+  transition: opacity 180ms var(--ease-out), stroke-width 180ms var(--ease-out);
+  vector-effect: non-scaling-stroke;
 }
-.map-route.main {
-  stroke: rgba(35, 70, 199, 0.62);
-  stroke-width: 2.1;
+.map-route.active {
+  opacity: 0.96;
+  stroke-width: 4.8;
+  filter: drop-shadow(0 4px 7px rgba(35, 70, 199, 0.18));
 }
-.map-route.secondary {
-  stroke: rgba(31, 143, 104, 0.42);
-  stroke-width: 1.6;
-  stroke-dasharray: 4 4;
+.route-breakfast.active { stroke: #219c73; }
+.route-study.active { stroke: #2846d8; }
+.map-building path,
+.map-building ellipse {
+  vector-effect: non-scaling-stroke;
 }
-.map-zone {
-  fill: rgba(255, 255, 255, 0.74);
-  stroke: rgba(102, 122, 154, 0.28);
-  stroke-width: 0.75;
+.map-building.main-campus path {
+  fill: rgba(255,255,255,0.86);
+  stroke: rgba(69, 91, 120, 0.22);
+  stroke-width: 1.1;
 }
-.map-zone.housing { fill: rgba(35, 70, 199, 0.10); }
-.map-zone.recreation { fill: rgba(31, 143, 104, 0.10); }
+.map-building.building-five path:first-child {
+  fill: rgba(255,255,255,0.94);
+  stroke: rgba(69, 91, 120, 0.24);
+  stroke-width: 1.1;
+}
+.map-building.building-five path:not(:first-child) {
+  fill: none;
+  stroke: rgba(35, 70, 199, 0.28);
+  stroke-width: 0.9;
+}
+.map-building.housing path {
+  fill: rgba(35, 70, 199, 0.16);
+  stroke: rgba(35, 70, 199, 0.24);
+  stroke-width: 1;
+}
+.map-building.housing path:last-child {
+  fill: none;
+  stroke: rgba(35, 70, 199, 0.30);
+  stroke-width: 1.2;
+}
+.map-building.food path {
+  fill: rgba(191, 114, 20, 0.18);
+  stroke: rgba(191, 114, 20, 0.28);
+  stroke-width: 1;
+}
+.map-building.sports ellipse {
+  fill: rgba(31, 143, 104, 0.16);
+  stroke: rgba(31, 143, 104, 0.28);
+  stroke-width: 1;
+}
+.map-building.sports path,
+.map-building.transit path {
+  fill: none;
+  stroke: rgba(31, 143, 104, 0.28);
+  stroke-width: 0.9;
+}
+.map-building.transit path {
+  fill: rgba(61, 147, 216, 0.16);
+  stroke: rgba(61, 147, 216, 0.30);
+}
+.map-text {
+  fill: rgba(35, 54, 82, 0.44);
+  font-size: 3.1px;
+  font-weight: 900;
+  letter-spacing: 0.04em;
+  pointer-events: none;
+}
 .campus-life-map-pin {
   position: absolute;
-  width: 34px;
-  height: 34px;
-  margin: -17px 0 0 -17px;
-  border: 2px solid #fff;
-  border-radius: 999px;
-  background: var(--surface);
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: auto;
+  height: auto;
+  border: 0;
+  background: transparent;
   color: var(--cobalt-700);
   cursor: pointer;
-  box-shadow: 0 6px 14px rgba(16, 32, 51, 0.16);
-  transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+  transform: translate(-50%, -50%);
+  transition: transform 180ms var(--ease-out);
 }
-.campus-life-map-pin span {
+.campus-life-map-pin-dot {
   display: block;
-  width: 12px;
-  height: 12px;
-  margin: 9px auto;
+  width: 15px;
+  height: 15px;
   border-radius: 999px;
   background: currentColor;
+  box-shadow: 0 0 0 7px #fff, 0 4px 10px rgba(16, 32, 51, 0.18);
+}
+.campus-life-map-pin-label {
+  position: absolute;
+  left: 24px;
+  top: 50%;
+  transform: translateY(-50%);
+  padding: 5px 8px;
+  border: 1px solid rgba(102, 122, 154, 0.18);
+  border-radius: 999px;
+  background: rgba(255,255,255,0.9);
+  color: var(--ink);
+  font-size: 0.72rem;
+  font-weight: 850;
+  line-height: 1;
+  white-space: nowrap;
+  box-shadow: 0 2px 6px rgba(16, 32, 51, 0.08);
+  opacity: 0.9;
+  transition: opacity 180ms var(--ease-out), border-color 180ms var(--ease-out);
 }
 .campus-life-map-pin:hover,
 .campus-life-map-pin.active {
-  transform: translateY(-2px) scale(1.05);
-  box-shadow: 0 8px 18px rgba(16, 32, 51, 0.20);
+  transform: translate(-50%, -50%) scale(1.05);
+}
+.campus-life-map-pin:hover .campus-life-map-pin-label,
+.campus-life-map-pin.active .campus-life-map-pin-label {
+  opacity: 1;
+  border-color: rgba(35, 70, 199, 0.24);
 }
 .campus-life-map-pin.housing { color: var(--cobalt-600); }
 .campus-life-map-pin.academic { color: var(--ink-soft); }
 .campus-life-map-pin.food { color: var(--warning); }
 .campus-life-map-pin.sports { color: var(--success); }
 .campus-life-map-pin.transit { color: var(--sky); }
+.stop-housing .campus-life-map-pin-label,
+.stop-sports .campus-life-map-pin-label {
+  left: auto;
+  right: 24px;
+}
 .campus-life-map-focus {
   display: grid;
   grid-template-columns: 34px minmax(0, 1fr);
   gap: 10px;
   align-items: start;
-  padding: 12px;
+  padding: 13px;
+  border: 1px solid #dce6f3;
   border-radius: 14px;
-  background: var(--cobalt-50);
+  background: linear-gradient(180deg, #f3f7ff, #fbfdff);
   color: var(--ink);
 }
 .campus-life-map-focus svg {
@@ -2867,12 +3042,26 @@ textarea::placeholder { color: #718196; opacity: 1; }
 }
 .campus-life-map-focus strong {
   display: block;
-  margin-bottom: 4px;
+  margin: 2px 0 4px;
 }
 .campus-life-map-focus p {
   margin: 0;
   color: var(--muted-strong);
   line-height: 1.45;
+}
+.campus-life-map-focus-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 10px;
+}
+.campus-life-map-focus-meta small {
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #fff;
+  color: var(--cobalt-700);
+  font-size: 0.72rem;
+  font-weight: 850;
 }
 .campus-life-route-list {
   display: grid;
@@ -2882,6 +3071,19 @@ textarea::placeholder { color: #718196; opacity: 1; }
   display: grid;
   gap: 8px;
   padding: 14px;
+  color: var(--ink);
+  text-align: left;
+  font: inherit;
+  cursor: pointer;
+  transition: border-color 180ms var(--ease-out), background 180ms var(--ease-out), transform 180ms var(--ease-out);
+}
+.campus-life-route-card:hover,
+.campus-life-route-card.active {
+  border-color: rgba(35, 70, 199, 0.32);
+  background: linear-gradient(180deg, #f8fbff, #fff);
+}
+.campus-life-route-card:hover {
+  transform: translateY(-1px);
 }
 .campus-life-route-card > div {
   display: flex;
@@ -4219,10 +4421,26 @@ th { color: var(--muted); font-size: 0.78rem; font-weight: 850; }
   .privacy-rights-grid { grid-template-columns: 1fr; }
   .campus-life-map-card,
   .campus-life-route-card { border-radius: 16px; }
+  .campus-life-map-toolbar {
+    display: grid;
+    gap: 10px;
+  }
+  .campus-life-map-legend { justify-content: flex-start; }
   .campus-life-map-canvas {
-    min-height: 260px;
+    min-height: 320px;
     border-radius: 14px;
   }
+  .campus-life-map-canvas::before {
+    max-width: 160px;
+    line-height: 1.15;
+  }
+  .campus-life-map-pin-label {
+    display: none;
+    max-width: 128px;
+    white-space: normal;
+    line-height: 1.15;
+  }
+  .campus-life-map-pin.active .campus-life-map-pin-label { display: block; }
   .campus-life-map-focus { grid-template-columns: 1fr; }
   .campus-life-route-card > div {
     display: grid;
