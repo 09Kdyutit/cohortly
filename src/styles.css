@@ -2758,6 +2758,154 @@ textarea::placeholder { color: #718196; opacity: 1; }
 .campus-life-section {
   padding: 18px;
 }
+.campus-life-map-section {
+  background: #fbfdff;
+}
+.campus-life-map-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(280px, 0.85fr);
+  gap: 14px;
+  margin-top: 14px;
+}
+.campus-life-map-card,
+.campus-life-route-card {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: #fff;
+  box-shadow: var(--shadow-sm);
+}
+.campus-life-map-card {
+  display: grid;
+  gap: 12px;
+  padding: 14px;
+}
+.campus-life-map-canvas {
+  position: relative;
+  min-height: 320px;
+  border: 1px solid #d8e3f1;
+  border-radius: 16px;
+  overflow: hidden;
+  background:
+    linear-gradient(90deg, rgba(35, 70, 199, 0.045) 1px, transparent 1px),
+    linear-gradient(0deg, rgba(35, 70, 199, 0.045) 1px, transparent 1px),
+    radial-gradient(circle at 72% 28%, rgba(35, 70, 199, 0.11), transparent 11rem),
+    radial-gradient(circle at 64% 74%, rgba(31, 143, 104, 0.10), transparent 10rem),
+    #f7fbff;
+  background-size: 42px 42px, 42px 42px, auto, auto, auto;
+}
+.campus-life-map-canvas svg {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.map-route {
+  fill: none;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.map-route.main {
+  stroke: rgba(35, 70, 199, 0.62);
+  stroke-width: 2.1;
+}
+.map-route.secondary {
+  stroke: rgba(31, 143, 104, 0.42);
+  stroke-width: 1.6;
+  stroke-dasharray: 4 4;
+}
+.map-zone {
+  fill: rgba(255, 255, 255, 0.74);
+  stroke: rgba(102, 122, 154, 0.28);
+  stroke-width: 0.75;
+}
+.map-zone.housing { fill: rgba(35, 70, 199, 0.10); }
+.map-zone.recreation { fill: rgba(31, 143, 104, 0.10); }
+.campus-life-map-pin {
+  position: absolute;
+  width: 34px;
+  height: 34px;
+  margin: -17px 0 0 -17px;
+  border: 2px solid #fff;
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--cobalt-700);
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(16, 32, 51, 0.16);
+  transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
+}
+.campus-life-map-pin span {
+  display: block;
+  width: 12px;
+  height: 12px;
+  margin: 9px auto;
+  border-radius: 999px;
+  background: currentColor;
+}
+.campus-life-map-pin:hover,
+.campus-life-map-pin.active {
+  transform: translateY(-2px) scale(1.05);
+  box-shadow: 0 8px 18px rgba(16, 32, 51, 0.20);
+}
+.campus-life-map-pin.housing { color: var(--cobalt-600); }
+.campus-life-map-pin.academic { color: var(--ink-soft); }
+.campus-life-map-pin.food { color: var(--warning); }
+.campus-life-map-pin.sports { color: var(--success); }
+.campus-life-map-pin.transit { color: var(--sky); }
+.campus-life-map-focus {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+  padding: 12px;
+  border-radius: 14px;
+  background: var(--cobalt-50);
+  color: var(--ink);
+}
+.campus-life-map-focus svg {
+  color: var(--cobalt-700);
+  margin-top: 2px;
+}
+.campus-life-map-focus strong {
+  display: block;
+  margin-bottom: 4px;
+}
+.campus-life-map-focus p {
+  margin: 0;
+  color: var(--muted-strong);
+  line-height: 1.45;
+}
+.campus-life-route-list {
+  display: grid;
+  gap: 10px;
+}
+.campus-life-route-card {
+  display: grid;
+  gap: 8px;
+  padding: 14px;
+}
+.campus-life-route-card > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: baseline;
+}
+.campus-life-route-card strong {
+  color: var(--ink);
+}
+.campus-life-route-card span,
+.campus-life-route-card small {
+  color: var(--cobalt-700);
+  font-size: 0.78rem;
+  font-weight: 820;
+}
+.campus-life-route-card p {
+  margin: 0;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.campus-life-route-card small {
+  color: var(--muted-strong);
+}
 .campus-life-community-grid {
   grid-template-columns: repeat(4, minmax(0, 1fr));
   margin-top: 14px;
@@ -3815,6 +3963,7 @@ th { color: var(--muted); font-size: 0.78rem; font-weight: 850; }
   .calendar-layout,
   .campus-life-hero,
   .campus-life-overview-grid,
+  .campus-life-map-layout,
   .classes-layout,
   .classroom-layout { grid-template-columns: 1fr; }
   .calendar-grid { grid-template-columns: repeat(7, minmax(64px, 1fr)); }
@@ -4066,7 +4215,19 @@ th { color: var(--muted); font-size: 0.78rem; font-weight: 850; }
   .campus-life-section { padding: 16px; }
   .campus-life-community-grid,
   .campus-life-guide-grid,
+  .campus-life-map-layout,
   .privacy-rights-grid { grid-template-columns: 1fr; }
+  .campus-life-map-card,
+  .campus-life-route-card { border-radius: 16px; }
+  .campus-life-map-canvas {
+    min-height: 260px;
+    border-radius: 14px;
+  }
+  .campus-life-map-focus { grid-template-columns: 1fr; }
+  .campus-life-route-card > div {
+    display: grid;
+    gap: 4px;
+  }
   .campus-life-hero-actions .primary-button,
   .campus-life-hero-actions .secondary-button { width: 100%; }
   .auth-card,

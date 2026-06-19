@@ -5696,6 +5696,23 @@ type CampusLifeCommunity = {
   tone: 'freshman' | 'returning' | 'commuter' | 'support';
 };
 
+type CampusLifeMapStop = {
+  id: string;
+  label: string;
+  kind: 'housing' | 'academic' | 'food' | 'sports' | 'support' | 'transit';
+  detail: string;
+  x: number;
+  y: number;
+};
+
+type CampusLifeRoute = {
+  id: string;
+  title: string;
+  time: string;
+  detail: string;
+  stops: string;
+};
+
 const campusLifeJios: CampusLifeJio[] = [
   {
     id: 'jio-breakfast',
@@ -5786,6 +5803,81 @@ const campusLifeGuides = [
   {
     title: 'Move-in essentials',
     detail: 'Pack bedding, toiletries, student card documents, laptop charger, approved adapters, and weather-safe shoes.',
+  },
+];
+
+const campusLifeMapStops: CampusLifeMapStop[] = [
+  {
+    id: 'housing',
+    label: 'Housing cluster',
+    kind: 'housing',
+    detail: 'Use official Housing for exact assignments. Cohortly only treats this as a broad home-base waypoint.',
+    x: 72,
+    y: 28,
+  },
+  {
+    id: 'main-campus',
+    label: 'Main campus',
+    kind: 'academic',
+    detail: 'Student Hub, teaching blocks, library, labs, and most Week 0 admin flows.',
+    x: 30,
+    y: 46,
+  },
+  {
+    id: 'building-5',
+    label: 'Building 5',
+    kind: 'academic',
+    detail: 'Library, study areas, computer labs, and common module prep meeting point.',
+    x: 38,
+    y: 26,
+  },
+  {
+    id: 'food',
+    label: 'Food loop',
+    kind: 'food',
+    detail: 'Common meeting point for breakfast, dinner, and supper jios before Week 1.',
+    x: 56,
+    y: 52,
+  },
+  {
+    id: 'sports',
+    label: 'Sports complex',
+    kind: 'sports',
+    detail: 'Beginner badminton, sports trials, gym access, pool, and first-week movement plans.',
+    x: 66,
+    y: 72,
+  },
+  {
+    id: 'bus',
+    label: 'Bus / MRT link',
+    kind: 'transit',
+    detail: 'A practical arrival anchor for students commuting or coming from airport/MRT connections.',
+    x: 18,
+    y: 74,
+  },
+];
+
+const campusLifeRoutes: CampusLifeRoute[] = [
+  {
+    id: 'arrival',
+    title: 'Arrival day path',
+    time: '20-30 min buffer',
+    detail: 'Transit link -> official Housing/key collection -> main campus admin desk.',
+    stops: 'Bus / MRT link -> Housing cluster -> Main campus',
+  },
+  {
+    id: 'breakfast',
+    title: '8 AM lecture breakfast',
+    time: '15 min',
+    detail: 'Meet at a common campus waypoint, grab food, then head to the lecture block together.',
+    stops: 'Housing cluster -> Food loop -> Main campus',
+  },
+  {
+    id: 'study',
+    title: 'Night study route',
+    time: '10 min',
+    detail: 'Broad group movement from housing to Building 5 without exposing individual rooms.',
+    stops: 'Housing cluster -> Building 5',
   },
 ];
 
@@ -9043,10 +9135,12 @@ function CampusLifeView({
 }) {
   const currentCommunity = profile.campusCommunity ?? 'freshmore-arrival';
   const [selectedCommunity, setSelectedCommunity] = useState(currentCommunity);
+  const [selectedStopId, setSelectedStopId] = useState('housing');
   const [joinedJios, setJoinedJios] = useState<Set<string>>(new Set());
   const [settlingHelpRequested, setSettlingHelpRequested] = useState(false);
 
   const selected = campusLifeCommunities.find((community) => community.id === selectedCommunity) ?? campusLifeCommunities[0];
+  const selectedStop = campusLifeMapStops.find((stop) => stop.id === selectedStopId) ?? campusLifeMapStops[0];
   const homeBase = profile.campusHomeBase ?? profile.homeBase ?? selected.label;
 
   const saveCommunity = (community: CampusLifeCommunity) => {
@@ -9114,6 +9208,60 @@ function CampusLifeView({
           <p>Use official housing portals and staff guidance for key collection, room changes, maintenance, safety rules, and emergency procedures.</p>
         </article>
       </div>
+
+      <section className="campus-life-section campus-life-map-section">
+        <div className="section-heading compact">
+          <div>
+            <span className="eyebrow">Hostel & campus map</span>
+            <h3>Use housing as a waypoint, not a directory</h3>
+          </div>
+          <p>Useful routes for move-in week, with no room, floor, resident, or occupancy display.</p>
+        </div>
+        <div className="campus-life-map-layout">
+          <div className="campus-life-map-card" aria-label="SUTD campus wayfinding map">
+            <div className="campus-life-map-canvas">
+              <svg viewBox="0 0 100 100" role="img" aria-label="Schematic campus routes from housing to main campus, food, sports, and transit">
+                <path className="map-route main" d="M18 74 C28 62 35 53 30 46 C36 36 42 31 38 26 C50 27 62 27 72 28" />
+                <path className="map-route secondary" d="M72 28 C66 38 62 47 56 52 C60 60 63 66 66 72" />
+                <path className="map-route secondary" d="M30 46 C42 48 50 50 56 52" />
+                <path className="map-zone main-campus" d="M19 36 L43 30 L48 51 L24 57 Z" />
+                <path className="map-zone housing" d="M63 14 L86 18 L84 38 L62 40 Z" />
+                <ellipse className="map-zone recreation" cx="66" cy="74" rx="16" ry="9" />
+              </svg>
+              {campusLifeMapStops.map((stop) => (
+                <button
+                  key={stop.id}
+                  className={'campus-life-map-pin ' + stop.kind + (selectedStopId === stop.id ? ' active' : '')}
+                  style={{ left: `${stop.x}%`, top: `${stop.y}%` }}
+                  onClick={() => setSelectedStopId(stop.id)}
+                  aria-label={stop.label}
+                >
+                  <span />
+                </button>
+              ))}
+            </div>
+            <div className="campus-life-map-focus">
+              <MapPinned size={17} />
+              <div>
+                <strong>{selectedStop.label}</strong>
+                <p>{selectedStop.detail}</p>
+              </div>
+            </div>
+          </div>
+          <div className="campus-life-route-list">
+            {campusLifeRoutes.map((route) => (
+              <article key={route.id} className="campus-life-route-card">
+                <div>
+                  <strong>{route.title}</strong>
+                  <span>{route.time}</span>
+                </div>
+                <p>{route.detail}</p>
+                <small>{route.stops}</small>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
 
       <section className="campus-life-section">
         <div className="section-heading compact">
