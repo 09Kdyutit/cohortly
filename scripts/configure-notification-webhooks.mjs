@@ -20,8 +20,13 @@ function argValue(name) {
   return index >= 0 ? process.argv[index + 1] : '';
 }
 
-const apiBase = (argValue('--base-url') || process.env.VITE_COHORTLY_API_BASE || process.env.COHORTLY_API_BASE || '').replace(/\/$/, '');
-const telegramWebhookUrl = process.env.TELEGRAM_WEBHOOK_URL || (apiBase ? `${apiBase}/api/notifications/telegram/webhook` : '');
+const baseUrlArg = argValue('--base-url');
+const telegramWebhookArg = argValue('--telegram-webhook-url');
+const apiBase = (baseUrlArg || process.env.VITE_COHORTLY_API_BASE || process.env.COHORTLY_API_BASE || '').replace(/\/$/, '');
+const telegramWebhookUrl = telegramWebhookArg
+  || (baseUrlArg ? `${apiBase}/api/notifications/telegram/webhook` : '')
+  || process.env.TELEGRAM_WEBHOOK_URL
+  || (apiBase ? `${apiBase}/api/notifications/telegram/webhook` : '');
 const whatsappWebhookUrl = apiBase ? `${apiBase}/api/notifications/whatsapp/webhook` : '';
 
 function required(name) {

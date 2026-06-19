@@ -121,12 +121,16 @@ function whatsappTemplateConfigured() {
   return Boolean(process.env.WHATSAPP_TEMPLATE_NAME);
 }
 
+function whatsappTemplateLanguage() {
+  return process.env.WHATSAPP_TEMPLATE_LANGUAGE || 'en_US';
+}
+
 function adminDispatchConfigured() {
   return Boolean(process.env.COHORTLY_NOTIFICATIONS_ADMIN_TOKEN);
 }
 
 function graphVersion() {
-  return process.env.WHATSAPP_GRAPH_VERSION || 'v23.0';
+  return process.env.WHATSAPP_GRAPH_VERSION || 'v25.0';
 }
 
 function botUsername() {
@@ -147,6 +151,45 @@ function base64UrlDecode(value = '') {
   }
 }
 
+function notificationTokenSecret() {
+  return process.env.COHORTLY_NOTIFICATION_TOKEN_SECRET
+    || process.env.COHORTLY_SESSION_SECRET
+    || process.env.COHORTLY_NOTIFICATIONS_ADMIN_TOKEN
+    || 'cohortly-local-development-secret-change-me';
+}
+
+function signTokenBody(body) {
+  return createHmac('sha256', notificationTokenSecret()).update(body).digest('base64url');
+}
+
+function createStartToken(email) {
+  const body = Buffer.from(JSON.stringify({
+    email: normalizeEmail(email),
+    exp: Date.now() + 24 * 60 * 60 * 1000,
+  }), 'utf8').toString('base64url');
+  return `${body}.${signTokenBody(body)}`;
+}
+
+function emailFromStartToken(token = '') {
+  if (!token.includes('.')) {
+    if (process.env.COHORTLY_ALLOW_LEGACY_NOTIFICATION_TOKENS === 'true') {
+      return normalizeEmail(base64UrlDecode(token));
+    }
+    return '';
+  }
+
+  const [body, signature] = token.split('.');
+  if (!body || !signature || !safeEqual(signature, signTokenBody(body))) return '';
+
+  try {
+    const payload = JSON.parse(Buffer.from(body, 'base64url').toString('utf8'));
+    if (!payload.exp || Date.now() > payload.exp) return '';
+    return normalizeEmail(payload.email);
+  } catch {
+    return '';
+  }
+}
+
 function safeProviderPayload(payload) {
   if (!payload || typeof payload !== 'object') return payload;
   const clone = JSON.parse(JSON.stringify(payload));
@@ -158,6 +201,13 @@ function safeEqual(actual = '', expected = '') {
   const actualBuffer = Buffer.from(String(actual));
   const expectedBuffer = Buffer.from(String(expected));
   return actualBuffer.length === expectedBuffer.length && timingSafeEqual(actualBuffer, expectedBuffer);
+}
+
+function escapeTelegramHtml(value = '') {
+  return String(value)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
 }
 
 function verifyTelegramWebhook(req) {
@@ -200,7 +250,7 @@ async function sendTelegram(chatId, text) {
     headers: jsonHeaders,
     body: JSON.stringify({
       chat_id: chatId,
-      text,
+      text: escapeTelegramHtml(text),
       parse_mode: 'HTML',
       disable_web_page_preview: true,
     }),
@@ -216,19 +266,39 @@ async function sendWhatsApp(phone, text) {
     return { ok: false, reason: 'WHATSAPP_CLOUD_TOKEN and WHATSAPP_PHONE_NUMBER_ID are not configured.' };
   }
 
+  const useTemplate = Boolean(process.env.WHATSAPP_TEMPLATE_NAME);
+  const body = useTemplate
+    ? {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: phoneForWhatsApp(phone),
+        type: 'template',
+        template: {
+          name: process.env.WHATSAPP_TEMPLATE_NAME,
+          language: { code: whatsappTemplateLanguage() },
+          components: [
+            {
+              type: 'body',
+              parameters: [{ type: 'text', text: String(text).slice(0, 1024) }],
+            },
+          ],
+        },
+      }
+    : {
+        messaging_product: 'whatsapp',
+        recipient_type: 'individual',
+        to: phoneForWhatsApp(phone),
+        type: 'text',
+        text: { preview_url: false, body: text },
+      };
+
   const response = await fetch(`https://graph.facebook.com/${graphVersion()}/${phoneNumberId}/messages`, {
     method: 'POST',
     headers: { ...jsonHeaders, Authorization: `Bearer ${token}` },
-    body: JSON.stringify({
-      messaging_product: 'whatsapp',
-      recipient_type: 'individual',
-      to: phoneForWhatsApp(phone),
-      type: 'text',
-      text: { preview_url: false, body: text },
-    }),
+    body: JSON.stringify(body),
   });
   const payload = await response.json().catch(() => ({}));
-  return { ok: response.ok, status: response.status, payload: safeProviderPayload(payload) };
+  return { ok: response.ok, status: response.status, mode: useTemplate ? 'template' : 'text', payload: safeProviderPayload(payload) };
 }
 
 function statusForEmail(email) {
@@ -244,7 +314,7 @@ function statusForEmail(email) {
       webhookSecretConfigured: telegramWebhookSecured(),
       connected: Boolean(prefs.telegramChatId && telegramConfigured()),
       username: prefs.telegramUsername ? `@${prefs.telegramUsername}` : '',
-      chatRegistered: Boolean(prefs.telegramUsername && store.telegramChats[prefs.telegramUsername]),
+      chatRegistered: Boolean(prefs.telegramChatId || (prefs.telegramUsername && store.telegramChats[prefs.telegramUsername])),
     },
     whatsapp: {
       configured: whatsappConfigured(),
@@ -252,6 +322,7 @@ function statusForEmail(email) {
       verifyTokenConfigured: Boolean(process.env.WHATSAPP_VERIFY_TOKEN),
       appSecretConfigured: whatsappWebhookSecured(),
       templateConfigured: whatsappTemplateConfigured(),
+      templateLanguage: whatsappTemplateLanguage(),
       businessPhone: whatsappBusinessPhone(),
       connected: Boolean(prefs.whatsappNumber && prefs.whatsappVerifiedAt && whatsappConfigured()),
       optedIn: Boolean(prefs.whatsappNumber && store.whatsappOptIns[phoneForWhatsApp(prefs.whatsappNumber)]),
@@ -260,6 +331,7 @@ function statusForEmail(email) {
     dispatch: {
       configured: adminDispatchConfigured(),
     },
+    startToken: createStartToken(email),
     preferences: {
       onAnswer: prefs.onAnswer ?? true,
       onEvent: prefs.onEvent ?? true,
@@ -275,18 +347,20 @@ async function handleTelegramWebhook(req, res) {
   const chatId = message?.chat?.id;
   const text = String(message?.text || '');
   const startArg = text.match(/^\/start(?:\s+(.+))?/i)?.[1]?.trim();
-  const emailFromStart = normalizeEmail(base64UrlDecode(startArg));
+  const emailFromStart = emailFromStartToken(startArg);
 
   if (username && chatId) {
     store.telegramChats[username] = chatId;
-    if (emailFromStart && emailFromStart.includes('@')) {
-      store.notificationPrefs[emailFromStart] = {
-        ...(store.notificationPrefs[emailFromStart] || {}),
-        telegramUsername: username,
-        telegramChatId: chatId,
-        telegramConnectedAt: new Date().toISOString(),
-      };
-    }
+    if (!emailFromStart) await saveStore();
+  }
+
+  if (chatId && emailFromStart && emailFromStart.includes('@')) {
+    store.notificationPrefs[emailFromStart] = {
+      ...(store.notificationPrefs[emailFromStart] || {}),
+      ...(username ? { telegramUsername: username } : {}),
+      telegramChatId: chatId,
+      telegramConnectedAt: new Date().toISOString(),
+    };
     await saveStore();
   }
 
@@ -294,7 +368,7 @@ async function handleTelegramWebhook(req, res) {
     await sendTelegram(chatId, 'Cohortly Telegram alerts are ready. Return to Cohortly and press Connect Telegram.');
   }
 
-  return sendJson(res, 200, { ok: true, registered: Boolean(username && chatId), linkedEmail: Boolean(emailFromStart) });
+  return sendJson(res, 200, { ok: true, registered: Boolean(chatId && (username || emailFromStart)), linkedEmail: Boolean(emailFromStart) });
 }
 
 async function handleWhatsAppWebhook(update, res) {
@@ -307,27 +381,35 @@ async function handleWhatsAppWebhook(update, res) {
     if (!phone) continue;
     const text = String(message?.text?.body || '');
     const startArg = text.match(/^start(?:\s+(.+))?/i)?.[1]?.trim();
-    const emailFromStart = normalizeEmail(base64UrlDecode(startArg));
-    store.whatsappOptIns[phone] = {
-      optedInAt: new Date().toISOString(),
-      lastMessageText: text,
-    };
+    const emailFromStart = emailFromStartToken(startArg);
+
+    if (/^(stop|unsubscribe|cancel)\b/i.test(text)) {
+      delete store.whatsappOptIns[phone];
+      for (const [email, prefs] of Object.entries(store.notificationPrefs)) {
+        if (phoneForWhatsApp(prefs.whatsappNumber || '') === phone) {
+          delete prefs.whatsappNumber;
+          delete prefs.whatsappOptedInAt;
+          delete prefs.whatsappVerifiedAt;
+          store.notificationPrefs[email] = prefs;
+        }
+      }
+      registered = true;
+      continue;
+    }
+
     if (emailFromStart && emailFromStart.includes('@')) {
+      store.whatsappOptIns[phone] = {
+        optedInAt: new Date().toISOString(),
+        email: emailFromStart,
+        lastMessageText: text,
+      };
       store.notificationPrefs[emailFromStart] = {
         ...(store.notificationPrefs[emailFromStart] || {}),
         whatsappNumber: normalizePhone(phone),
         whatsappOptedInAt: new Date().toISOString(),
       };
+      registered = true;
     }
-    for (const [email, prefs] of Object.entries(store.notificationPrefs)) {
-      if (phoneForWhatsApp(prefs.whatsappNumber || '') === phone) {
-        store.notificationPrefs[email] = {
-          ...prefs,
-          whatsappOptedInAt: new Date().toISOString(),
-        };
-      }
-    }
-    registered = true;
   }
 
   if (registered) await saveStore();
@@ -387,14 +469,15 @@ export function createNotificationsHandler() {
         const body = await readJson(req);
         const email = normalizeEmail(body.email);
         const username = normalizeTelegramUsername(body.username);
-        if (!email || !username) return sendJson(res, 400, { ok: false, message: 'Email and Telegram username are required.' });
+        if (!email) return sendJson(res, 400, { ok: false, message: 'Email is required.' });
         if (!telegramConfigured()) {
           return sendJson(res, 503, { ok: false, connected: false, message: 'Telegram is not configured on the notification server. Add TELEGRAM_BOT_TOKEN and set the Telegram webhook.' });
         }
 
-        const chatId = store.telegramChats[username];
+        const existingPrefs = store.notificationPrefs[email] || {};
+        const chatId = existingPrefs.telegramChatId || store.telegramChats[username];
         if (!chatId) {
-          store.notificationPrefs[email] = { ...(store.notificationPrefs[email] || {}), telegramUsername: username };
+          store.notificationPrefs[email] = { ...existingPrefs, ...(username ? { telegramUsername: username } : {}) };
           await saveStore();
           return sendJson(res, 409, { ok: false, connected: false, message: `Start @${botUsername()} first, then press Connect Telegram again.` });
         }
@@ -405,8 +488,8 @@ export function createNotificationsHandler() {
         }
 
         store.notificationPrefs[email] = {
-          ...(store.notificationPrefs[email] || {}),
-          telegramUsername: username,
+          ...existingPrefs,
+          ...(username ? { telegramUsername: username } : {}),
           telegramChatId: chatId,
           telegramConnectedAt: new Date().toISOString(),
         };
@@ -424,6 +507,20 @@ export function createNotificationsHandler() {
         }
 
         const phoneKey = phoneForWhatsApp(phone);
+        const optIn = store.whatsappOptIns[phoneKey];
+        if (!optIn || (optIn.email && optIn.email !== email)) {
+          store.notificationPrefs[email] = {
+            ...(store.notificationPrefs[email] || {}),
+            whatsappNumber: phone,
+          };
+          await saveStore();
+          return sendJson(res, 409, {
+            ok: false,
+            connected: false,
+            message: 'Open the Cohortly WhatsApp link and send the pre-filled start message before connecting.',
+          });
+        }
+
         store.notificationPrefs[email] = {
           ...(store.notificationPrefs[email] || {}),
           whatsappNumber: phone,

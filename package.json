@@ -8,6 +8,7 @@
     "ai": "python3 -m uvicorn server.ai_server:app --port 8000 --reload",
     "build": "vite build",
     "start": "node server/production-server.mjs",
+    "notifications:check": "node scripts/check-notification-config.mjs",
     "notifications:webhooks": "node scripts/configure-notification-webhooks.mjs",
     "notifications:smoke": "node scripts/smoke-notifications.mjs",
     "preview": "vite preview --host 0.0.0.0",

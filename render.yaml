@@ -17,6 +17,8 @@ services:
         value: /var/data/notifications.json
       - key: COHORTLY_NOTIFICATIONS_ADMIN_TOKEN
         generateValue: true
+      - key: COHORTLY_NOTIFICATION_TOKEN_SECRET
+        generateValue: true
       - key: RESEND_API_KEY
         sync: false
       - key: RESEND_FROM
@@ -42,9 +44,11 @@ services:
       - key: WHATSAPP_BUSINESS_PHONE
         sync: false
       - key: WHATSAPP_GRAPH_VERSION
-        value: v23.0
+        value: v25.0
       - key: WHATSAPP_TEMPLATE_NAME
         sync: false
+      - key: WHATSAPP_TEMPLATE_LANGUAGE
+        value: en_US
       # Firebase — fill these in on the Render dashboard (needed at build time)
       - key: VITE_FIREBASE_API_KEY
         sync: false

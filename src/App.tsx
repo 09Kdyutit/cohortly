@@ -1851,6 +1851,7 @@ type NotificationStatus = {
   dispatch?: {
     configured: boolean;
   };
+  startToken?: string;
   preferences: Pick<NotifPrefs, 'onAnswer' | 'onEvent' | 'onConnection'>;
 };
 
@@ -8343,7 +8344,7 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
   const waConnected = Boolean(status?.whatsapp.connected);
   const apiLabel = notificationApiBase || 'same-origin /api';
   const botName = status?.telegram.botUsername || 'CohortlyBot';
-  const startToken = notificationStartToken(userEmail);
+  const startToken = status?.startToken || notificationStartToken(userEmail);
   const tgDeepLink = `https://t.me/${botName}?start=${startToken}`;
   const waBusinessPhone = status?.whatsapp.businessPhone || '';
   const waOptInLink = waBusinessPhone
@@ -8352,20 +8353,19 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
 
   const connectTelegram = async () => {
     const handle = telegramInput.trim().replace(/^@/, '');
-    if (!handle) return;
     setTgVerifying(true);
     try {
       const payload = await notificationJson<{ connected: boolean; message?: string }>('/api/notifications/telegram/connect', {
         method: 'POST',
         body: JSON.stringify({ email: userEmail, username: handle }),
       });
-      const updated: NotifPrefs = { ...prefs, telegramHandle: `@${handle}`, botConnected: payload.connected };
+      const updated: NotifPrefs = { ...prefs, telegramHandle: handle ? `@${handle}` : prefs.telegramHandle, botConnected: payload.connected };
       setPrefs(updated);
       saveNotifPrefs(userEmail, updated);
       setChannelNotice(payload.message || 'Telegram connected. Confirmation message sent.');
       await refreshStatus();
     } catch (error) {
-      const updated: NotifPrefs = { ...prefs, telegramHandle: `@${handle}`, botConnected: false };
+      const updated: NotifPrefs = { ...prefs, telegramHandle: handle ? `@${handle}` : prefs.telegramHandle, botConnected: false };
       setPrefs(updated);
       saveNotifPrefs(userEmail, updated);
       setChannelNotice(error instanceof Error ? error.message : 'Telegram connection failed.');
@@ -8484,6 +8484,7 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
     { label: 'WhatsApp Cloud API', ok: Boolean(status?.whatsapp.configured), detail: status?.whatsapp.configured ? 'Token and phone number ID configured' : 'Missing WHATSAPP_CLOUD_TOKEN / WHATSAPP_PHONE_NUMBER_ID' },
     { label: 'WhatsApp webhook', ok: Boolean(status?.whatsapp.verifyTokenConfigured), detail: status?.whatsapp.verifyTokenConfigured ? 'Verify token configured' : 'Missing WHATSAPP_VERIFY_TOKEN' },
     { label: 'WhatsApp signature', ok: Boolean(status?.whatsapp.appSecretConfigured), detail: status?.whatsapp.appSecretConfigured ? 'Meta signature validation enforced' : 'Add WHATSAPP_APP_SECRET' },
+    { label: 'WhatsApp template', ok: Boolean(status?.whatsapp.templateConfigured), detail: status?.whatsapp.templateConfigured ? 'Approved template configured' : 'Add approved WHATSAPP_TEMPLATE_NAME' },
     { label: 'Alert dispatch', ok: Boolean(status?.dispatch?.configured), detail: status?.dispatch?.configured ? 'Server dispatch token configured' : 'Add COHORTLY_NOTIFICATIONS_ADMIN_TOKEN' },
   ];
 
@@ -8563,7 +8564,7 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
                   <Send size={13} />
                 </div>
                 <div>
-                  <strong>{prefs.telegramHandle}</strong>
+                  <strong>{prefs.telegramHandle || 'Telegram chat linked'}</strong>
                   <span>Receiving alerts via Telegram</span>
                 </div>
               </div>
@@ -8586,10 +8587,10 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
               <div className="notif-step">
                 <span className="notif-step-num">2</span>
                 <div>
-                  <strong>Enter your Telegram username</strong>
+                  <strong>Telegram username optional</strong>
                   <input
                     className="notif-input"
-                    placeholder="@yourusername"
+                    placeholder="@yourusername if you have one"
                     value={telegramInput}
                     onChange={(e) => setTelegramInput(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && connectTelegram()}
@@ -8605,7 +8606,7 @@ function NotificationsView({ userEmail }: { userEmail: string }) {
                     className="primary-button"
                     style={{ marginTop: 8, padding: '7px 20px', fontSize: '0.84rem' }}
                     onClick={connectTelegram}
-                    disabled={!telegramInput.trim() || tgVerifying}
+                    disabled={tgVerifying}
                   >
                     {tgVerifying
                       ? <><span className="notif-spinner" /> Verifying…</>
