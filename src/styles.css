@@ -994,7 +994,7 @@ textarea::placeholder { color: #718196; opacity: 1; }
   color: var(--cobalt-700);
   background: var(--cobalt-50);
 }
-.role-card-icon.mentor { color: var(--success); background: var(--success-soft); }
+.role-card-icon.peer { color: var(--success); background: var(--success-soft); }
 .role-card strong { font-size: 1.1rem; }
 .role-card em {
   color: var(--muted-strong);
@@ -1143,12 +1143,6 @@ textarea::placeholder { color: #718196; opacity: 1; }
 .preview-list svg {
   flex: 0 0 auto;
   color: var(--cobalt-700);
-}
-.mentor-preview-card {
-  padding: 14px;
-  border: 1px solid var(--line);
-  border-radius: 14px;
-  background: #f8fbff;
 }
 .timetable-import-box {
   padding: 14px;
@@ -1650,7 +1644,6 @@ textarea::placeholder { color: #718196; opacity: 1; }
 .phase-icon-people { background: var(--violet); }
 .phase-icon-clubs { background: var(--warning); }
 .phase-icon-qa { background: var(--cobalt-600); }
-.phase-icon-mentor { background: var(--mint); }
 .launchpad-main { padding: 24px; display: grid; gap: 18px; }
 .launchpad-next-action {
   padding: 20px;
@@ -2530,8 +2523,7 @@ textarea::placeholder { color: #718196; opacity: 1; }
   font-size: 0.84rem;
   font-weight: 760;
 }
-.answer-card,
-.mentor-answer {
+.answer-card {
   margin-left: 42px;
   padding: 13px 14px;
   border-radius: var(--radius);
@@ -2548,50 +2540,6 @@ textarea::placeholder { color: #718196; opacity: 1; }
   background: #fbfcff;
 }
 
-/* Mentor workspace */
-.mentor-hero {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
-  gap: 22px;
-  align-items: stretch;
-}
-.mentor-hero h2 {
-  margin: 4px 0 12px;
-  font-size: 1.8rem;
-}
-.mentor-hero p {
-  max-width: 76ch;
-  margin-bottom: 18px;
-}
-.mentor-stats-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-}
-.mentor-stat {
-  display: grid;
-  gap: 4px;
-  min-height: 116px;
-  padding: 16px;
-  border-radius: var(--radius-lg);
-  background: var(--cobalt-50);
-  border: 1px solid var(--cobalt-100);
-}
-.mentor-stat strong {
-  color: var(--cobalt-700);
-  font-size: 1.8rem;
-  line-height: 1;
-  font-variant-numeric: tabular-nums;
-}
-.mentor-stat span {
-  color: var(--ink);
-  font-weight: 820;
-}
-.mentor-stat em {
-  color: var(--muted);
-  font-size: 0.82rem;
-  font-style: normal;
-}
 .priority-grid {
   display: grid;
   grid-template-columns: minmax(300px, 0.9fr) minmax(0, 1.1fr);
@@ -2805,6 +2753,54 @@ textarea::placeholder { color: #718196; opacity: 1; }
   background: var(--canvas);
   color: var(--ink);
 }
+.message {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr);
+  gap: 10px;
+  align-items: start;
+}
+.msg-avatar {
+  width: 34px;
+  height: 34px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  background: var(--cobalt-50);
+  color: var(--cobalt-700);
+  font-size: 0.74rem;
+  font-weight: 900;
+}
+.msg-bubble-wrap {
+  display: grid;
+  gap: 4px;
+}
+.msg-bubble-wrap strong {
+  font-size: 0.78rem;
+  color: var(--muted-strong);
+}
+.msg-bubble-wrap p {
+  margin: 0;
+  line-height: 1.48;
+}
+.message.student {
+  align-self: flex-end;
+  background: var(--cobalt-600);
+  color: #fff;
+}
+.message.student .msg-avatar {
+  background: rgba(255,255,255,0.16);
+  color: #fff;
+}
+.message.student .msg-bubble-wrap strong {
+  color: rgba(255,255,255,0.72);
+}
+.message.student .msg-bubble-wrap p {
+  color: #fff;
+}
+.message.peer {
+  border: 1px solid var(--line);
+  background: #fff;
+}
 .message.me,
 .message.user,
 .message-bubble.me,
@@ -2815,6 +2811,7 @@ textarea::placeholder { color: #718196; opacity: 1; }
 }
 .message.system,
 .message-bubble.system {
+  display: block;
   align-self: center;
   max-width: 80%;
   background: var(--cobalt-50);
@@ -4592,7 +4589,6 @@ th { color: var(--muted); font-size: 0.78rem; font-weight: 850; }
   .role-cards,
   .setup-intro,
   .setup-workspace,
-  .mentor-hero,
   .priority-grid,
   .launchpad,
   .event-command-strip,

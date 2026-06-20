@@ -85,10 +85,10 @@ type LucideIcon = ForwardRefExoticComponent<
 >;
 
 type StudentJourneyStage = 'pre_arrival' | 'freshmore' | 'returning' | 'exchange';
-type AppWorkspace = 'student' | 'mentor' | 'admin';
-type UserRole = Exclude<AppWorkspace, 'admin'>;
-type DemoMode = 'freshman' | 'returning' | 'exchange' | 'mentor';
-type View = 'today' | 'launchpad' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'campus-life' | 'mentor-home' | 'mentor-help' | 'privacy' | 'notifications';
+type AppWorkspace = 'student' | 'admin';
+type UserRole = 'student';
+type DemoMode = 'freshman' | 'returning' | 'exchange';
+type View = 'today' | 'launchpad' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'campus-life' | 'privacy' | 'notifications';
 type InstitutionId = 'sutd';
 type BelongingEntry = { week: string; score: number; at: number };
 type InterventionStage = 'flagged' | 'contacted' | 're-measured' | 'resolved' | 'escalated';
@@ -143,7 +143,7 @@ type ClassRoom = {
   code: string;
   title: string;
   activity: string;
-  mentors: string;
+  helpers: string;
   status: string;
   isDesignAI?: boolean;
 };
@@ -169,10 +169,6 @@ type StudentProfile = {
   year?: string;
   campusHomeBase?: string;
   campusCommunity?: string;
-  mentorYear?: string;
-  mentorPillar?: string;
-  mentorModules?: string[];
-  mentorHelpStyle?: string[];
 };
 
 const PROFILE_SCHEMA_VERSION = 2;
@@ -219,7 +215,7 @@ const journeyMeta: Record<StudentJourneyStage, JourneyMeta> = {
     setupLabel: 'Returning student setup',
     todayLine: 'Already onboarded · focus on modules, projects, and cohort leadership',
     progressLabel: 'Term setup',
-    nextActionCopy: 'You are not being onboarded again. Cohortly is prioritising your year, modules, project groups, and ways to guide juniors.',
+    nextActionCopy: 'You are not being onboarded again. Cohortly is prioritising your year, modules, project groups, and ways to help through shared rooms.',
     campusCommunityId: 'returning-guides',
     defaultHomeBase: 'Returning student circles',
   },
@@ -238,7 +234,7 @@ const journeyMeta: Record<StudentJourneyStage, JourneyMeta> = {
 
 // ─── Notification model ───────────────────────────────────────────────────────
 
-type NotifType = 'connection' | 'qa_answer' | 'event' | 'system' | 'mentor';
+type NotifType = 'connection' | 'qa_answer' | 'event' | 'system';
 type NotifItem = {
   id: string; type: NotifType;
   title: string; body: string;
@@ -251,7 +247,7 @@ const seedNotifs: NotifItem[] = [
   { id: 'n2', type: 'connection', title: 'New connection',        body: 'Mei Lin accepted your intro request',             read: false, time: '45m ago', action: { label: 'View profile', view: 'people' } },
   { id: 'n3', type: 'event',      title: 'Event reminder',        body: 'First Friday food crawl starts in 2 hours',       read: false, time: '1h ago',  action: { label: 'View event', view: 'events' } },
   { id: 'n4', type: 'system',     title: 'Welcome to Cohortly',   body: 'Your SUTD student profile is now verified.',       read: true,  time: '2h ago' },
-  { id: 'n5', type: 'mentor',     title: 'Office hour available', body: 'Aarav posted a study session slot for 10.014',    read: true,  time: '3h ago',  action: { label: 'View slot', view: 'classes' } },
+  { id: 'n5', type: 'qa_answer',  title: 'Study slot available', body: 'Aarav posted a peer study slot for 10.014',        read: true,  time: '3h ago',  action: { label: 'View slot', view: 'classes' } },
 ];
 
 function loadNotifs(email: string): NotifItem[] {
@@ -271,14 +267,6 @@ const navItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
   { id: 'classes', label: 'Classes', icon: BookOpen },
   { id: 'campus-life', label: 'Campus Life', icon: MapPinned },
   { id: 'kb', label: 'Knowledge Base', icon: BookMarked },
-  { id: 'messages', label: 'Messages', icon: MessageCircle },
-];
-
-const mentorNavItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
-  { id: 'mentor-home', label: 'Dashboard', icon: LayoutDashboard },
-  { id: 'mentor-help', label: 'Help Requests', icon: BookOpen },
-  { id: 'people', label: 'Students', icon: Users },
-  { id: 'events', label: 'Events', icon: CalendarCheck },
   { id: 'messages', label: 'Messages', icon: MessageCircle },
 ];
 
@@ -320,8 +308,8 @@ const starterEvents: EventItem[] = [
     time: '8:30 PM',
     location: 'Building 5 Library, Room 3',
     audience: 'Freshmore — Computational Thinking',
-    meta: '68 joined · 4 returning students active',
-    description: 'Returning-student prep for tracing code, recursion basics, and what to revise before the first graded lab. ISTD and EPD students rotate through.',
+    meta: '68 joined · 4 peer helpers active',
+    description: 'Peer-led prep for tracing code, recursion basics, and what to revise before the first graded lab. ISTD and EPD students rotate through.',
     tone: 'study',
   },
   {
@@ -477,7 +465,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     id: 'week0', label: 'Week 0 orientation', icon: 'orientation',
     tasks: [
       { id: 'camp', label: 'Attend Freshmore Orientation Camp', desc: 'SUTD\'s intro event — ice breakers, campus tour, team building.' },
-      { id: 'campus-tour', label: 'Get a campus tour from a returning student', desc: 'FabLab, library, Level 3 hangout spots, best food nearby.' },
+      { id: 'campus-tour', label: 'Get a campus tour from a student guide', desc: 'FabLab, library, Level 3 hangout spots, best food nearby.' },
       { id: 'admin', label: 'Complete admin setup', desc: 'SUTD email, Canvas LMS, ModTrek, Student Hub — all activated.' },
       { id: 'fifth-row-fair', label: 'Attend Fifth Row Club Fair', desc: 'Browse 80+ clubs — find your co-curricular home.', link: { label: 'Browse Fifth Row', view: 'fifth-row' } },
       { id: 'wellbeing', label: 'Know where Wellbeing Services is', desc: 'Level 2, Building 54. Counselling, mental health support — no stigma.' },
@@ -487,7 +475,7 @@ const launchpadPhases: LaunchpadPhase[] = [
     id: 'week1', label: 'Week 1 academic setup', icon: 'academic',
     tasks: [
       { id: 'first-class', label: 'Attend your first class', desc: 'Check Canvas for room allocation and pre-read materials.' },
-      { id: 'module-room', label: 'Join your module rooms on Cohortly', desc: 'Returning students are already answering in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
+      { id: 'module-room', label: 'Join your module rooms on Cohortly', desc: 'Verified peers are already answering in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
       { id: 'returning-match', label: 'Connect with a returning student', desc: 'Find Year 2, 3, and 4 students grouped by pillar and module.', link: { label: 'Find people', view: 'people' } },
       { id: 'first-q', label: 'Ask your first module question', desc: 'No question is too basic. Post it in the class room.', link: { label: 'Ask a question', view: 'classes' } },
       { id: 'study-group', label: 'Form or join a study group', desc: 'Check Events or module rooms for group study sessions.', link: { label: 'Browse Events', view: 'events' } },
@@ -515,16 +503,16 @@ const launchpadPhases: LaunchpadPhase[] = [
   {
     id: 'qa-phase', label: 'Ask my first module question', icon: 'qa',
     tasks: [
-      { id: 'q-read', label: 'Read existing Q&A threads in your module', desc: 'See what returning students have already answered in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
+      { id: 'q-read', label: 'Read existing Q&A threads in your module', desc: 'See what classmates and peer helpers have already answered in 10.014 and 10.009.', link: { label: 'Open Classes', view: 'classes' } },
       { id: 'q-post', label: 'Post your first question', desc: 'Any confusion in any module — ask it. No question is too small.', link: { label: 'Post a question', view: 'classes' } },
-      { id: 'q-answered', label: 'Get an answer from a returning student', desc: 'Helpful classmates usually respond within a few hours.' },
+      { id: 'q-answered', label: 'Get an answer from a verified peer', desc: 'Helpful classmates usually respond within a few hours.' },
     ],
   },
   {
-    id: 'returning-phase', label: 'Join a returning-student session', icon: 'people',
+    id: 'returning-phase', label: 'Join a peer study session', icon: 'people',
     tasks: [
-      { id: 'm-view', label: 'View a returning student profile', desc: 'See their modules, year, pillar, availability, and compatibility score.', link: { label: 'Browse people', view: 'people' } },
-      { id: 'm-connect', label: 'Request an intro with a returning student', desc: 'Send your first connection request to someone a year or two ahead.', link: { label: 'Find people', view: 'people' } },
+      { id: 'm-view', label: 'View a Year 2+ profile', desc: 'See their modules, year, pillar, availability, and compatibility score.', link: { label: 'Browse people', view: 'people' } },
+      { id: 'm-connect', label: 'Request an intro with a Year 2+ student', desc: 'Send your first connection request to someone a year or two ahead.', link: { label: 'Find people', view: 'people' } },
       { id: 'm-attend', label: 'Attend a prep session or office hours', desc: 'Aarav runs weekly 10.014 coding prep — check Events.', link: { label: 'Browse Events', view: 'events' } },
     ],
   },
@@ -657,49 +645,49 @@ const classRooms: ClassRoom[] = [
     code: '10.014',
     title: 'Computational Thinking for Design',
     activity: '28 questions answered this week',
-    mentors: 'Aarav (Y3 ISTD), Daryl (Y3 EPD), Sara (Y2 DAI)',
+    helpers: 'Aarav (Y3 ISTD), Daryl (Y3 EPD), Sara (Y2 DAI)',
     status: 'Prep room live tonight — Building 5, Rm 3',
   },
   {
     code: '10.009',
     title: 'The Digital World',
-    activity: '19 questions · 3 returning students active',
-    mentors: 'Wei Jian (Y3 ISTD), Priya (Y2 ESD)',
+    activity: '19 questions · 3 peer helpers active',
+    helpers: 'Wei Jian (Y3 ISTD), Priya (Y2 ESD)',
     status: '2D project kickoff slides pinned',
   },
   {
     code: '30.007',
     title: 'Engineering Design Innovation',
     activity: '11 team formation posts',
-    mentors: 'Mei Lin (Y3 EPD), Noah (Y2 EPD)',
+    helpers: 'Mei Lin (Y3 EPD), Noah (Y2 EPD)',
     status: 'Prototype critique slots open — FabLab',
   },
   {
     code: '40.011',
     title: 'Data-Driven World',
     activity: '16 dataset help threads',
-    mentors: 'Sarah (Y4 ESD), Nikhil (Y3 ESD)',
+    helpers: 'Sarah (Y4 ESD), Nikhil (Y3 ESD)',
     status: 'Visualisation examples pinned',
   },
   {
     code: '50.007',
     title: 'Machine Learning',
     activity: '22 questions · assignment 1 help',
-    mentors: 'Aarav (Y3 ISTD), Kevin (Y4 ISTD)',
+    helpers: 'Aarav (Y3 ISTD), Kevin (Y4 ISTD)',
     status: 'Assignment 1 walkthrough Friday',
   },
   {
     code: 'ASD Studio',
     title: 'ASD Design Studio I',
     activity: '8 pin-up feedback threads',
-    mentors: 'Mei Lin (Y2 ASD), Tariq (Y3 ASD)',
+    helpers: 'Mei Lin (Y2 ASD), Tariq (Y3 ASD)',
     status: 'Critique sign-ups open — Building 2',
   },
   {
     code: 'iDeA-1',
     title: 'Innovating with Design & AI — Term 1',
     activity: '34 prompts shared · 12 teams forming',
-    mentors: 'Sara (Y2 DAI), Aarav (Y3 ISTD), Mei Lin (Y2 ASD)',
+    helpers: 'Sara (Y2 DAI), Aarav (Y3 ISTD), Mei Lin (Y2 ASD)',
     status: 'Team formation open · Week 3 brief released',
     isDesignAI: true,
   },
@@ -707,7 +695,7 @@ const classRooms: ClassRoom[] = [
     code: 'iDeA-2',
     title: 'Innovating with Design & AI — Term 2',
     activity: '21 prototypes in showcase · 8 teams active',
-    mentors: 'Wei Jian (Y3 ISTD), Tariq (Y3 ASD)',
+    helpers: 'Wei Jian (Y3 ISTD), Tariq (Y3 ASD)',
     status: 'Mid-term prototype review — submit by Friday',
     isDesignAI: true,
   },
@@ -715,7 +703,7 @@ const classRooms: ClassRoom[] = [
     code: 'iDeA-3',
     title: 'Innovating with Design & AI — Term 3',
     activity: '17 final builds · showcase voting open',
-    mentors: 'Aarav (Y3 ISTD), Sarah (Y4 ESD)',
+    helpers: 'Aarav (Y3 ISTD), Sarah (Y4 ESD)',
     status: 'Final showcase — Design Week submissions open',
     isDesignAI: true,
   },
@@ -863,7 +851,7 @@ const interestOptions = [
 ];
 const goalOptions = [
   'Find my first-week circle',
-  'Get returning-student module advice',
+  'Get peer module advice',
   'Join casual sports events',
   'Build a study group',
   'Find a startup co-founder',
@@ -896,9 +884,6 @@ const journeyGoalOptions: Record<StudentJourneyStage, string[]> = {
   ],
 };
 const availabilityOptions = ['Weekday evenings', 'Weekend mornings', 'After lunch', 'Late-night study', 'Flexible'];
-const mentorYearOptions = ['Year 2', 'Year 3', 'Year 4'];
-const mentorPillarOptions = ['ASD', 'EPD', 'ESD', 'ISTD', 'DAI'];
-const mentorHelpStyleOptions = ['One-on-one sessions', 'Group study rooms', 'Q&A threads only', 'Weekly office hours'];
 const weekdayLabels = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
 const pulseStats = [
@@ -929,7 +914,7 @@ type KBArticle = { id: string; category: KBCategory; title: string; summary: str
 const kbArticles: KBArticle[] = [
   {
     id: 'ka1', category: 'Academics', title: 'How Freshmore modules work', summary: 'All Year 1s take the same 5 Freshmore modules in Term 1. Here\'s what to expect.',
-    content: `<p>Every SUTD Freshmore takes a common set of 5 modules in Term 1: <strong>10.001 Advanced Mathematics I</strong>, <strong>10.002 Modelling the Systems World</strong>, <strong>10.003 Modelling Space and Systems</strong>, <strong>10.009 The Digital World</strong>, and <strong>10.014 Computational Thinking for Design</strong>.</p><p>These modules are integrated — the maths you learn feeds directly into the design modules. Attendance is compulsory and there are no bell curves in most assessments. Collaborate freely; academic integrity rules apply to final exams and individual assignments.</p><ul><li>Canvas is the LMS — check it daily for announcements</li><li>ModTrek shows your timetable</li><li>Office hours are posted in the module room — use them</li><li>Returning students in Cohortly answer practical module questions through the same student network</li></ul>`,
+    content: `<p>Every SUTD Freshmore takes a common set of 5 modules in Term 1: <strong>10.001 Advanced Mathematics I</strong>, <strong>10.002 Modelling the Systems World</strong>, <strong>10.003 Modelling Space and Systems</strong>, <strong>10.009 The Digital World</strong>, and <strong>10.014 Computational Thinking for Design</strong>.</p><p>These modules are integrated — the maths you learn feeds directly into the design modules. Attendance is compulsory and there are no bell curves in most assessments. Collaborate freely; academic integrity rules apply to final exams and individual assignments.</p><ul><li>Canvas is the LMS — check it daily for announcements</li><li>ModTrek shows your timetable</li><li>Office hours are posted in the module room — use them</li><li>Verified peers in Cohortly answer practical module questions through the same student network</li></ul>`,
     views: 512, helpful: 89,
   },
   {
@@ -938,8 +923,8 @@ const kbArticles: KBArticle[] = [
     views: 388, helpful: 74,
   },
   {
-    id: 'ka3', category: 'Academics', title: 'Using the Cohortly module rooms', summary: 'How to get help fast from classmates and returning students in 10.014, 10.009, and more.',
-    content: `<p>Each module on Cohortly has a <strong>Q&A room</strong> where verified students ask and answer questions. Returning students are grouped by year and pillar inside the same student network.</p><p>To get the best answers: be specific about your problem, share relevant code or working (a screenshot is fine), and mention what you've already tried. Vague questions get vague answers.</p><ul><li>Most questions in 10.014 and 10.009 should include the exact error message or worksheet step</li><li>Urgent? Post in the module room and message a classmate or returning student in the same module</li><li>Prep rooms and office hours live in Events so everyone sees the same schedule</li></ul>`,
+    id: 'ka3', category: 'Academics', title: 'Using the Cohortly module rooms', summary: 'How to get help fast from classmates and verified peers in 10.014, 10.009, and more.',
+    content: `<p>Each module on Cohortly has a <strong>Q&A room</strong> where verified students ask and answer questions. Any verified student can help when they know the answer; returning students are still grouped by year and pillar inside the same network.</p><p>To get the best answers: be specific about your problem, share relevant code or working (a screenshot is fine), and mention what you've already tried. Vague questions get vague answers.</p><ul><li>Most questions in 10.014 and 10.009 should include the exact error message or worksheet step</li><li>Urgent? Post in the module room and message a classmate or active helper in the same module</li><li>Prep rooms and office hours live in Events so everyone sees the same schedule</li></ul>`,
     views: 290, helpful: 68,
   },
   {
@@ -1015,13 +1000,13 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'm-10014',
     triggers: ['10.014', 'computational thinking', 'computational thinking for design', 'python module', 'coding module', 'programming module', 'lab 1', 'lab 2', 'lab 3', 'recursion', 'tree traversal', 'jupyter', 'ctd'],
-    response: `**10.014 Computational Thinking for Design** is your intro to Python and algorithmic thinking. Here's what to know:\n\n- Labs use **Jupyter notebooks** — install Anaconda or use the lab machines in Building 5 (open 24h)\n- Key topics: functions, loops, recursion, data structures, basic algorithms\n- Recursion trips most people up — trace through the factorial example by hand before the lab\n- **Submit via Canvas** — check the assignment page for the exact deadline and format\n- Returning student **Aarav** (Y3 ISTD) runs weekly prep sessions — check Events for the next one\n- Stuck? Post in the **10.014 module room** on Cohortly — classmates and returning students usually answer within a few hours`,
+    response: `**10.014 Computational Thinking for Design** is your intro to Python and algorithmic thinking. Here's what to know:\n\n- Labs use **Jupyter notebooks** — install Anaconda or use the lab machines in Building 5 (open 24h)\n- Key topics: functions, loops, recursion, data structures, basic algorithms\n- Recursion trips most people up — trace through the factorial example by hand before the lab\n- **Submit via Canvas** — check the assignment page for the exact deadline and format\n- **Aarav** (Y3 ISTD) runs weekly prep sessions — check Events for the next one\n- Stuck? Post in the **10.014 module room** on Cohortly — classmates and active peer helpers usually answer within a few hours`,
     followUps: ['How do I set up Python?', 'Who is Aarav Menon?', 'Where do I submit my lab?'],
   },
   {
     id: 'm-10009',
     triggers: ['10.009', 'digital world', 'the digital world', '2d project', '2d project brief', 'digital world project', 'team formation 10.009'],
-    response: `**10.009 The Digital World** is about technology, systems, and how digital tools shape society. The big deliverable is the **2D Group Project** — here's what returning students say:\n\n- The brief drops in **Week 2** — don't wait to form your team\n- Pick teammates with **complementary skills** — ideally across different pillars (ASD + ISTD combos work well)\n- Past project themes: smart city systems, assistive tech, sustainability platforms\n- Module room on Cohortly has **Wei Jian** and Aarav answering scope questions\n- Don't overbuild — scoping down is always better than running out of time`,
+    response: `**10.009 The Digital World** is about technology, systems, and how digital tools shape society. The big deliverable is the **2D Group Project** — here's what students who have taken it say:\n\n- The brief drops in **Week 2** — don't wait to form your team\n- Pick teammates with **complementary skills** — ideally across different pillars (ASD + ISTD combos work well)\n- Past project themes: smart city systems, assistive tech, sustainability platforms\n- Module room on Cohortly has **Wei Jian** and Aarav answering scope questions\n- Don't overbuild — scoping down is always better than running out of time`,
     followUps: ['How do I form a good team?', 'What other modules do I take?', 'How does Pass/Fail grading work?'],
   },
   {
@@ -1208,7 +1193,7 @@ const COHORTLY_KB: AIEntry[] = [
   {
     id: 'module-rooms',
     triggers: ['module room', 'qa room', 'class room', 'q&a', 'ask question', 'post question', 'classes tab', 'how to ask', 'question forum', 'cohortly classes'],
-    response: `**Module rooms** are Q&A forums for each module — accessed via the **Classes tab**.\n\n**How they work:**\n- Select your module (10.014, 10.009, etc.)\n- Read existing threads — someone may have already asked your question\n- Post a new question: be specific (include error messages, what you've tried)\n- Classmates and returning students answer in shared threads so the answer helps everyone\n\n**Tips for getting fast answers:**\n- Post the actual error message, not just "it doesn't work"\n- Say what you've already tried\n- Post early in the day (not the night before the deadline)`,
+    response: `**Module rooms** are Q&A forums for each module — accessed via the **Classes tab**.\n\n**How they work:**\n- Select your module (10.014, 10.009, etc.)\n- Read existing threads — someone may have already asked your question\n- Post a new question: be specific (include error messages, what you've tried)\n- Classmates and any verified student who knows the answer can reply in shared threads so the answer helps everyone\n\n**Tips for getting fast answers:**\n- Post the actual error message, not just "it doesn't work"\n- Say what you've already tried\n- Post early in the day (not the night before the deadline)`,
     followUps: ['Who answers in the module rooms?', 'How do I post a question?', 'What is 10.014 like?'],
   },
   {
@@ -1917,21 +1902,21 @@ const adoptionSteps: Array<{ label: string; count: number; total: number; pct: n
 
 const adminClassHealth: Array<{
   code: string; title: string; students: number;
-  questions: number; answered: number; mentors: number; status: 'healthy' | 'attention';
+  questions: number; answered: number; helpers: number; status: 'healthy' | 'attention';
 }> = [
-  { code: '10.014', title: 'Computational Thinking', students: 68, questions: 28, answered: 28, mentors: 4, status: 'healthy' },
-  { code: '10.009', title: 'The Digital World', students: 43, questions: 19, answered: 18, mentors: 2, status: 'healthy' },
-  { code: '50.007', title: 'Machine Learning', students: 38, questions: 22, answered: 20, mentors: 2, status: 'healthy' },
-  { code: '30.007', title: 'Engineering Design', students: 22, questions: 11, answered: 9, mentors: 1, status: 'attention' },
-  { code: '40.011', title: 'Data-Driven World', students: 19, questions: 16, answered: 14, mentors: 2, status: 'healthy' },
-  { code: 'ASD Studio', title: 'ASD Design Studio I', students: 16, questions: 8, answered: 7, mentors: 2, status: 'healthy' },
+  { code: '10.014', title: 'Computational Thinking', students: 68, questions: 28, answered: 28, helpers: 4, status: 'healthy' },
+  { code: '10.009', title: 'The Digital World', students: 43, questions: 19, answered: 18, helpers: 2, status: 'healthy' },
+  { code: '50.007', title: 'Machine Learning', students: 38, questions: 22, answered: 20, helpers: 2, status: 'healthy' },
+  { code: '30.007', title: 'Engineering Design', students: 22, questions: 11, answered: 9, helpers: 1, status: 'attention' },
+  { code: '40.011', title: 'Data-Driven World', students: 19, questions: 16, answered: 14, helpers: 2, status: 'healthy' },
+  { code: 'ASD Studio', title: 'ASD Design Studio I', students: 16, questions: 8, answered: 7, helpers: 2, status: 'healthy' },
 ];
 
 const adminAlerts: Array<{ type: 'urgent' | 'warning' | 'info'; title: string; detail: string; action: string }> = [
-  { type: 'urgent', title: '3 questions unanswered for >6 hours', detail: '10.014 Computational Thinking · Lab 2 recursion help', action: 'Notify returning students' },
+  { type: 'urgent', title: '3 questions unanswered for >6 hours', detail: '10.014 Computational Thinking · Lab 2 recursion help', action: 'Notify active helpers' },
   { type: 'warning', title: '14 students have zero connections', detail: 'First-week isolation risk — no events RSVPd or messages sent', action: 'Send care nudge' },
   { type: 'warning', title: '22 students haven\'t joined any event', detail: 'Signed up and verified but not yet engaged with the cohort', action: 'Highlight events' },
-  { type: 'info', title: '30.007 Engineering Design needs more returning-student coverage', detail: 'Only 1 active Year 2+ student — 11 open questions this week', action: 'Invite returning students' },
+  { type: 'info', title: '30.007 Engineering Design needs more peer-help coverage', detail: 'Only 1 active helper — 11 open questions this week', action: 'Invite active students' },
 ];
 
 const adminStudents: Array<{ name: string; pillar: string; joined: string; connections: number; events: number }> = [
@@ -1945,28 +1930,6 @@ const adminStudents: Array<{ name: string; pillar: string; joined: string; conne
 ];
 
 function getDemoProfile(mode: DemoMode): StudentProfile {
-  if (mode === 'mentor') {
-    return {
-      profileVersion: PROFILE_SCHEMA_VERSION,
-      workspace: 'mentor',
-      role: 'mentor',
-      journeyStage: 'returning',
-      classes: ['10.014 Computational Thinking', '10.009 The Digital World', '50.007 Machine Learning'],
-      interests: ['Teaching', 'Study groups', 'Startups & iCube'],
-      goals: ['Answer module questions', 'Host office hours', 'Spot students who need help'],
-      availability: 'Weekday evenings',
-      homeBase: 'ISTD senior mentor group',
-      intro: 'Year 3 ISTD senior mentor. I help with recursion, systems thinking, and project scoping without turning every question into a DM.',
-      pillar: 'ISTD',
-      year: 'Year 3',
-      campusHomeBase: 'Returning student circles',
-      campusCommunity: 'returning-guides',
-      mentorYear: 'Year 3',
-      mentorPillar: 'ISTD',
-      mentorModules: ['10.014 Computational Thinking', '10.009 The Digital World', '50.007 Machine Learning'],
-      mentorHelpStyle: ['Group study rooms', 'Weekly office hours', 'Q&A threads only'],
-    };
-  }
   if (mode === 'returning') {
     return {
       profileVersion: PROFILE_SCHEMA_VERSION,
@@ -1975,7 +1938,7 @@ function getDemoProfile(mode: DemoMode): StudentProfile {
       journeyStage: 'returning',
       classes: ['50.001 Introduction to ISTD', '50.004 Algorithm Design', '50.007 Machine Learning'],
       interests: ['Startups & iCube', 'Robotics', 'Study groups'],
-      goals: ['Find project teammates', 'Share module notes', 'Join a returning-student circle'],
+      goals: ['Find project teammates', 'Share module notes', 'Join a peer-help circle'],
       availability: 'Weekday evenings',
       homeBase: 'Returning student home base',
       intro: 'Returning ISTD student looking for project teammates, class groups, and useful ways to help incoming students settle in.',
@@ -2010,7 +1973,7 @@ function getDemoProfile(mode: DemoMode): StudentProfile {
     journeyStage: 'freshmore',
     classes: ['10.014 Computational Thinking', '10.009 The Digital World', '10.001 Advanced Maths I'],
     interests: ['Startups & iCube', 'Badminton', 'Food & Cafes'],
-    goals: ['Find my first-week circle', 'Get module advice from returning students'],
+    goals: ['Find my first-week circle', 'Get module advice from peers'],
     availability: 'Weekday evenings',
     homeBase: 'Freshmore campus-life community',
     intro: 'New to SUTD — looking for low-pressure events, coding help, and startup friends.',
@@ -2114,6 +2077,8 @@ function loadPfpLocal(email: string): string | undefined {
 }
 
 function inferJourneyStage(profile: Partial<StudentProfile>): StudentJourneyStage {
+  const legacyRole = (profile as { role?: unknown; workspace?: unknown }).role;
+  const legacyWorkspace = (profile as { role?: unknown; workspace?: unknown }).workspace;
   const combined = [
     profile.journeyStage,
     profile.year,
@@ -2124,7 +2089,7 @@ function inferJourneyStage(profile: Partial<StudentProfile>): StudentJourneyStag
     profile.intro,
     ...(profile.goals ?? []),
   ].filter(Boolean).join(' ').toLowerCase();
-  if (profile.role === 'mentor' || profile.workspace === 'mentor') return 'returning';
+  if (legacyRole === 'mentor' || legacyWorkspace === 'mentor') return 'returning';
   if (combined.includes('exchange')) return 'exchange';
   if (/year\s*[234]|y[234]|returning|upper/.test(combined)) return 'returning';
   if (combined.includes('pre-arrival') || combined.includes('pre arrival')) return 'pre_arrival';
@@ -2133,7 +2098,6 @@ function inferJourneyStage(profile: Partial<StudentProfile>): StudentJourneyStag
 
 function normalizeProfile(raw: Partial<StudentProfile> | null | undefined): StudentProfile | null {
   if (!raw) return null;
-  const workspace: AppWorkspace = raw.workspace === 'mentor' || raw.role === 'mentor' ? 'mentor' : 'student';
   const journeyStage = raw.journeyStage ?? inferJourneyStage(raw);
   const meta = journeyMeta[journeyStage];
   const classes = Array.isArray(raw.classes) ? raw.classes : [];
@@ -2142,8 +2106,8 @@ function normalizeProfile(raw: Partial<StudentProfile> | null | undefined): Stud
   return {
     ...raw,
     profileVersion: PROFILE_SCHEMA_VERSION,
-    workspace,
-    role: workspace === 'mentor' ? 'mentor' : 'student',
+    workspace: 'student',
+    role: 'student',
     journeyStage,
     classes,
     interests,
@@ -2161,10 +2125,6 @@ function normalizeProfile(raw: Partial<StudentProfile> | null | undefined): Stud
 
 function journeyStageForProfile(profile: StudentProfile): StudentJourneyStage {
   return profile.journeyStage ?? inferJourneyStage(profile);
-}
-
-function workspaceForProfile(profile: StudentProfile): AppWorkspace {
-  return profile.workspace ?? (profile.role === 'mentor' ? 'mentor' : 'student');
 }
 
 async function loadProfile(email: string): Promise<StudentProfile | null> {
@@ -2487,15 +2447,6 @@ function App() {
         shortName: 'SUTD',
         verifiedAt: new Date().toISOString(),
       },
-      mentor: {
-        name: 'Aarav Menon',
-        email: 'demo.mentor@mymail.sutd.edu.sg',
-        studentId: 'DEMO0004',
-        institutionId: 'sutd',
-        institutionName: 'Singapore University of Technology and Design',
-        shortName: 'SUTD',
-        verifiedAt: new Date().toISOString(),
-      },
     };
     const user = demoUsers[mode];
     if (wasReset.current) {
@@ -2565,7 +2516,6 @@ function App() {
     return (
       <LandingScreen
         onSelectJourney={(stage) => { setPreRole('student'); setPreJourneyStage(stage); }}
-        onSelectMentor={() => { setPreRole('mentor'); setPreJourneyStage('returning'); }}
         onDemoLogin={handleDemoLogin}
         onAdminDemo={() => setShowAdmin(true)}
         onSSOLogin={handleSSOLogin}
@@ -2865,14 +2815,12 @@ function LandingHero3D() {
 
 function LandingScreen({
   onSelectJourney,
-  onSelectMentor,
   onDemoLogin,
   onAdminDemo,
   onSSOLogin,
   ssoError,
 }: {
   onSelectJourney: (stage: StudentJourneyStage) => void;
-  onSelectMentor: () => void;
   onDemoLogin: (mode: DemoMode) => void;
   onAdminDemo: () => void;
   onSSOLogin: (p: 'microsoft') => void;
@@ -2899,8 +2847,8 @@ function LandingScreen({
           </span>
           <h1>Meet the right SUTD people for your stage.</h1>
           <p>
-            Freshmores, exchange students, returning students, and senior mentors each get a workspace
-            tuned to what they actually need.
+            Freshmores, exchange students, and returning students each get a workspace tuned
+            to what they actually need, with peer help open to everyone.
           </p>
 
           <div className="landing-trust-row">
@@ -2950,14 +2898,6 @@ function LandingScreen({
               </div>
               <span className="path-card-arrow"><ArrowRight size={18} /></span>
             </button>
-            <button className="path-card mentor-path" onClick={onSelectMentor}>
-              <div className="path-card-icon"><HeartHandshake size={20} /></div>
-              <div className="path-card-text">
-                <strong>I'm a senior mentor</strong>
-                <span>Guide module rooms and help requests</span>
-              </div>
-              <span className="path-card-arrow"><ArrowRight size={18} /></span>
-            </button>
           </div>
 
           <div className="landing-demo-inline" aria-label="Open demo modes">
@@ -2970,9 +2910,6 @@ function LandingScreen({
             </button>
             <button className="demo-btn exchange-demo" onClick={() => onDemoLogin('exchange')}>
               <Globe2 size={14} /> Exchange
-            </button>
-            <button className="demo-btn mentor-demo" onClick={() => onDemoLogin('mentor')}>
-              <HeartHandshake size={14} /> Mentor
             </button>
             <button className="demo-btn admin-demo" onClick={onAdminDemo}>
               <Building2 size={14} /> Admin
@@ -3011,8 +2948,8 @@ function LandingScreen({
           </div>
           <div className="landing-value-card">
             <div className="landing-value-card-icon" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}><HeartHandshake size={20} /></div>
-            <h3>Senior mentor workspace</h3>
-            <p>Mentors get a separate help-request queue and module support view instead of being mixed into normal student browsing.</p>
+            <h3>Peer help everywhere</h3>
+            <p>Any verified student can answer module questions, post study sessions, and help the cohort through shared rooms.</p>
           </div>
           <div className="landing-value-card">
             <div className="landing-value-card-icon" style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24' }}><HeartHandshake size={20} /></div>
@@ -3048,9 +2985,6 @@ function AuthScreen({
   const [step, setStep] = useState<'identity' | 'code'>('identity');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
-  const roleHint = role === 'mentor'
-    ? { icon: <HeartHandshake size={16} />, label: 'Joining as a verified SUTD senior mentor' }
-    : { icon: <GraduationCap size={16} />, label: 'Joining as a verified SUTD student' };
 
 
   const requestCode = async () => {
@@ -3113,8 +3047,8 @@ function AuthScreen({
         </div>
 
         <div className="auth-role-hint">
-          {roleHint.icon}
-          {roleHint.label}
+          <GraduationCap size={16} />
+          Joining as a verified SUTD student
         </div>
 
         {step === 'identity' && (
@@ -3399,10 +3333,9 @@ function ProfileOnboarding({
 }) {
   const institution = institutionFor(user.institutionId, institutions);
   const [onboardStep, setOnboardStep] = useState<'role' | 'major' | 'profile'>(
-    initialRole === 'student' ? 'major' : initialRole === 'mentor' ? 'profile' : 'role',
+    initialRole === 'student' ? 'major' : 'role',
   );
-  const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole ?? 'student');
-  const [journeyStage, setJourneyStage] = useState<StudentJourneyStage>(initialJourneyStage ?? (initialRole === 'mentor' ? 'returning' : 'freshmore'));
+  const [journeyStage, setJourneyStage] = useState<StudentJourneyStage>(initialJourneyStage ?? 'freshmore');
   const [pillar, setPillar] = useState('');
   const [term, setTerm] = useState('');
   const [year, setYear] = useState(initialJourneyStage === 'returning' ? 'Year 3' : initialJourneyStage === 'exchange' ? 'Exchange' : 'Year 1');
@@ -3422,17 +3355,10 @@ function ProfileOnboarding({
   // Student fields
   const [classes, setClasses] = useState<string[]>(['10.014 Computational Thinking', '10.009 The Digital World']);
   const [interests, setInterests] = useState<string[]>(['Startups & iCube', 'Badminton', 'Food & Cafes']);
-  const [goals, setGoals] = useState<string[]>(['Find my first-week circle', 'Get returning-student module advice']);
+  const [goals, setGoals] = useState<string[]>(['Find my first-week circle', 'Get peer module advice']);
   const [availability, setAvailability] = useState(availabilityOptions[0]);
   const [homeBase, setHomeBase] = useState('Freshmore housing / East Coast');
   const [intro, setIntro] = useState('New to SUTD and looking for low-pressure events, coding help, and startup friends.');
-
-  // Mentor fields
-  const [mentorYear, setMentorYear] = useState('');
-  const [mentorPillar, setMentorPillar] = useState('');
-  const [mentorModules, setMentorModules] = useState<string[]>([]);
-  const [mentorHelpStyle, setMentorHelpStyle] = useState<string[]>([]);
-  const [mentorBio, setMentorBio] = useState('');
 
   const applyJourneyDefaults = (stage: StudentJourneyStage) => {
     setJourneyStage(stage);
@@ -3440,8 +3366,8 @@ function ProfileOnboarding({
       setYear('Year 3');
       setTerm('');
       setHomeBase(journeyMeta.returning.defaultHomeBase);
-      setIntro('Returning SUTD student looking for module groups, project teammates, and useful ways to guide juniors.');
-      setGoals(['Find project teammates', 'Share module notes', 'Join a returning-student circle']);
+      setIntro('Returning SUTD student looking for module groups, project teammates, and useful ways to help in shared class rooms.');
+      setGoals(['Find project teammates', 'Share module notes', 'Answer shared module questions']);
       setClasses(['50.001 Introduction to ISTD', '50.004 Algorithm Design', '50.007 Machine Learning']);
     } else if (stage === 'exchange') {
       setYear('Exchange');
@@ -3455,15 +3381,10 @@ function ProfileOnboarding({
       setTerm('');
       setHomeBase(journeyMeta.freshmore.defaultHomeBase);
       setIntro('New to SUTD and looking for low-pressure events, coding help, and startup friends.');
-      setGoals(['Find my first-week circle', 'Get returning-student module advice']);
+      setGoals(['Find my first-week circle', 'Get peer module advice']);
       setClasses(['10.014 Computational Thinking', '10.009 The Digital World']);
     }
   };
-
-  const mentorPillarGroup = useMemo(
-    () => classGroups.find((g) => g.pillarKey === mentorPillar.toLowerCase()) ?? null,
-    [mentorPillar],
-  );
 
   const studentProfile = useMemo<StudentProfile>(
     () => ({
@@ -3482,36 +3403,11 @@ function ProfileOnboarding({
     [availability, classes, goals, homeBase, interests, intro, journeyStage, pillar, term, year, pfpDataUrl],
   );
 
-  const mentorProfile = useMemo<StudentProfile>(
-    () => ({
-      profileVersion: PROFILE_SCHEMA_VERSION,
-      workspace: 'mentor',
-      role: 'mentor',
-      journeyStage: 'returning',
-      classes: mentorModules,
-      interests: [],
-      goals: [],
-      availability,
-      homeBase: mentorPillar,
-      intro: mentorBio,
-      year: mentorYear || undefined,
-      pillar: mentorPillar || undefined,
-      campusHomeBase: 'Senior mentor workspace',
-      campusCommunity: 'returning-guides',
-      mentorYear,
-      mentorPillar,
-      mentorModules,
-      mentorHelpStyle,
-    }),
-    [availability, mentorBio, mentorHelpStyle, mentorModules, mentorPillar, mentorYear],
-  );
-
   const toggle = (value: string, selected: string[], setSelected: (next: string[]) => void) => {
     setSelected(selected.includes(value) ? selected.filter((item) => item !== value) : [...selected, value]);
   };
 
   const canOpenStudent = classes.length > 0 && interests.length > 0 && goals.length > 0 && intro.trim().length > 10;
-  const canOpenMentor = mentorYear !== '' && mentorPillar !== '' && mentorModules.length > 0 && mentorBio.trim().length > 10;
 
   if (onboardStep === 'role') {
     return (
@@ -3535,37 +3431,37 @@ function ProfileOnboarding({
           <div className="role-cards">
             <button
               className="role-card student-role-card"
-              onClick={() => { setSelectedRole('student'); applyJourneyDefaults('freshmore'); setOnboardStep('major'); }}
+              onClick={() => { applyJourneyDefaults('freshmore'); setOnboardStep('major'); }}
             >
               <div className="role-card-icon"><GraduationCap size={28} /></div>
               <strong>Incoming Freshmore</strong>
               <em>Pre-arrival or first Freshmore term</em>
               <ul>
                 <li><Check size={14} /> Find your first-week cohort circle</li>
-                <li><Check size={14} /> Get module help from returning students</li>
+                <li><Check size={14} /> Get module help from verified peers</li>
                 <li><Check size={14} /> Join events before orientation starts</li>
                 <li><Check size={14} /> One place for classes, people, events</li>
               </ul>
               <span className="role-card-cta">Set up Freshmore profile <ArrowRight size={15} /></span>
             </button>
             <button
-              className="role-card mentor-role-card"
-              onClick={() => { setSelectedRole('student'); applyJourneyDefaults('returning'); setOnboardStep('major'); }}
+              className="role-card returning-role-card"
+              onClick={() => { applyJourneyDefaults('returning'); setOnboardStep('major'); }}
             >
-              <div className="role-card-icon mentor"><Users size={28} /></div>
+              <div className="role-card-icon peer"><Users size={28} /></div>
               <strong>Returning Student</strong>
               <em>Year 2, 3 or 4 · grouped by year</em>
               <ul>
                 <li><Check size={14} /> Find students in your pillar and year</li>
                 <li><Check size={14} /> Join module rooms and project groups</li>
-                <li><Check size={14} /> Share useful campus plans with your cohort</li>
+                <li><Check size={14} /> Answer questions when you know the answer</li>
                 <li><Check size={14} /> Keep Campus Life, Fifth Row, and class circles together</li>
               </ul>
               <span className="role-card-cta">Set up returning profile <ArrowRight size={15} /></span>
             </button>
             <button
               className="role-card student-role-card"
-              onClick={() => { setSelectedRole('student'); applyJourneyDefaults('exchange'); setOnboardStep('major'); }}
+              onClick={() => { applyJourneyDefaults('exchange'); setOnboardStep('major'); }}
             >
               <div className="role-card-icon"><Globe2 size={28} /></div>
               <strong>Exchange Student</strong>
@@ -3577,21 +3473,6 @@ function ProfileOnboarding({
                 <li><Check size={14} /> Keep module rooms and events in one place</li>
               </ul>
               <span className="role-card-cta">Set up exchange profile <ArrowRight size={15} /></span>
-            </button>
-            <button
-              className="role-card mentor-role-card"
-              onClick={() => { setSelectedRole('mentor'); setJourneyStage('returning'); setOnboardStep('profile'); }}
-            >
-              <div className="role-card-icon mentor"><HeartHandshake size={28} /></div>
-              <strong>Senior Mentor</strong>
-              <em>Returning student support workspace</em>
-              <ul>
-                <li><Check size={14} /> Answer high-signal module questions</li>
-                <li><Check size={14} /> Run office hours without random DMs</li>
-                <li><Check size={14} /> See students waiting on your modules</li>
-                <li><Check size={14} /> Keep mentor work separate from student browsing</li>
-              </ul>
-              <span className="role-card-cta">Set up mentor workspace <ArrowRight size={15} /></span>
             </button>
           </div>
         </div>
@@ -3625,7 +3506,7 @@ function ProfileOnboarding({
               ? 'Returning students are matched by year, pillar, current modules, project groups, and cohort activity. No Freshmore checklist.'
               : journeyStage === 'exchange'
                 ? 'Exchange students need fast access to classes, local plans, campus routes, and admin basics.'
-                : 'Cohortly uses this to match you to the right classmates, returning students, and module rooms instantly.'}</p>
+                : 'Cohortly uses this to match you to the right classmates, peer helpers, and module rooms instantly.'}</p>
           </div>
 
           <div className="setup-section">
@@ -3678,161 +3559,6 @@ function ProfileOnboarding({
     );
   }
 
-  if (selectedRole === 'mentor') {
-    return (
-      <main className="setup-page">
-        <section className="setup-intro mentor-intro">
-          <div className="auth-brand compact">
-            <span className="brand-mark">C</span>
-            <span>
-              <strong>Cohortly</strong>
-              <small>{institution.shortName} verified</small>
-            </span>
-          </div>
-          <div>
-            <span className="soft-pill"><HeartHandshake size={15} /> Returning student setup</span>
-            <h1>Your profile tells freshmores exactly who to reach.</h1>
-            <p>
-              Pick the modules you can help with. Cohortly matches you to students who have questions in those exact rooms
-              — no cold messages, no guesswork.
-            </p>
-          </div>
-          <div className="setup-proof">
-            <ShieldCheck size={18} />
-            <span>{user.email}</span>
-          </div>
-          <button className="text-button" style={{ color: 'rgba(255,255,255,0.6)' }} onClick={() => setOnboardStep('role')}>
-            <ChevronLeft size={16} /> Switch role
-          </button>
-        </section>
-
-        <section className="setup-workspace">
-          <div className="setup-card">
-            <div className="setup-card-head">
-              <span className="eyebrow">Mentor profile</span>
-              <h2>Your year, pillar, and module expertise</h2>
-            </div>
-
-            <div className="setup-section">
-              <div className="setup-label"><GraduationCap size={18} /><strong>Your year</strong></div>
-              <div className="choice-grid">
-                {mentorYearOptions.map((year) => (
-                  <button
-                    key={year}
-                    className={mentorYear === year ? 'choice selected' : 'choice'}
-                    onClick={() => setMentorYear(year)}
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="setup-section">
-              <div className="setup-label"><BookOpen size={18} /><strong>Your pillar</strong></div>
-              <div className="choice-grid">
-                {mentorPillarOptions.map((pillar) => (
-                  <button
-                    key={pillar}
-                    className={mentorPillar === pillar ? 'choice selected' : 'choice'}
-                    onClick={() => { setMentorPillar(pillar); setMentorModules([]); }}
-                  >
-                    {pillar}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {mentorPillarGroup && (
-              <div className="setup-section">
-                <div className="setup-label"><Sparkles size={18} /><strong>Modules you can help with</strong></div>
-                <div className="choice-grid">
-                  {[...classGroups[0].courses, ...mentorPillarGroup.courses].map((course) => (
-                    <button
-                      key={course}
-                      className={mentorModules.includes(course) ? 'choice selected' : 'choice'}
-                      onClick={() => toggle(course, mentorModules, setMentorModules)}
-                    >
-                      {course}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="setup-section">
-              <div className="setup-label"><HeartHandshake size={18} /><strong>How you prefer to help</strong></div>
-              <div className="choice-grid wide">
-                {mentorHelpStyleOptions.map((style) => (
-                  <button
-                    key={style}
-                    className={mentorHelpStyle.includes(style) ? 'choice selected' : 'choice'}
-                    onClick={() => toggle(style, mentorHelpStyle, setMentorHelpStyle)}
-                  >
-                    {style}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="setup-fields">
-              <label className="field">
-                Availability
-                <select value={availability} onChange={(event) => setAvailability(event.target.value)}>
-                  {availabilityOptions.map((option) => <option key={option}>{option}</option>)}
-                </select>
-              </label>
-            </div>
-
-            <label className="field">
-              Short bio for students
-              <textarea
-                value={mentorBio}
-                onChange={(event) => setMentorBio(event.target.value)}
-                placeholder={`Year ${mentorYear || '3'} ${mentorPillar || 'ISTD'} student. Can help with recursion, data structures, and lab preparation. Ping me through Cohortly.`}
-              />
-            </label>
-          </div>
-
-          <aside className="setup-preview">
-            <span className="eyebrow">Your mentor card</span>
-            <h2>What freshmores see</h2>
-            <div className="mentor-preview-card">
-              <Avatar name={user.name} color="teal" />
-              <div>
-                <strong>{user.name}</strong>
-                <span>{mentorYear || 'Year ?'} · {mentorPillar || 'Pillar'}</span>
-              </div>
-              <div className="tag-row" style={{ marginTop: 8 }}>
-                {mentorModules.slice(0, 4).map((m) => <span key={m}>{m}</span>)}
-                {mentorModules.length > 4 && <span>+{mentorModules.length - 4} more</span>}
-              </div>
-              {mentorBio && <p style={{ marginTop: 10, color: 'var(--muted)', lineHeight: 1.5, fontSize: '0.9rem' }}>{mentorBio}</p>}
-            </div>
-            <div className="preview-list">
-              <div>
-                <Users size={18} />
-                <span>Matched to freshmores in {mentorModules.length || 'your'} module{mentorModules.length !== 1 ? 's' : ''}</span>
-              </div>
-              <div>
-                <MessageCircle size={18} />
-                <span>Students can reach you through Cohortly, not random Telegram cold-messages</span>
-              </div>
-              <div>
-                <Clock3 size={18} />
-                <span>{availability} availability shown on your card</span>
-              </div>
-            </div>
-            <button className="primary-button wide" onClick={() => onComplete(mentorProfile)} disabled={!canOpenMentor}>
-              <ArrowRight size={18} />
-              Open mentor dashboard
-            </button>
-          </aside>
-        </section>
-      </main>
-    );
-  }
-
   // Student onboarding
   const studentSetupTitle = journeyStage === 'returning'
     ? 'Reconnect with your year, modules, and project circles.'
@@ -3843,7 +3569,7 @@ function ProfileOnboarding({
     ? 'Cohortly will prioritise current modules, pillar circles, project teams, events, and optional ways to help incoming students. No arrival checklist.'
     : journeyStage === 'exchange'
       ? 'Choose your classes, interests, and availability so Cohortly can surface classmates, local plans, campus routes, and admin guidance quickly.'
-      : 'Choose courses from any pillar, your interests, and first-week goals. Cohortly uses these to surface relevant class rooms, returning-student groups, and student circles — instead of one giant chat.';
+      : 'Choose courses from any pillar, your interests, and first-week goals. Cohortly uses these to surface relevant class rooms, peer groups, and student circles — instead of one giant chat.';
   const studentSetupPill = journeyMeta[journeyStage].setupLabel;
   return (
     <main className="setup-page">
@@ -3989,7 +3715,7 @@ function ProfileOnboarding({
           <div className="preview-list">
             <div>
               <BookOpen size={18} />
-              <span>{classes.slice(0, 2).join(', ') || 'Module'} rooms with returning students already attached</span>
+              <span>{classes.slice(0, 2).join(', ') || 'Module'} rooms with peer helpers already active</span>
             </div>
             <div>
               <Users size={18} />
@@ -4670,33 +4396,21 @@ function NotificationPanel({
 
 // ─── Mobile Bottom Nav ────────────────────────────────────────────────────────
 
-function MobileBottomNav({ active, setActive, role = 'student', journeyStage = 'freshmore' }: { active: View; setActive: (v: View) => void; role?: UserRole; journeyStage?: StudentJourneyStage }) {
+function MobileBottomNav({ active, setActive, journeyStage = 'freshmore' }: { active: View; setActive: (v: View) => void; journeyStage?: StudentJourneyStage }) {
   const [moreOpen, setMoreOpen] = useState(false);
-  const primaryItems: Array<{ id: View; label: string; icon: LucideIcon }> = role === 'mentor'
-    ? [
-        { id: 'mentor-home', label: 'Home', icon: LayoutDashboard },
-        { id: 'mentor-help', label: 'Help', icon: HeartHandshake },
-        { id: 'people', label: 'Students', icon: Users },
-        { id: 'messages', label: 'Chats', icon: MessageCircle },
-      ]
-    : [
-        { id: 'today', label: 'Today', icon: Home },
-        { id: 'people', label: 'People', icon: Users },
-        { id: 'events', label: 'Events', icon: CalendarCheck },
-        { id: 'classes', label: 'Classes', icon: BookOpen },
-      ];
-  const moreItems: Array<{ id: View; label: string; icon: LucideIcon }> = role === 'mentor'
-    ? [
-        { id: 'events', label: 'Events', icon: CalendarCheck },
-        { id: 'classes', label: 'Classes', icon: BookOpen },
-      ]
-    : [
-        { id: 'messages', label: 'Messages', icon: MessageCircle },
-        { id: 'launchpad', label: journeyMeta[journeyStage].navHubLabel, icon: Rocket },
-        { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
-        { id: 'campus-life', label: 'Campus Life', icon: MapPinned },
-        { id: 'kb', label: 'Resources', icon: BookMarked },
-      ];
+  const primaryItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
+    { id: 'today', label: 'Today', icon: Home },
+    { id: 'people', label: 'People', icon: Users },
+    { id: 'events', label: 'Events', icon: CalendarCheck },
+    { id: 'classes', label: 'Classes', icon: BookOpen },
+  ];
+  const moreItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
+    { id: 'messages', label: 'Messages', icon: MessageCircle },
+    { id: 'launchpad', label: journeyMeta[journeyStage].navHubLabel, icon: Rocket },
+    { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
+    { id: 'campus-life', label: 'Campus Life', icon: MapPinned },
+    { id: 'kb', label: 'Resources', icon: BookMarked },
+  ];
   return (
     <>
       {moreOpen && (
@@ -4763,11 +4477,9 @@ function StudentApp({
   onProfileUpdate: (p: StudentProfile) => void;
   onResetDemo: () => void;
 }) {
-  const workspace = workspaceForProfile(profile);
   const journeyStage = journeyStageForProfile(profile);
-  const isMentor = workspace === 'mentor';
-  const appNavItems = isMentor ? mentorNavItems : studentNavItemsFor(profile);
-  const [activeView, setActiveView] = useState<View>(isMentor ? 'mentor-home' : 'today');
+  const appNavItems = studentNavItemsFor(profile);
+  const [activeView, setActiveView] = useState<View>('today');
   const [dmTarget, setDmTarget] = useState<string | null>(null);
   const openDm = (name: string) => { setDmTarget(name); setActiveView('messages'); };
   const [showSearch, setShowSearch] = useState(false);
@@ -4908,7 +4620,7 @@ function StudentApp({
     <>
     {showSearch && <GlobalSearch onClose={() => setShowSearch(false)} onNavigate={(v) => { setActiveView(v); setShowSearch(false); }} />}
     {showNotifPanel && <NotificationPanel notifs={notifs} onClose={() => setShowNotifPanel(false)} onMarkAll={markAllRead} onMarkRead={markRead} onNavigate={(v) => { setActiveView(v); setShowNotifPanel(false); }} />}
-    <MobileBottomNav active={activeView} setActive={setActiveView} role={isMentor ? 'mentor' : 'student'} journeyStage={journeyStage} />
+    <MobileBottomNav active={activeView} setActive={setActiveView} journeyStage={journeyStage} />
     {showPulse && <WeeklyPulseModal onClose={() => setShowPulse(false)} userEmail={user.email} />}
     {showEditProfile && (
       <EditProfileSheet
@@ -4937,7 +4649,7 @@ function StudentApp({
           <span className="brand-mark">C</span>
           <span>
           <strong>Cohortly</strong>
-            <small>{institution.shortName} · {isMentor ? 'Mentor' : journeyMeta[journeyStage].shortLabel}</small>
+            <small>{institution.shortName} · {journeyMeta[journeyStage].shortLabel}</small>
           </span>
         </button>
 
@@ -4989,7 +4701,7 @@ function StudentApp({
       <div className="student-main">
         <header className="app-topbar">
           <div>
-            <span className="eyebrow">{isMentor ? 'Senior mentor workspace' : journeyMeta[journeyStage].label}</span>
+            <span className="eyebrow">{journeyMeta[journeyStage].label}</span>
             <h1>{activeView === 'privacy' ? 'Privacy & Data' : activeView === 'notifications' ? 'Notifications & Bots' : (appNavItems.find((item) => item.id === activeView)?.label ?? 'Cohortly')}</h1>
           </div>
           <div className="topbar-actions">
@@ -5065,15 +4777,7 @@ function StudentApp({
             </div>
           )}
           <div key={activeView} className="view-wrapper">
-            {activeView === 'mentor-home' && (
-              <MentorDashboardView
-                user={user}
-                profile={profile}
-                setActiveView={setActiveView}
-              />
-            )}
-            {activeView === 'mentor-help' && <MentorHelpView profile={profile} />}
-            {activeView === 'today' && !isMentor && (
+            {activeView === 'today' && (
               <TodayView
                 user={user}
                 profile={profile}
@@ -5083,7 +4787,7 @@ function StudentApp({
                 onOpenPulse={() => setShowPulse(true)}
               />
             )}
-            {activeView === 'launchpad' && !isMentor && (
+            {activeView === 'launchpad' && (
               <LaunchpadView
                 userEmail={user.email}
                 userName={user.name}
@@ -5091,8 +4795,8 @@ function StudentApp({
                 setActiveView={setActiveView}
               />
             )}
-            {activeView === 'fifth-row' && !isMentor && <FifthRowView />}
-            {activeView === 'kb' && !isMentor && <KnowledgeBaseView />}
+            {activeView === 'fifth-row' && <FifthRowView />}
+            {activeView === 'kb' && <KnowledgeBaseView />}
             {activeView === 'events' && (
               <EventsView
                 events={events}
@@ -5113,8 +4817,8 @@ function StudentApp({
             )}
             {activeView === 'people' && <PeopleView userEmail={user.email} onMessage={openDm} profile={profile} />}
             {activeView === 'classes' && <ClassesView enrolledClasses={profile.classes} onEnroll={(updated) => onProfileUpdate({ ...profile, classes: updated })} />}
-            {activeView === 'messages' && <MessagesView isMentor={isMentor} openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
-            {activeView === 'campus-life' && !isMentor && <CampusLifeView profile={profile} onProfileUpdate={onProfileUpdate} userEmail={user.email} userName={user.name} />}
+            {activeView === 'messages' && <MessagesView openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
+            {activeView === 'campus-life' && <CampusLifeView profile={profile} onProfileUpdate={onProfileUpdate} userEmail={user.email} userName={user.name} />}
             {activeView === 'privacy' && <PrivacySettingsView userEmail={user.email} userName={user.name} onBack={() => setActiveView('today')} onLogout={logout} />}
             {activeView === 'notifications' && <NotificationsView userEmail={user.email} />}
           </div>
@@ -5158,7 +4862,7 @@ function TodayView({
         { label: 'Connect with 3 people', done: false, view: 'people' as View | null },
       ],
       cards: [
-        { title: '10.014 Computational Thinking', body: '4 returning students active now · 28 Q&As this week', view: 'classes' as View, icon: BookOpen, tone: 'indigo', cta: 'Open room' },
+        { title: '10.014 Computational Thinking', body: '4 peer helpers active now · 28 Q&As this week', view: 'classes' as View, icon: BookOpen, tone: 'indigo', cta: 'Open room' },
         { title: 'First Friday food crawl', body: '42 going · Dover MRT → Ghim Moh · Fri 7:30 PM', view: 'events' as View, icon: CalendarCheck, tone: 'green', cta: 'RSVP' },
         { title: 'Aarav Menon', body: 'Year 3 ISTD · 94% match · 10.014 guide', view: 'people' as View, icon: Users, tone: 'violet', cta: 'Connect' },
       ],
@@ -5175,7 +4879,7 @@ function TodayView({
         { label: 'Connect with 3 people', done: false, view: 'people' as View | null },
       ],
       cards: [
-        { title: '10.014 Computational Thinking', body: '4 returning students active now · 28 Q&As this week', view: 'classes' as View, icon: BookOpen, tone: 'indigo', cta: 'Open room' },
+        { title: '10.014 Computational Thinking', body: '4 peer helpers active now · 28 Q&As this week', view: 'classes' as View, icon: BookOpen, tone: 'indigo', cta: 'Open room' },
         { title: 'Freshmore campus walk', body: 'Housing → B5 → food loop · Today 6 PM', view: 'campus-life' as View, icon: MapPinned, tone: 'green', cta: 'View route' },
         { title: 'Aarav Menon', body: 'Year 3 ISTD · 94% match · 10.014 guide', view: 'people' as View, icon: Users, tone: 'violet', cta: 'Connect' },
       ],
@@ -5183,7 +4887,7 @@ function TodayView({
     returning: {
       progress: `${profile.year ?? 'Returning'} · current term workspace`,
       progressWidth: '64%',
-      meta: ['96 returning students active', '12 project groups', '18 junior questions answered'],
+      meta: ['96 returning students active', '12 project groups', '18 shared questions answered'],
       checklist: [
         { label: 'Sync current module rooms', done: profile.classes.length > 0, view: 'classes' as View | null },
         { label: 'Join your year/pillar circle', done: true, view: 'people' as View | null },
@@ -5192,9 +4896,9 @@ function TodayView({
         { label: 'RSVP to a serious term event', done: false, view: 'events' as View | null },
       ],
       cards: [
-        { title: '50.007 Machine Learning', body: '38 students · 22 Q&As · 2 returning guides active', view: 'classes' as View, icon: BookOpen, tone: 'indigo', cta: 'Open room' },
+        { title: '50.007 Machine Learning', body: '38 students · 22 Q&As · 2 active helpers', view: 'classes' as View, icon: BookOpen, tone: 'indigo', cta: 'Open room' },
         { title: 'Project teammate search', body: 'ISTD + DAI students looking for systems builders', view: 'people' as View, icon: Users, tone: 'green', cta: 'Browse' },
-        { title: 'Senior help queue', body: '3 Freshmore questions fit your modules', view: 'classes' as View, icon: HeartHandshake, tone: 'violet', cta: 'Answer' },
+        { title: 'Peer help queue', body: '3 Freshmore questions match modules you know', view: 'classes' as View, icon: HeartHandshake, tone: 'violet', cta: 'Answer' },
       ],
     },
     exchange: {
@@ -5336,8 +5040,8 @@ const phaseDesc: Record<string, string> = {
   'week1': 'Academic setup, first lectures, and your first connections.',
   'people5': 'Your first 5 key relationships on campus.',
   'fifth-row-phase': 'Find your co-curricular community.',
-  'qa-phase': 'Get comfortable asking — returning students and classmates are here to answer.',
-  'returning-phase': 'Use returning-student sessions grouped by year, pillar, and module.',
+  'qa-phase': 'Get comfortable asking — verified peers and classmates are here to answer.',
+  'returning-phase': 'Use peer study sessions grouped by year, pillar, and module.',
   'returning-term-setup': 'Keep the current term accurate without repeating Freshmore onboarding.',
   'returning-projects': 'Find project partners, answer shared questions, and organise serious study.',
   'returning-opportunities': 'Surface leadership, research, internship, and support opportunities.',
@@ -6260,14 +5964,14 @@ const campusLifeJios: CampusLifeJio[] = [
     time: 'Tonight 6:30 PM',
     desc: 'Small-group dinner for students who want a low-pressure first-week plan.',
     host: 'Noah · Year 2 community',
-    scope: 'Freshman + returning students',
+    scope: 'All verified students',
   },
   {
     id: 'jio-study',
     icon: 'study',
     title: '10.014 lab prep circle',
     time: 'Wed 8 PM · Building 5',
-    desc: 'Returning students walk through recursion mistakes and setup checks. Bring your laptop.',
+    desc: 'Peer helpers walk through recursion mistakes and setup checks. Bring your laptop.',
     host: 'Aarav · ISTD year circle',
     scope: 'Module-based group',
   },
@@ -6613,7 +6317,6 @@ function ClassesView({
 }: {
   enrolledClasses?: string[]; onEnroll?: (c: string[]) => void;
 }) {
-  const isMentor = false;
   const [selectedCode, setSelectedCode] = useState<string | null>(null);
   const [questionText, setQuestionText] = useState('');
   const [askAnonymous, setAskAnonymous] = useState(false);
@@ -6731,7 +6434,7 @@ function ClassesView({
   const submitAnswer = (threadId: string) => {
     const text = answerText.trim();
     if (!text || !selectedCode) return;
-    const displayName = 'Returning Student';
+    const displayName = 'Peer helper';
     const updated = (localQA[selectedCode] ?? []).map((q) =>
       q.id === threadId ? { ...q, answered: true, answer: text, answerer: displayName } : q,
     );
@@ -6750,11 +6453,9 @@ function ClassesView({
       <div className="class-list-panel">
         <div className="class-list-panel-head">
           <span className="eyebrow">My rooms {myRooms.length > 0 && `· ${myRooms.length}`}</span>
-          {!isMentor && (
-            <button className="class-import-btn" onClick={() => setShowImport((v) => !v)} title="Import timetable">
-              <FileSpreadsheet size={14} /> Import
-            </button>
-          )}
+          <button className="class-import-btn" onClick={() => setShowImport((v) => !v)} title="Import timetable">
+            <FileSpreadsheet size={14} /> Import
+          </button>
         </div>
 
         {/* Timetable import widget */}
@@ -6795,16 +6496,12 @@ function ClassesView({
               <strong>{room.title}</strong>
               <span>{room.activity}</span>
             </button>
-            {!isMentor && (
-              <button className="class-leave-btn" onClick={() => leaveRoom(room.code)} title="Leave room">
-                <X size={11} />
-              </button>
-            )}
+            <button className="class-leave-btn" onClick={() => leaveRoom(room.code)} title="Leave room">
+              <X size={11} />
+            </button>
           </div>
         )) : (
-          !isMentor && (
-            <p className="class-empty-hint">No rooms yet — import your timetable or join a room below.</p>
-          )
+          <p className="class-empty-hint">No rooms yet — import your timetable or join a room below.</p>
         )}
 
         {/* Browse other rooms */}
@@ -6823,11 +6520,9 @@ function ClassesView({
                   <strong>{room.title}</strong>
                   <span>{room.activity}</span>
                 </button>
-                {!isMentor && (
-                  <button className="class-join-btn" onClick={() => joinRoom(room)} title="Join room">
-                    <Plus size={11} />
-                  </button>
-                )}
+                <button className="class-join-btn" onClick={() => joinRoom(room)} title="Join room">
+                  <Plus size={11} />
+                </button>
               </div>
             ))}
           </>
@@ -6840,7 +6535,6 @@ function ClassesView({
           <DesignAIRoomPanel
             room={selectedRoom}
             threads={threads}
-            isMentor={isMentor}
             claimedId={claimedId}
             answerText={answerText}
             questionText={questionText}
@@ -6855,7 +6549,7 @@ function ClassesView({
           <div className="class-room-header">
             <div className="class-room-meta">
               <span className="item-code">{selectedRoom.code}</span>
-              <span>{selectedRoom.mentors}</span>
+              <span>{selectedRoom.helpers}</span>
             </div>
             <h2>{selectedRoom.title}</h2>
             <div className="class-room-meta">
@@ -6905,7 +6599,7 @@ function ClassesView({
                         </div>
                         <p>{q.answer}</p>
                       </div>
-                    ) : isMentor ? (
+                    ) : (
                       claimedId === q.id ? (
                         <div className="qa-answer-composer">
                           <textarea
@@ -6922,11 +6616,9 @@ function ClassesView({
                         </div>
                       ) : (
                         <button className="qa-claim-btn" onClick={() => { setClaimedId(q.id); setAnswerText(''); }}>
-                          <ThumbsUp size={13} /> Claim & answer this
+                          <ThumbsUp size={13} /> Answer this if you know it
                         </button>
                       )
-                    ) : (
-                      <span className="qa-waiting">Waiting for a classmate or returning student…</span>
                     )}
                   </div>
                 );
@@ -6937,24 +6629,22 @@ function ClassesView({
             </div>
           </div>
 
-          {!isMentor && (
-            <div className="qa-compose">
-              <textarea
-                placeholder={`Ask a question in ${selectedRoom.code}…`}
-                value={questionText}
-                onChange={(e) => setQuestionText(e.target.value)}
-              />
-              <div className="qa-compose-actions">
-                <label className="qa-anon-toggle">
-                  <input type="checkbox" checked={askAnonymous} onChange={(e) => setAskAnonymous(e.target.checked)} />
-                  Ask anonymously
-                </label>
-                <button className="primary-button" onClick={postQuestion} disabled={!questionText.trim()}>
-                  <Send size={15} /> Post question
-                </button>
-              </div>
+          <div className="qa-compose">
+            <textarea
+              placeholder={`Ask a question in ${selectedRoom.code}…`}
+              value={questionText}
+              onChange={(e) => setQuestionText(e.target.value)}
+            />
+            <div className="qa-compose-actions">
+              <label className="qa-anon-toggle">
+                <input type="checkbox" checked={askAnonymous} onChange={(e) => setAskAnonymous(e.target.checked)} />
+                Ask anonymously
+              </label>
+              <button className="primary-button" onClick={postQuestion} disabled={!questionText.trim()}>
+                <Send size={15} /> Post question
+              </button>
             </div>
-          )}
+          </div>
         </div>
         )
       ) : (
@@ -6969,12 +6659,11 @@ function ClassesView({
 }
 
 function DesignAIRoomPanel({
-  room, threads, isMentor, claimedId, answerText, questionText,
+  room, threads, claimedId, answerText, questionText,
   setQuestionText, setClaimedId, setAnswerText, postQuestion, submitAnswer,
 }: {
   room: ClassRoom;
   threads: QAThread[];
-  isMentor: boolean;
   claimedId: string | null;
   answerText: string;
   questionText: string;
@@ -7052,7 +6741,7 @@ function DesignAIRoomPanel({
       <div className="class-room-header" style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #312e81 100%)' }}>
         <div className="class-room-meta">
           <span className="item-code" style={{ background: 'rgba(255,255,255,0.15)', color: '#fff' }}>{room.code}</span>
-          <span style={{ color: 'rgba(255,255,255,0.7)' }}>{room.mentors}</span>
+          <span style={{ color: 'rgba(255,255,255,0.7)' }}>{room.helpers}</span>
         </div>
         <h2 style={{ color: '#fff' }}>{room.title}</h2>
         <div className="class-room-meta">
@@ -7091,7 +6780,7 @@ function DesignAIRoomPanel({
                       <span className="qa-answerer">{q.answerer}</span>
                       <p>{q.answer}</p>
                     </div>
-                  ) : isMentor ? (
+                  ) : (
                     claimedId === q.id ? (
                       <div className="qa-answer-composer">
                         <textarea placeholder="Write your answer…" value={answerText} onChange={(e) => setAnswerText(e.target.value)} />
@@ -7101,23 +6790,19 @@ function DesignAIRoomPanel({
                         </div>
                       </div>
                     ) : (
-                      <button className="qa-claim-btn" onClick={() => { setClaimedId(q.id); setAnswerText(''); }}><ThumbsUp size={13} /> Claim & answer</button>
+                      <button className="qa-claim-btn" onClick={() => { setClaimedId(q.id); setAnswerText(''); }}><ThumbsUp size={13} /> Answer this if you know it</button>
                     )
-                  ) : (
-                    <span className="qa-waiting">Waiting for a classmate or returning student…</span>
                   )}
                 </div>
               ))}
             </div>
-            {!isMentor && (
-              <div className="qa-compose">
-                <textarea placeholder={`Ask a design or process question in ${room.code}…`} value={questionText} onChange={(e) => setQuestionText(e.target.value)} />
-                <div className="qa-compose-actions">
-                  <span>Visible to all verified iDeA students</span>
-                  <button className="primary-button" onClick={postQuestion} disabled={!questionText.trim()}><Send size={15} /> Post question</button>
-                </div>
+            <div className="qa-compose">
+              <textarea placeholder={`Ask a design or process question in ${room.code}…`} value={questionText} onChange={(e) => setQuestionText(e.target.value)} />
+              <div className="qa-compose-actions">
+                <span>Visible to all verified iDeA students</span>
+                <button className="primary-button" onClick={postQuestion} disabled={!questionText.trim()}><Send size={15} /> Post question</button>
               </div>
-            )}
+            </div>
           </div>
         )}
 
@@ -7303,12 +6988,10 @@ function DesignAIRoomPanel({
   );
 }
 
-function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?: boolean; openWith?: string | null; onClearTarget?: () => void }) {
-  const defaultThreads = isMentor
-    ? ['Vanika · 10.014 help request', 'Kai · CTD prep session', '10.014 study group', 'ISTD freshmores circle']
-    : ['Aarav · 10.014 prep', 'Food crawl group', 'SUTD exchange arrivals', 'ASD design studio warmup'];
+function MessagesView({ openWith, onClearTarget }: { openWith?: string | null; onClearTarget?: () => void }) {
+  const defaultThreads = ['Aarav · 10.014 prep', 'Food crawl group', 'SUTD exchange arrivals', 'ASD design studio warmup'];
 
-  type ChatMsg = { author: string; text: string; tone: 'student' | 'mentor' | 'system' };
+  type ChatMsg = { author: string; text: string; tone: 'student' | 'peer' | 'system' };
   const threadKey = (thread: string) => `messages_${thread.replace(/\s+/g, '_').toLowerCase()}`;
   const loadThreadMessages = (thread: string): ChatMsg[] => {
     try { return JSON.parse(localStorage.getItem(threadKey(thread)) ?? '[]'); } catch { return []; }
@@ -7350,19 +7033,12 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
     setInput('');
   };
 
-  const defaultMessages = isMentor ? (
-    <>
-      <Message tone="system" author="Cohortly" text="Matched via 10.014 Computational Thinking · Weekday evenings · SUTD verified" />
-      <Message tone="student" author="Vanika" text="Hi, I'm struggling with the recursion exercises in 10.014 lab 2. The tree traversal part is confusing me." />
-      <Message tone="mentor" author="Aarav" text="No worries — this trips most people up. I'll run a walkthrough session tonight in Building 5, Room 3. Come at 8:30 PM." />
-      <Message tone="student" author="Vanika" text="That sounds great, I'll be there. Should I review anything specific before coming?" />
-    </>
-  ) : (
+  const defaultMessages = (
     <>
       <Message tone="system" author="Cohortly" text="Matched on 10.014, Startups & iCube, Badminton, and weekday evening availability." />
-      <Message tone="mentor" author="Aarav" text="Hey! Saw you joined the 10.014 room. I run weekly coding prep sessions for Freshmores — happy to help." />
+      <Message tone="peer" author="Aarav" text="Hey! Saw you joined the 10.014 room. I run weekly coding prep sessions and answer questions there when I can." />
       <Message tone="student" author="Vanika" text="I am nervous about coding because everyone sounds ahead already." />
-      <Message tone="mentor" author="Aarav" text="That is exactly why the prep room exists. Drop by Building 5 Level 3 this week and we will start with tracing code by hand." />
+      <Message tone="peer" author="Aarav" text="That is exactly why the prep room exists. Drop by Building 5 Level 3 this week and we will start with tracing code by hand." />
     </>
   );
 
@@ -7376,7 +7052,7 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
   return (
     <div className="messages-layout">
       <aside className="panel thread-panel">
-        <span className="eyebrow">{isMentor ? 'Student threads' : 'Circles'}</span>
+        <span className="eyebrow">Circles</span>
         {threads.map((thread) => {
           const parts = thread.split(' · ');
           const displayName = parts[0];
@@ -7402,7 +7078,7 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
           <div className="chat-header-avatar">{headerAv(threadName)}</div>
           <div className="chat-header-info">
             <h2>{activeThread.replace(' · new conversation', '')}</h2>
-            <span className="eyebrow">{isNewConv ? 'New conversation' : (isMentor ? 'Student thread' : 'Direct message')}</span>
+            <span className="eyebrow">{isNewConv ? 'New conversation' : 'Direct message'}</span>
           </div>
         </div>
         <div className="chat-list" ref={chatListRef}>
@@ -7423,174 +7099,12 @@ function MessagesView({ isMentor = false, openWith, onClearTarget }: { isMentor?
         </div>
         <div className="message-composer">
           <input
-            placeholder={isNewConv ? `Message ${threadName}…` : (isMentor ? `Reply to ${threadName}…` : 'Ask a question or suggest a meetup')}
+            placeholder={isNewConv ? `Message ${threadName}…` : 'Ask a question or suggest a meetup'}
             value={input}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && send()}
           />
           <button className="primary-button icon-only" aria-label="Send" onClick={send} disabled={!input.trim()}><Send size={18} /></button>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-const mentorHelpRequests = [
-  { module: '10.014 Computational Thinking', question: 'Stuck on lab 2 tree traversal — recursion is still not clicking for me.', student: 'Vanika', time: '2h ago', urgent: true },
-  { module: '50.007 Machine Learning', question: 'Assignment 1 gradient descent — my loss is going up instead of down. Code shared below.', student: 'Kai', time: '4h ago', urgent: false },
-  { module: '10.009 The Digital World', question: '2D project scope feels too big. How did you scope yours in Year 1?', student: 'Mei', time: '6h ago', urgent: false },
-  { module: '10.014 Computational Thinking', question: 'Struggling to understand memoisation vs. tabulation — which should I learn first?', student: 'Jerome', time: '1d ago', urgent: false },
-];
-
-const mentorStats = [
-  { value: '12', label: 'students helped', change: 'this term' },
-  { value: '34', label: 'questions answered', change: '91% in <24h' },
-  { value: '3', label: 'sessions hosted', change: '+2 scheduled' },
-  { value: '4.9', label: 'mentor rating', change: 'out of 5.0' },
-];
-
-function MentorDashboardView({
-  user,
-  profile,
-  setActiveView,
-}: {
-  user: VerifiedUser;
-  profile: StudentProfile;
-  setActiveView: (view: View) => void;
-}) {
-  const modules = profile.mentorModules ?? profile.classes;
-  return (
-    <div className="today-stack">
-      <section className="mentor-hero panel">
-        <div>
-          <span className="eyebrow">Mentor dashboard</span>
-          <h2>Welcome back, {user.name.split(' ')[0]}.</h2>
-          <p>
-            {mentorHelpRequests.filter((r) => r.urgent).length} students are waiting on your modules right now.
-            Your answers help the whole cohort — not just one person.
-          </p>
-          <div className="hero-actions">
-            <button className="primary-button" onClick={() => setActiveView('mentor-help')}>
-              <BookOpen size={18} />
-              See help requests
-            </button>
-            <button className="secondary-button" onClick={() => setActiveView('events')}>
-              <CalendarCheck size={18} />
-              Post a study session
-            </button>
-          </div>
-        </div>
-        <div className="mentor-stats-grid">
-          {mentorStats.map((stat) => (
-            <div className="mentor-stat" key={stat.label}>
-              <strong>{stat.value}</strong>
-              <span>{stat.label}</span>
-              <em>{stat.change}</em>
-            </div>
-          ))}
-        </div>
-      </section>
-
-      <section className="priority-grid">
-        <article className="panel next-best-card">
-          <span className="eyebrow">Most urgent</span>
-          {mentorHelpRequests.filter((r) => r.urgent).map((req) => (
-            <div key={req.student}>
-              <span className="event-type study">{req.module}</span>
-              <h2 style={{ marginTop: 12 }}>{req.student}</h2>
-              <p style={{ marginTop: 8 }}>{req.question}</p>
-              <div className="featured-meta" style={{ marginTop: 12 }}>
-                <span><Clock3 size={17} /> {req.time}</span>
-              </div>
-              <button className="primary-button" style={{ marginTop: 16 }} onClick={() => setActiveView('messages')}>
-                <MessageCircle size={18} />
-                Reply now
-              </button>
-            </div>
-          ))}
-        </article>
-
-        <article className="panel campus-zones-card">
-          <div className="section-heading compact-heading">
-            <div>
-              <span className="eyebrow">Your active modules</span>
-              <h2>Rooms you're covering</h2>
-            </div>
-          </div>
-          <div className="class-list">
-            {classRooms.filter((r) => modules.some((m) => m.includes(r.code))).slice(0, 3).map((room) => (
-              <article className="class-card" key={room.code}>
-                <span>{room.code}</span>
-                <div>
-                  <h3>{room.title}</h3>
-                  <p>{room.activity}</p>
-                </div>
-                <strong>{room.status}</strong>
-              </article>
-            ))}
-            {classRooms.filter((r) => modules.some((m) => m.includes(r.code))).length === 0 && (
-              <div style={{ padding: 16, color: 'var(--muted)' }}>Your module rooms appear here once active.</div>
-            )}
-          </div>
-        </article>
-
-        <article className="panel live-feed-card">
-          <span className="eyebrow">Recent activity</span>
-          <div className="activity-timeline">
-            <div>
-              <span />
-              <strong>Vanika asked about recursion in 10.014</strong>
-              <small>2 hours ago · awaiting your reply</small>
-            </div>
-            <div>
-              <span />
-              <strong>Your session last Friday helped 12 students</strong>
-              <small>Building 5, Room 3 · 10.014 prep</small>
-            </div>
-            <div>
-              <span />
-              <strong>Kai joined your 50.007 ML study room</strong>
-              <small>6 hours ago</small>
-            </div>
-          </div>
-        </article>
-      </section>
-    </div>
-  );
-}
-
-function MentorHelpView({ profile }: { profile: StudentProfile }) {
-  const modules = profile.mentorModules ?? profile.classes;
-  const filtered = modules.length > 0
-    ? mentorHelpRequests.filter((r) => modules.some((m) => r.module.includes(m.split(' ')[0])))
-    : mentorHelpRequests;
-  const displayed = filtered.length > 0 ? filtered : mentorHelpRequests;
-
-  return (
-    <div className="screen-stack">
-      <section className="panel">
-        <div className="section-heading">
-          <div>
-            <span className="eyebrow">Help requests</span>
-            <h2>Students waiting on your modules</h2>
-          </div>
-          <span className="soft-pill dark">{displayed.length} open</span>
-        </div>
-        <div className="class-list">
-          {displayed.map((req) => (
-            <article key={req.student + req.module} className="class-card" style={{ gridTemplateColumns: 'auto 1fr auto', alignItems: 'start', paddingTop: 16, paddingBottom: 16 }}>
-              <Avatar name={req.student} color="teal" />
-              <div>
-                <span style={{ color: 'var(--teal-dark)', fontSize: '0.76rem', fontWeight: 900, textTransform: 'uppercase' }}>{req.module}</span>
-                <h3 style={{ marginTop: 4, fontSize: '0.98rem' }}>{req.question}</h3>
-                <p style={{ marginTop: 4, color: 'var(--muted)', fontSize: '0.84rem' }}>{req.student} · {req.time}</p>
-              </div>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: 8, alignItems: 'flex-end' }}>
-                {req.urgent && <span className="event-type study" style={{ fontSize: '0.7rem' }}>Urgent</span>}
-                <button className="secondary-button">Reply</button>
-              </div>
-            </article>
-          ))}
         </div>
       </section>
     </div>
@@ -7659,7 +7173,7 @@ function ActionItem({ icon: Icon, title, body }: { icon: LucideIcon; title: stri
   );
 }
 
-function Message({ tone, author, text }: { tone: 'student' | 'mentor' | 'system'; author: string; text: string }) {
+function Message({ tone, author, text }: { tone: 'student' | 'peer' | 'system'; author: string; text: string }) {
   if (tone === 'system') {
     return (
       <div className="message system">
@@ -7787,7 +7301,7 @@ function AdminClassTable() {
             <th>Students</th>
             <th>Questions</th>
             <th>Response rate</th>
-            <th>Returning students</th>
+            <th>Active helpers</th>
             <th>Status</th>
           </tr>
         </thead>
@@ -7810,7 +7324,7 @@ function AdminClassTable() {
                     <span>{rate}%</span>
                   </div>
                 </td>
-                <td>{row.mentors} returning student{row.mentors !== 1 ? 's' : ''}</td>
+                <td>{row.helpers} active helper{row.helpers !== 1 ? 's' : ''}</td>
                 <td>
                   <span className={`admin-status ${row.status}`}>
                     {row.status === 'healthy' ? '✓ Active' : '⚠ Needs attention'}

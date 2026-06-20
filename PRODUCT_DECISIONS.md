@@ -2,7 +2,7 @@
 
 ## Final Demo Position
 
-Cohortly is a verified SUTD campus platform for incoming Freshmores, exchange students, returning students, senior mentors, and student-life staff. The demo should communicate one promise: the product understands where each student is in their university journey and gives them the right workspace without making private student location data public.
+Cohortly is a verified SUTD campus platform for incoming Freshmores, exchange students, returning students, and student-life staff. The demo should communicate one promise: the product understands where each student is in their university journey and gives them the right experience without making private student location data public. Help is peer-based: any verified student can answer, host, guide, or connect when they know something useful.
 
 ## Persona Architecture
 
@@ -19,7 +19,6 @@ type StudentJourneyStage =
 
 type AppWorkspace =
   | 'student'
-  | 'mentor'
   | 'admin';
 ```
 
@@ -29,7 +28,7 @@ Implementation contract:
 - Freshmore and pre-arrival students see Launchpad-style readiness.
 - Returning Year 2/3/4 students see a Year Hub focused on current modules, project groups, opportunities, and optional junior support.
 - Exchange students see an Exchange Guide focused on fast campus/admin/local context.
-- Senior mentors are returning students using a separate mentor workspace for help requests and module support.
+- Peer help happens inside shared module rooms, People, Messages, and Events. There is no separate mentor workspace, mentor demo, or mentor-only help queue.
 - Admin remains a separate workspace with institutional operational visibility.
 
 ## Campus Life Replaces Hostel Directory
@@ -62,11 +61,11 @@ Secondary destinations live behind More:
 - Campus Life
 - Resources
 
-## Returning Students And Mentors
+## Returning Students And Peer Help
 
 Returning students are not Freshmores and must never be pushed through Freshmore onboarding copy. They are grouped by year, pillar, current modules, project/team needs, activities, and availability.
 
-Senior mentors are a separate workspace, not the default returning-student experience. Use "returning student" for normal Year 2/3/4 browsing and "senior mentor" only for the help-request/module-support workspace.
+Returning students can still be helpful, but they are not a separate product role. Use "returning student" for Year 2/3/4 browsing and "peer help" for answers, study sessions, intros, and guidance that happen in shared rooms.
 
 ## Notifications
 
