@@ -13,6 +13,7 @@
     "notifications:smoke": "node scripts/smoke-notifications.mjs",
     "preview": "vite preview --host 0.0.0.0",
     "lint": "vite build --emptyOutDir false",
+    "test:personas": "node scripts/persona-architecture-check.mjs",
     "visual:qa": "node scripts/visual-qa.mjs"
   },
   "dependencies": {

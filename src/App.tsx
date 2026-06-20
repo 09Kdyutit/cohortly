@@ -84,8 +84,10 @@ type LucideIcon = ForwardRefExoticComponent<
     RefAttributes<SVGSVGElement>
 >;
 
-type UserRole = 'student' | 'mentor';
-type DemoMode = 'freshman' | 'returning';
+type StudentJourneyStage = 'pre_arrival' | 'freshmore' | 'returning' | 'exchange';
+type AppWorkspace = 'student' | 'mentor' | 'admin';
+type UserRole = Exclude<AppWorkspace, 'admin'>;
+type DemoMode = 'freshman' | 'returning' | 'exchange' | 'mentor';
 type View = 'today' | 'launchpad' | 'events' | 'people' | 'fifth-row' | 'classes' | 'messages' | 'kb' | 'campus-life' | 'mentor-home' | 'mentor-help' | 'privacy' | 'notifications';
 type InstitutionId = 'sutd';
 type BelongingEntry = { week: string; score: number; at: number };
@@ -151,7 +153,10 @@ type TeamPost = { id: string; name: string; looking: string; members: string[]; 
 type ShowcasePost = { id: string; author: string; time: string; title: string; desc: string; tags: string[]; likes: number };
 
 type StudentProfile = {
+  profileVersion: number;
+  workspace: AppWorkspace;
   role: UserRole;
+  journeyStage: StudentJourneyStage;
   classes: string[];
   interests: string[];
   goals: string[];
@@ -168,6 +173,67 @@ type StudentProfile = {
   mentorPillar?: string;
   mentorModules?: string[];
   mentorHelpStyle?: string[];
+};
+
+const PROFILE_SCHEMA_VERSION = 2;
+
+type JourneyMeta = {
+  label: string;
+  shortLabel: string;
+  navHubLabel: string;
+  setupLabel: string;
+  todayLine: string;
+  progressLabel: string;
+  nextActionCopy: string;
+  campusCommunityId: string;
+  defaultHomeBase: string;
+};
+
+const journeyMeta: Record<StudentJourneyStage, JourneyMeta> = {
+  pre_arrival: {
+    label: 'Pre-arrival student',
+    shortLabel: 'Pre-arrival',
+    navHubLabel: 'Launchpad',
+    setupLabel: 'Incoming setup',
+    todayLine: 'Offer accepted · not on campus yet',
+    progressLabel: 'Pre-arrival readiness',
+    nextActionCopy: 'Finish the setup that actually matters before you reach campus.',
+    campusCommunityId: 'freshmore-arrival',
+    defaultHomeBase: 'Pre-arrival Freshmore circle',
+  },
+  freshmore: {
+    label: 'Freshmore student',
+    shortLabel: 'Freshmore',
+    navHubLabel: 'Launchpad',
+    setupLabel: 'Freshmore setup',
+    todayLine: 'Freshmore year · first campus term',
+    progressLabel: 'Freshmore readiness',
+    nextActionCopy: 'The fastest way to feel settled before Day 1 — this takes most students under five minutes.',
+    campusCommunityId: 'freshmore-arrival',
+    defaultHomeBase: 'Freshmore campus-life community',
+  },
+  returning: {
+    label: 'Returning student',
+    shortLabel: 'Returning',
+    navHubLabel: 'Year Hub',
+    setupLabel: 'Returning student setup',
+    todayLine: 'Already onboarded · focus on modules, projects, and cohort leadership',
+    progressLabel: 'Term setup',
+    nextActionCopy: 'You are not being onboarded again. Cohortly is prioritising your year, modules, project groups, and ways to guide juniors.',
+    campusCommunityId: 'returning-guides',
+    defaultHomeBase: 'Returning student circles',
+  },
+  exchange: {
+    label: 'Exchange student',
+    shortLabel: 'Exchange',
+    navHubLabel: 'Exchange Guide',
+    setupLabel: 'Exchange setup',
+    todayLine: 'Exchange term · campus arrival and local network',
+    progressLabel: 'Exchange arrival',
+    nextActionCopy: 'Get the essentials for a short, high-signal term: classes, campus routes, local friends, and admin support.',
+    campusCommunityId: 'commuter-campus',
+    defaultHomeBase: 'Exchange and commuter campus loop',
+  },
 };
 
 // ─── Notification model ───────────────────────────────────────────────────────
@@ -215,6 +281,13 @@ const mentorNavItems: Array<{ id: View; label: string; icon: LucideIcon }> = [
   { id: 'events', label: 'Events', icon: CalendarCheck },
   { id: 'messages', label: 'Messages', icon: MessageCircle },
 ];
+
+function studentNavItemsFor(profile: StudentProfile): Array<{ id: View; label: string; icon: LucideIcon }> {
+  const stage = journeyStageForProfile(profile);
+  return navItems.map((item) => item.id === 'launchpad'
+    ? { ...item, label: journeyMeta[stage].navHubLabel }
+    : item);
+}
 
 const fallbackInstitutions: Institution[] = [
   {
@@ -457,6 +530,106 @@ const launchpadPhases: LaunchpadPhase[] = [
   },
 ];
 
+type JourneyPlan = {
+  title: string;
+  subtitle: string;
+  phaseNoun: string;
+  phases: LaunchpadPhase[];
+};
+
+const returningJourneyPhases: LaunchpadPhase[] = [
+  {
+    id: 'returning-term-setup',
+    label: 'Term setup',
+    icon: 'academic',
+    tasks: [
+      { id: 'ret-sync-modules', label: 'Sync current modules', desc: 'Keep your current module rooms accurate so classmates and project partners find you.', link: { label: 'Open Classes', view: 'classes' } },
+      { id: 'ret-year-circle', label: 'Join your year/pillar circle', desc: 'Year 2/3/4 spaces prioritise project teams, pillar context, and serious term planning.', link: { label: 'Browse People', view: 'people' } },
+      { id: 'ret-calendar', label: 'RSVP to one relevant event', desc: 'Pick study sessions, project nights, Fifth Row leadership calls, or internship prep.', link: { label: 'See Events', view: 'events' } },
+    ],
+  },
+  {
+    id: 'returning-projects',
+    label: 'Projects & modules',
+    icon: 'qa',
+    tasks: [
+      { id: 'ret-project-team', label: 'Find or update project teammates', desc: 'Use module and pillar context instead of broad freshman discovery.', link: { label: 'Find People', view: 'people' } },
+      { id: 'ret-qa-answer', label: 'Answer one module question', desc: 'Help only where you have context. Shared answers scale better than private DMs.', link: { label: 'Open Classes', view: 'classes' } },
+      { id: 'ret-study-plan', label: 'Create or join a study plan', desc: 'Group prep for active modules, exams, or project critiques.', link: { label: 'Create Event', view: 'events' } },
+    ],
+  },
+  {
+    id: 'returning-opportunities',
+    label: 'Opportunities',
+    icon: 'clubs',
+    tasks: [
+      { id: 'ret-fifth-row-role', label: 'Find serious Fifth Row roles', desc: 'Leadership, performance, maker teams, and competition groups are prioritised for returning students.', link: { label: 'Open Fifth Row', view: 'fifth-row' } },
+      { id: 'ret-urop', label: 'Track UROP / internship prep', desc: 'Keep research, iCube, and internship prep visible alongside student life.' },
+      { id: 'ret-support', label: 'Opt into support signals', desc: 'Private check-ins remain available without treating you like a first-week arrival.' },
+    ],
+  },
+];
+
+const exchangeJourneyPhases: LaunchpadPhase[] = [
+  {
+    id: 'exchange-arrival',
+    label: 'Arrival basics',
+    icon: 'arrival',
+    tasks: [
+      { id: 'ex-admin', label: 'Confirm exchange admin steps', desc: 'Student pass, SUTD account, card access, and OSA instructions stay visible until complete.' },
+      { id: 'ex-campus-route', label: 'Learn the campus route map', desc: 'Find main campus, Building 5, food, sports, transport, and housing waypoints.', link: { label: 'Open Campus Life', view: 'campus-life' } },
+      { id: 'ex-wifi-card', label: 'Set up Wi-Fi and student card', desc: 'Essential before classes, labs, and library access.' },
+    ],
+  },
+  {
+    id: 'exchange-classes',
+    label: 'Classes & groups',
+    icon: 'academic',
+    tasks: [
+      { id: 'ex-module-room', label: 'Join module rooms', desc: 'Find classmates and returning students in the modules you are taking this term.', link: { label: 'Open Classes', view: 'classes' } },
+      { id: 'ex-local-classmate', label: 'Connect with local classmates', desc: 'Start with people in your modules or shared interests, not a generic freshman list.', link: { label: 'Find People', view: 'people' } },
+      { id: 'ex-study-event', label: 'RSVP to one study or project event', desc: 'Short-term students need fast context and reliable plans.', link: { label: 'See Events', view: 'events' } },
+    ],
+  },
+  {
+    id: 'exchange-local-life',
+    label: 'Local life',
+    icon: 'community',
+    tasks: [
+      { id: 'ex-food-plan', label: 'Join one food or weekend plan', desc: 'Use jios to learn Dover, Ghim Moh, and first-week social rhythms.', link: { label: 'Open Campus Life', view: 'campus-life' } },
+      { id: 'ex-fifth-row', label: 'Try one Fifth Row activity', desc: 'Short trial sessions are better than overcommitting during exchange.', link: { label: 'Browse Fifth Row', view: 'fifth-row' } },
+      { id: 'ex-support-route', label: 'Know where to get help', desc: 'Keep OSA, wellbeing, admin, and peer support paths easy to find.' },
+    ],
+  },
+];
+
+const journeyPlans: Record<StudentJourneyStage, JourneyPlan> = {
+  pre_arrival: {
+    title: 'Pre-arrival Launchpad',
+    subtitle: 'Get the essentials done before campus starts.',
+    phaseNoun: 'phase',
+    phases: launchpadPhases,
+  },
+  freshmore: {
+    title: 'Freshmore Launchpad',
+    subtitle: 'Your guided SUTD journey',
+    phaseNoun: 'phase',
+    phases: launchpadPhases,
+  },
+  returning: {
+    title: 'Returning Year Hub',
+    subtitle: 'No onboarding repeat. Current modules, year circles, project teams, and ways to help.',
+    phaseNoun: 'track',
+    phases: returningJourneyPhases,
+  },
+  exchange: {
+    title: 'Exchange Guide',
+    subtitle: 'Short-term campus setup, local context, and module groups.',
+    phaseNoun: 'track',
+    phases: exchangeJourneyPhases,
+  },
+};
+
 // ─── Fifth Row clubs ─────────────────────────────────────────────────────────
 
 type FifthRowCluster = 'Arts' | 'Sports' | 'Community' | 'Culture' | 'Makers';
@@ -698,6 +871,30 @@ const goalOptions = [
   'Get ASD critique feedback',
   'Land a summer internship',
 ];
+const journeyGoalOptions: Record<StudentJourneyStage, string[]> = {
+  pre_arrival: goalOptions,
+  freshmore: goalOptions,
+  returning: [
+    'Find project teammates',
+    'Join my year/pillar circle',
+    'Share useful module notes',
+    'Host a study session',
+    'Find internship prep partners',
+    'Join capstone / UROP opportunities',
+    'Discover serious Fifth Row roles',
+    'Help incoming students selectively',
+  ],
+  exchange: [
+    'Understand local admin fast',
+    'Find classmates in my modules',
+    'Join weekend Singapore plans',
+    'Find food and culture groups',
+    'Meet project teammates',
+    'Understand campus transport',
+    'Try one Fifth Row activity',
+    'Find short-term housing support',
+  ],
+};
 const availabilityOptions = ['Weekday evenings', 'Weekend mornings', 'After lunch', 'Late-night study', 'Flexible'];
 const mentorYearOptions = ['Year 2', 'Year 3', 'Year 4'];
 const mentorPillarOptions = ['ASD', 'EPD', 'ESD', 'ISTD', 'DAI'];
@@ -1748,9 +1945,34 @@ const adminStudents: Array<{ name: string; pillar: string; joined: string; conne
 ];
 
 function getDemoProfile(mode: DemoMode): StudentProfile {
+  if (mode === 'mentor') {
+    return {
+      profileVersion: PROFILE_SCHEMA_VERSION,
+      workspace: 'mentor',
+      role: 'mentor',
+      journeyStage: 'returning',
+      classes: ['10.014 Computational Thinking', '10.009 The Digital World', '50.007 Machine Learning'],
+      interests: ['Teaching', 'Study groups', 'Startups & iCube'],
+      goals: ['Answer module questions', 'Host office hours', 'Spot students who need help'],
+      availability: 'Weekday evenings',
+      homeBase: 'ISTD senior mentor group',
+      intro: 'Year 3 ISTD senior mentor. I help with recursion, systems thinking, and project scoping without turning every question into a DM.',
+      pillar: 'ISTD',
+      year: 'Year 3',
+      campusHomeBase: 'Returning student circles',
+      campusCommunity: 'returning-guides',
+      mentorYear: 'Year 3',
+      mentorPillar: 'ISTD',
+      mentorModules: ['10.014 Computational Thinking', '10.009 The Digital World', '50.007 Machine Learning'],
+      mentorHelpStyle: ['Group study rooms', 'Weekly office hours', 'Q&A threads only'],
+    };
+  }
   if (mode === 'returning') {
     return {
+      profileVersion: PROFILE_SCHEMA_VERSION,
+      workspace: 'student',
       role: 'student',
+      journeyStage: 'returning',
       classes: ['50.001 Introduction to ISTD', '50.004 Algorithm Design', '50.007 Machine Learning'],
       interests: ['Startups & iCube', 'Robotics', 'Study groups'],
       goals: ['Find project teammates', 'Share module notes', 'Join a returning-student circle'],
@@ -1759,12 +1981,33 @@ function getDemoProfile(mode: DemoMode): StudentProfile {
       intro: 'Returning ISTD student looking for project teammates, class groups, and useful ways to help incoming students settle in.',
       pillar: 'ISTD',
       year: 'Year 3',
-      campusHomeBase: 'Returning student home base',
-      campusCommunity: 'Year 3 ISTD / project circles',
+      campusHomeBase: 'Returning student circles',
+      campusCommunity: 'returning-guides',
+    };
+  }
+  if (mode === 'exchange') {
+    return {
+      profileVersion: PROFILE_SCHEMA_VERSION,
+      workspace: 'student',
+      role: 'student',
+      journeyStage: 'exchange',
+      classes: ['10.014 Computational Thinking', '30.007 Engineering Design', 'ASD Studio'],
+      interests: ['Food & Cafes', 'Culture', 'Sports'],
+      goals: ['Understand local admin', 'Find weekend plans', 'Meet project teammates'],
+      availability: 'Weekends',
+      homeBase: 'Exchange and commuter campus loop',
+      intro: 'Exchange student here for one term — looking for class groups, local food plans, and a practical campus rhythm fast.',
+      pillar: 'EPD',
+      year: 'Exchange',
+      campusHomeBase: 'Exchange and commuter campus loop',
+      campusCommunity: 'commuter-campus',
     };
   }
   return {
+    profileVersion: PROFILE_SCHEMA_VERSION,
+    workspace: 'student',
     role: 'student',
+    journeyStage: 'freshmore',
     classes: ['10.014 Computational Thinking', '10.009 The Digital World', '10.001 Advanced Maths I'],
     interests: ['Startups & iCube', 'Badminton', 'Food & Cafes'],
     goals: ['Find my first-week circle', 'Get module advice from returning students'],
@@ -1870,11 +2113,65 @@ function loadPfpLocal(email: string): string | undefined {
   try { return localStorage.getItem(`cohortly.pfp.${email}`) ?? undefined; } catch { return undefined; }
 }
 
+function inferJourneyStage(profile: Partial<StudentProfile>): StudentJourneyStage {
+  const combined = [
+    profile.journeyStage,
+    profile.year,
+    profile.pillar,
+    profile.homeBase,
+    profile.campusHomeBase,
+    profile.campusCommunity,
+    profile.intro,
+    ...(profile.goals ?? []),
+  ].filter(Boolean).join(' ').toLowerCase();
+  if (profile.role === 'mentor' || profile.workspace === 'mentor') return 'returning';
+  if (combined.includes('exchange')) return 'exchange';
+  if (/year\s*[234]|y[234]|returning|upper/.test(combined)) return 'returning';
+  if (combined.includes('pre-arrival') || combined.includes('pre arrival')) return 'pre_arrival';
+  return 'freshmore';
+}
+
+function normalizeProfile(raw: Partial<StudentProfile> | null | undefined): StudentProfile | null {
+  if (!raw) return null;
+  const workspace: AppWorkspace = raw.workspace === 'mentor' || raw.role === 'mentor' ? 'mentor' : 'student';
+  const journeyStage = raw.journeyStage ?? inferJourneyStage(raw);
+  const meta = journeyMeta[journeyStage];
+  const classes = Array.isArray(raw.classes) ? raw.classes : [];
+  const interests = Array.isArray(raw.interests) ? raw.interests : [];
+  const goals = Array.isArray(raw.goals) ? raw.goals : [];
+  return {
+    ...raw,
+    profileVersion: PROFILE_SCHEMA_VERSION,
+    workspace,
+    role: workspace === 'mentor' ? 'mentor' : 'student',
+    journeyStage,
+    classes,
+    interests,
+    goals,
+    availability: raw.availability || 'Weekday evenings',
+    homeBase: raw.homeBase || meta.defaultHomeBase,
+    intro: raw.intro || '',
+    year: raw.year || (journeyStage === 'returning' ? 'Year 3' : journeyStage === 'exchange' ? 'Exchange' : 'Year 1'),
+    campusHomeBase: raw.campusHomeBase || raw.homeBase || meta.defaultHomeBase,
+    campusCommunity: raw.campusCommunity && campusLifeCommunities.some((community) => community.id === raw.campusCommunity)
+      ? raw.campusCommunity
+      : meta.campusCommunityId,
+  };
+}
+
+function journeyStageForProfile(profile: StudentProfile): StudentJourneyStage {
+  return profile.journeyStage ?? inferJourneyStage(profile);
+}
+
+function workspaceForProfile(profile: StudentProfile): AppWorkspace {
+  return profile.workspace ?? (profile.role === 'mentor' ? 'mentor' : 'student');
+}
+
 async function loadProfile(email: string): Promise<StudentProfile | null> {
   const localRead = (): StudentProfile | null => {
     try {
       const raw = localStorage.getItem(`cohortly.profile.${email}`);
-      return raw ? (JSON.parse(raw) as StudentProfile) : null;
+      return raw ? normalizeProfile(JSON.parse(raw) as Partial<StudentProfile>) : null;
     } catch { return null; }
   };
 
@@ -1887,7 +2184,7 @@ async function loadProfile(email: string): Promise<StudentProfile | null> {
       ]);
       if (snap && typeof (snap as { exists?: unknown }).exists === 'function' && (snap as { exists: () => boolean }).exists()) {
         const data = (snap as unknown as { data: () => Omit<StudentProfile, 'pfpDataUrl'> }).data();
-        return { ...data, pfpDataUrl: loadPfpLocal(email) };
+        return normalizeProfile({ ...data, pfpDataUrl: loadPfpLocal(email) });
       }
     } catch (e) {
       console.warn('[cohortly] Firestore read failed, falling back to localStorage', e);
@@ -1897,10 +2194,11 @@ async function loadProfile(email: string): Promise<StudentProfile | null> {
 }
 
 async function saveProfile(email: string, profile: StudentProfile): Promise<void> {
-  const { pfpDataUrl, ...profileData } = profile;
+  const normalized = normalizeProfile(profile) ?? profile;
+  const { pfpDataUrl, ...profileData } = normalized;
   if (pfpDataUrl) savePfpLocal(email, pfpDataUrl);
   // Always write to localStorage first — reliable across server restarts and network failures
-  try { localStorage.setItem(`cohortly.profile.${email}`, JSON.stringify(profile)); } catch {}
+  try { localStorage.setItem(`cohortly.profile.${email}`, JSON.stringify(normalized)); } catch {}
   // Also persist to Firestore for cross-device sync
   if (db) {
     try {
@@ -2085,6 +2383,7 @@ function App() {
   const [loading, setLoading] = useState(false); // don't block render on server API
   const [institutions, setInstitutions] = useState<Institution[]>(fallbackInstitutions);
   const [preRole, setPreRole] = useState<UserRole | null>(null);
+  const [preJourneyStage, setPreJourneyStage] = useState<StudentJourneyStage | null>(null);
   const [showAdmin, setShowAdmin] = useState(false);
   const [privacyAccepted, setPrivacyAccepted] = useState(() => checkPrivacyConsent());
   const [ssoError, setSsoError] = useState('');
@@ -2153,9 +2452,10 @@ function App() {
 
   const completeOnboarding = (nextProfile: StudentProfile) => {
     if (!session) return;
-    setProfile(nextProfile);
+    const normalized = normalizeProfile(nextProfile) ?? nextProfile;
+    setProfile(normalized);
     setProfileLoaded(true);
-    saveProfile(session.email, nextProfile); // async fire-and-forget
+    saveProfile(session.email, normalized); // async fire-and-forget
   };
 
   const handleDemoLogin = (mode: DemoMode) => {
@@ -2173,6 +2473,24 @@ function App() {
         name: 'Aarav Menon',
         email: 'demo.returning@mymail.sutd.edu.sg',
         studentId: 'DEMO0002',
+        institutionId: 'sutd',
+        institutionName: 'Singapore University of Technology and Design',
+        shortName: 'SUTD',
+        verifiedAt: new Date().toISOString(),
+      },
+      exchange: {
+        name: 'Noah Richter',
+        email: 'demo.exchange@mymail.sutd.edu.sg',
+        studentId: 'DEMO0003',
+        institutionId: 'sutd',
+        institutionName: 'Singapore University of Technology and Design',
+        shortName: 'SUTD',
+        verifiedAt: new Date().toISOString(),
+      },
+      mentor: {
+        name: 'Aarav Menon',
+        email: 'demo.mentor@mymail.sutd.edu.sg',
+        studentId: 'DEMO0004',
         institutionId: 'sutd',
         institutionName: 'Singapore University of Technology and Design',
         shortName: 'SUTD',
@@ -2214,6 +2532,7 @@ function App() {
     setProfile(null);
     setSession(null);
     setPreRole(null);
+    setPreJourneyStage(null);
     if (auth) signOut(auth).catch(() => {});
   };
 
@@ -2224,6 +2543,7 @@ function App() {
     setProfile(null);
     setSession(null);
     setPreRole(null);
+    setPreJourneyStage(null);
     setShowAdmin(false);
     setSsoError('');
   };
@@ -2244,7 +2564,8 @@ function App() {
   if (!session && preRole === null) {
     return (
       <LandingScreen
-        onSelectRole={setPreRole}
+        onSelectJourney={(stage) => { setPreRole('student'); setPreJourneyStage(stage); }}
+        onSelectMentor={() => { setPreRole('mentor'); setPreJourneyStage('returning'); }}
         onDemoLogin={handleDemoLogin}
         onAdminDemo={() => setShowAdmin(true)}
         onSSOLogin={handleSSOLogin}
@@ -2269,7 +2590,7 @@ function App() {
   if (!profileLoaded) return <LoadingScreen />;
 
   if (!profile) {
-    return <ProfileOnboarding institutions={institutions} user={session} onComplete={completeOnboarding} initialRole={preRole ?? undefined} />;
+    return <ProfileOnboarding institutions={institutions} user={session} onComplete={completeOnboarding} initialRole={preRole ?? undefined} initialJourneyStage={preJourneyStage ?? undefined} />;
   }
 
   return <StudentApp institutions={institutions} profile={profile} user={session} onLogout={logout} onProfileUpdate={completeOnboarding} onResetDemo={resetDemo} />;
@@ -2530,11 +2851,11 @@ function LandingHero3D() {
       <div className="hero-3d-hud hero-3d-hud--top">
         <span>Live SUTD cohort map</span>
         <strong>812 verified students</strong>
-        <small>Freshmen, returning students, rooms, events and module help moving in one campus graph.</small>
+        <small>Freshmores, exchange students, returning students, events and module help moving in one verified campus graph.</small>
       </div>
       <div className="hero-3d-hud hero-3d-hud--bottom">
-        <span>Freshmore jio live</span>
-        <strong>10.014 room active</strong>
+        <span>Stage-aware workspace</span>
+        <strong>Freshmore · Exchange · Returning</strong>
       </div>
       <div className="hero-3d-chip hero-3d-chip--left">Campus-life circles</div>
       <div className="hero-3d-chip hero-3d-chip--right">Fifth Row plans</div>
@@ -2543,13 +2864,15 @@ function LandingHero3D() {
 }
 
 function LandingScreen({
-  onSelectRole,
+  onSelectJourney,
+  onSelectMentor,
   onDemoLogin,
   onAdminDemo,
   onSSOLogin,
   ssoError,
 }: {
-  onSelectRole: (role: UserRole) => void;
+  onSelectJourney: (stage: StudentJourneyStage) => void;
+  onSelectMentor: () => void;
   onDemoLogin: (mode: DemoMode) => void;
   onAdminDemo: () => void;
   onSSOLogin: (p: 'microsoft') => void;
@@ -2565,7 +2888,7 @@ function LandingScreen({
         </div>
         <div className="landing-nav-right">
           <span className="landing-live-pill">Verified access</span>
-          <span className="landing-join-count">Freshman and returning student demos</span>
+          <span className="landing-join-count">Persona-aware demos</span>
         </div>
       </nav>
 
@@ -2574,21 +2897,21 @@ function LandingScreen({
           <span className="landing-eyebrow-tag">
             <Sparkles size={12} /> Verified SUTD community
           </span>
-          <h1>Meet your verified SUTD community before Day 1.</h1>
+          <h1>Meet the right SUTD people for your stage.</h1>
           <p>
-            Find classmates, get module help from returning students, join small-group plans,
-            and settle into campus with fewer unknowns.
+            Freshmores, exchange students, returning students, and senior mentors each get a workspace
+            tuned to what they actually need.
           </p>
 
           <div className="landing-trust-row">
             <span className="landing-trust-chip"><ShieldCheck size={13} /> Verified SUTD network</span>
             <span className="landing-trust-chip"><Lock size={13} /> Private cohort</span>
-            <span className="landing-trust-chip"><GraduationCap size={13} /> Built for Freshmores</span>
+            <span className="landing-trust-chip"><GraduationCap size={13} /> Built for every student stage</span>
           </div>
 
           <div className="landing-story-panel">
-            <strong>One calm place for the first weeks of university.</strong>
-            <span>Freshmen see the next useful action. Returning students find class groups, floor circles, and first-week plans by year.</span>
+            <strong>One campus platform, different journeys.</strong>
+            <span>Freshmores get arrival readiness. Exchange students get fast local context. Returning students get current-term groups by year, pillar, and module.</span>
           </div>
 
           <div className="sso-primary-block">
@@ -2602,20 +2925,36 @@ function LandingScreen({
           </div>
 
           <div className="landing-paths">
-            <button className="path-card student-path" onClick={() => onSelectRole('student')}>
+            <button className="path-card student-path" onClick={() => onSelectJourney('freshmore')}>
               <div className="path-card-icon"><GraduationCap size={20} /></div>
               <div className="path-card-text">
                 <strong>I'm a freshman</strong>
-                <span>Freshmore · Exchange · Incoming 2026</span>
+                <span>Freshmore · Incoming 2026 · Day 1 readiness</span>
               </div>
               <span className="path-card-arrow"><ArrowRight size={18} /></span>
             </button>
 
-            <button className="path-card returning-path" onClick={() => onSelectRole('student')}>
+            <button className="path-card returning-path" onClick={() => onSelectJourney('returning')}>
               <div className="path-card-icon"><Users size={20} /></div>
               <div className="path-card-text">
                 <strong>I'm a returning student</strong>
                 <span>Year 2, 3 or 4 · grouped by year and pillar</span>
+              </div>
+              <span className="path-card-arrow"><ArrowRight size={18} /></span>
+            </button>
+            <button className="path-card exchange-path" onClick={() => onSelectJourney('exchange')}>
+              <div className="path-card-icon"><Globe2 size={20} /></div>
+              <div className="path-card-text">
+                <strong>I'm an exchange student</strong>
+                <span>Short-term arrival · classes · local network</span>
+              </div>
+              <span className="path-card-arrow"><ArrowRight size={18} /></span>
+            </button>
+            <button className="path-card mentor-path" onClick={onSelectMentor}>
+              <div className="path-card-icon"><HeartHandshake size={20} /></div>
+              <div className="path-card-text">
+                <strong>I'm a senior mentor</strong>
+                <span>Guide module rooms and help requests</span>
               </div>
               <span className="path-card-arrow"><ArrowRight size={18} /></span>
             </button>
@@ -2629,6 +2968,12 @@ function LandingScreen({
             <button className="demo-btn returning-demo" onClick={() => onDemoLogin('returning')}>
               <Users size={14} /> Returning
             </button>
+            <button className="demo-btn exchange-demo" onClick={() => onDemoLogin('exchange')}>
+              <Globe2 size={14} /> Exchange
+            </button>
+            <button className="demo-btn mentor-demo" onClick={() => onDemoLogin('mentor')}>
+              <HeartHandshake size={14} /> Mentor
+            </button>
             <button className="demo-btn admin-demo" onClick={onAdminDemo}>
               <Building2 size={14} /> Admin
             </button>
@@ -2641,8 +2986,8 @@ function LandingScreen({
       </div>
 
       <section className="landing-value-section">
-        <h2>Built around student years and real campus groups</h2>
-        <p>Cohortly keeps incoming and returning SUTD students together by cohort, module, floor, and Fifth Row interest.</p>
+        <h2>Built around student stages and real campus groups</h2>
+        <p>Cohortly keeps SUTD students connected by journey stage, cohort, year, pillar, module, Fifth Row interest, and broad campus-life context.</p>
         <div className="landing-value-cards">
           <div className="landing-value-card landing-value-card--lead">
             <div className="landing-value-card-icon" style={{ background: 'rgba(56,189,248,0.12)', color: '#38bdf8' }}><Rocket size={20} /></div>
@@ -2652,14 +2997,24 @@ function LandingScreen({
           <div className="landing-value-card">
             <div className="landing-value-card-icon" style={{ background: 'rgba(16,185,129,0.12)', color: '#34d399' }}><Users size={20} /></div>
             <h3>Returning student circles</h3>
-            <p>Year 2, 3, and 4 students are grouped by pillar, module, floor, and live study plans.</p>
+            <p>Year 2, 3, and 4 students are grouped by pillar, current modules, project needs, and live study plans.</p>
           </div>
           <div className="landing-value-card">
             <div className="landing-value-card-icon" style={{ background: 'rgba(168,85,247,0.12)', color: '#c084fc' }}><Sparkles size={20} /></div>
             <h3>Fifth Row Discovery</h3>
             <p>Clubs find their members before orientation — interest signals match students to CCAs.</p>
           </div>
-          <div className="landing-value-card landing-value-card--wide">
+          <div className="landing-value-card">
+            <div className="landing-value-card-icon" style={{ background: 'rgba(45,125,210,0.12)', color: '#2d7dd2' }}><Globe2 size={20} /></div>
+            <h3>Exchange Guide</h3>
+            <p>Short-term students get campus routes, admin steps, local classmates, and useful first-week plans without Freshmore onboarding.</p>
+          </div>
+          <div className="landing-value-card">
+            <div className="landing-value-card-icon" style={{ background: 'rgba(16,185,129,0.12)', color: '#10b981' }}><HeartHandshake size={20} /></div>
+            <h3>Senior mentor workspace</h3>
+            <p>Mentors get a separate help-request queue and module support view instead of being mixed into normal student browsing.</p>
+          </div>
+          <div className="landing-value-card">
             <div className="landing-value-card-icon" style={{ background: 'rgba(245,158,11,0.12)', color: '#fbbf24' }}><HeartHandshake size={20} /></div>
             <h3>Staff support signals</h3>
             <p>Privacy-safe support signals so advisors can reach out before a student disengages.</p>
@@ -2693,6 +3048,9 @@ function AuthScreen({
   const [step, setStep] = useState<'identity' | 'code'>('identity');
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState('');
+  const roleHint = role === 'mentor'
+    ? { icon: <HeartHandshake size={16} />, label: 'Joining as a verified SUTD senior mentor' }
+    : { icon: <GraduationCap size={16} />, label: 'Joining as a verified SUTD student' };
 
 
   const requestCode = async () => {
@@ -2755,8 +3113,8 @@ function AuthScreen({
         </div>
 
         <div className="auth-role-hint">
-          <GraduationCap size={16} />
-          Joining as a verified SUTD student
+          {roleHint.icon}
+          {roleHint.label}
         </div>
 
         {step === 'identity' && (
@@ -3031,19 +3389,23 @@ function ProfileOnboarding({
   user,
   onComplete,
   initialRole,
+  initialJourneyStage,
 }: {
   institutions: Institution[];
   user: VerifiedUser;
   onComplete: (profile: StudentProfile) => void;
   initialRole?: UserRole;
+  initialJourneyStage?: StudentJourneyStage;
 }) {
   const institution = institutionFor(user.institutionId, institutions);
   const [onboardStep, setOnboardStep] = useState<'role' | 'major' | 'profile'>(
     initialRole === 'student' ? 'major' : initialRole === 'mentor' ? 'profile' : 'role',
   );
   const [selectedRole, setSelectedRole] = useState<UserRole>(initialRole ?? 'student');
+  const [journeyStage, setJourneyStage] = useState<StudentJourneyStage>(initialJourneyStage ?? (initialRole === 'mentor' ? 'returning' : 'freshmore'));
   const [pillar, setPillar] = useState('');
   const [term, setTerm] = useState('');
+  const [year, setYear] = useState(initialJourneyStage === 'returning' ? 'Year 3' : initialJourneyStage === 'exchange' ? 'Exchange' : 'Year 1');
   const [pfpDataUrl, setPfpDataUrl] = useState('');
 
   const [timetableText, setTimetableText] = useState('');
@@ -3072,6 +3434,32 @@ function ProfileOnboarding({
   const [mentorHelpStyle, setMentorHelpStyle] = useState<string[]>([]);
   const [mentorBio, setMentorBio] = useState('');
 
+  const applyJourneyDefaults = (stage: StudentJourneyStage) => {
+    setJourneyStage(stage);
+    if (stage === 'returning') {
+      setYear('Year 3');
+      setTerm('');
+      setHomeBase(journeyMeta.returning.defaultHomeBase);
+      setIntro('Returning SUTD student looking for module groups, project teammates, and useful ways to guide juniors.');
+      setGoals(['Find project teammates', 'Share module notes', 'Join a returning-student circle']);
+      setClasses(['50.001 Introduction to ISTD', '50.004 Algorithm Design', '50.007 Machine Learning']);
+    } else if (stage === 'exchange') {
+      setYear('Exchange');
+      setTerm('September 2026 · Exchange term');
+      setHomeBase(journeyMeta.exchange.defaultHomeBase);
+      setIntro('Exchange student here for one term — looking for class groups, local food plans, and a practical campus rhythm fast.');
+      setGoals(['Understand local admin', 'Find weekend plans', 'Meet project teammates']);
+      setClasses(['10.014 Computational Thinking', '30.007 Engineering Design', 'ASD Studio']);
+    } else {
+      setYear('Year 1');
+      setTerm('');
+      setHomeBase(journeyMeta.freshmore.defaultHomeBase);
+      setIntro('New to SUTD and looking for low-pressure events, coding help, and startup friends.');
+      setGoals(['Find my first-week circle', 'Get returning-student module advice']);
+      setClasses(['10.014 Computational Thinking', '10.009 The Digital World']);
+    }
+  };
+
   const mentorPillarGroup = useMemo(
     () => classGroups.find((g) => g.pillarKey === mentorPillar.toLowerCase()) ?? null,
     [mentorPillar],
@@ -3079,23 +3467,37 @@ function ProfileOnboarding({
 
   const studentProfile = useMemo<StudentProfile>(
     () => ({
-      role: 'student', classes, interests, goals, availability, homeBase, intro,
+      profileVersion: PROFILE_SCHEMA_VERSION,
+      workspace: 'student',
+      role: 'student',
+      journeyStage,
+      classes, interests, goals, availability, homeBase, intro,
       pillar: pillar || undefined,
       term: term || undefined,
+      year: year || undefined,
       pfpDataUrl: pfpDataUrl || undefined,
+      campusHomeBase: homeBase || journeyMeta[journeyStage].defaultHomeBase,
+      campusCommunity: journeyMeta[journeyStage].campusCommunityId,
     }),
-    [availability, classes, goals, homeBase, interests, intro, pillar, term, pfpDataUrl],
+    [availability, classes, goals, homeBase, interests, intro, journeyStage, pillar, term, year, pfpDataUrl],
   );
 
   const mentorProfile = useMemo<StudentProfile>(
     () => ({
+      profileVersion: PROFILE_SCHEMA_VERSION,
+      workspace: 'mentor',
       role: 'mentor',
+      journeyStage: 'returning',
       classes: mentorModules,
       interests: [],
       goals: [],
       availability,
       homeBase: mentorPillar,
       intro: mentorBio,
+      year: mentorYear || undefined,
+      pillar: mentorPillar || undefined,
+      campusHomeBase: 'Senior mentor workspace',
+      campusCommunity: 'returning-guides',
       mentorYear,
       mentorPillar,
       mentorModules,
@@ -3129,26 +3531,26 @@ function ProfileOnboarding({
         </div>
         <div className="role-select-content">
           <h1>Welcome to SUTD Cohortly, {user.name.split(' ')[0]}.</h1>
-          <p>Pick the student stage that fits you. Cohortly groups people by year, pillar, module, and floor.</p>
+          <p>Pick the journey stage that fits you. Cohortly changes the workspace instead of forcing everyone through the same student onboarding.</p>
           <div className="role-cards">
             <button
               className="role-card student-role-card"
-              onClick={() => { setSelectedRole('student'); setOnboardStep('major'); }}
+              onClick={() => { setSelectedRole('student'); applyJourneyDefaults('freshmore'); setOnboardStep('major'); }}
             >
               <div className="role-card-icon"><GraduationCap size={28} /></div>
-              <strong>Freshman</strong>
-              <em>Freshmore · Exchange · New arrival</em>
+              <strong>Incoming Freshmore</strong>
+              <em>Pre-arrival or first Freshmore term</em>
               <ul>
                 <li><Check size={14} /> Find your first-week cohort circle</li>
                 <li><Check size={14} /> Get module help from returning students</li>
                 <li><Check size={14} /> Join events before orientation starts</li>
                 <li><Check size={14} /> One place for classes, people, events</li>
               </ul>
-              <span className="role-card-cta">Set up student profile <ArrowRight size={15} /></span>
+              <span className="role-card-cta">Set up Freshmore profile <ArrowRight size={15} /></span>
             </button>
             <button
               className="role-card mentor-role-card"
-              onClick={() => { setSelectedRole('student'); setOnboardStep('major'); }}
+              onClick={() => { setSelectedRole('student'); applyJourneyDefaults('returning'); setOnboardStep('major'); }}
             >
               <div className="role-card-icon mentor"><Users size={28} /></div>
               <strong>Returning Student</strong>
@@ -3160,6 +3562,36 @@ function ProfileOnboarding({
                 <li><Check size={14} /> Keep Campus Life, Fifth Row, and class circles together</li>
               </ul>
               <span className="role-card-cta">Set up returning profile <ArrowRight size={15} /></span>
+            </button>
+            <button
+              className="role-card student-role-card"
+              onClick={() => { setSelectedRole('student'); applyJourneyDefaults('exchange'); setOnboardStep('major'); }}
+            >
+              <div className="role-card-icon"><Globe2 size={28} /></div>
+              <strong>Exchange Student</strong>
+              <em>Short-term campus arrival</em>
+              <ul>
+                <li><Check size={14} /> Find local classmates quickly</li>
+                <li><Check size={14} /> See practical admin and campus guidance</li>
+                <li><Check size={14} /> Join weekend plans and food circles</li>
+                <li><Check size={14} /> Keep module rooms and events in one place</li>
+              </ul>
+              <span className="role-card-cta">Set up exchange profile <ArrowRight size={15} /></span>
+            </button>
+            <button
+              className="role-card mentor-role-card"
+              onClick={() => { setSelectedRole('mentor'); setJourneyStage('returning'); setOnboardStep('profile'); }}
+            >
+              <div className="role-card-icon mentor"><HeartHandshake size={28} /></div>
+              <strong>Senior Mentor</strong>
+              <em>Returning student support workspace</em>
+              <ul>
+                <li><Check size={14} /> Answer high-signal module questions</li>
+                <li><Check size={14} /> Run office hours without random DMs</li>
+                <li><Check size={14} /> See students waiting on your modules</li>
+                <li><Check size={14} /> Keep mentor work separate from student browsing</li>
+              </ul>
+              <span className="role-card-cta">Set up mentor workspace <ArrowRight size={15} /></span>
             </button>
           </div>
         </div>
@@ -3188,8 +3620,12 @@ function ProfileOnboarding({
             <button className="text-button" onClick={() => setOnboardStep('role')}>
               <ChevronLeft size={15} /> Back
             </button>
-            <h1>Tell us about your journey.</h1>
-            <p>Cohortly uses this to match you to the right classmates, returning students, and module rooms instantly.</p>
+            <h1>{journeyStage === 'returning' ? 'Tell us where you are now.' : journeyStage === 'exchange' ? 'Set up your exchange term.' : 'Tell us about your journey.'}</h1>
+            <p>{journeyStage === 'returning'
+              ? 'Returning students are matched by year, pillar, current modules, project groups, and cohort activity. No Freshmore checklist.'
+              : journeyStage === 'exchange'
+                ? 'Exchange students need fast access to classes, local plans, campus routes, and admin basics.'
+                : 'Cohortly uses this to match you to the right classmates, returning students, and module rooms instantly.'}</p>
           </div>
 
           <div className="setup-section">
@@ -3209,24 +3645,30 @@ function ProfileOnboarding({
           </div>
 
           <div className="setup-section">
-            <div className="setup-label"><Clock3 size={18} /><strong>When are you joining?</strong></div>
+            <div className="setup-label"><Clock3 size={18} /><strong>{journeyStage === 'returning' ? 'Which year are you in?' : journeyStage === 'exchange' ? 'Which exchange term?' : 'When are you joining?'}</strong></div>
             <div className="choice-grid">
-              {termOptions.map((t) => (
-                <button
-                  key={t}
-                  className={term === t ? 'choice selected' : 'choice'}
-                  onClick={() => setTerm(t)}
-                >
-                  {t}
-                </button>
-              ))}
+              {(journeyStage === 'returning' ? ['Year 2', 'Year 3', 'Year 4'] : journeyStage === 'exchange' ? ['September 2026 · Exchange term', 'January 2027 · Exchange term'] : termOptions).map((option) => {
+                const selected = journeyStage === 'returning' ? year === option : term === option;
+                return (
+                  <button
+                    key={option}
+                    className={selected ? 'choice selected' : 'choice'}
+                    onClick={() => {
+                      if (journeyStage === 'returning') setYear(option);
+                      else setTerm(option);
+                    }}
+                  >
+                    {option}
+                  </button>
+                );
+              })}
             </div>
           </div>
 
           <button
             className="primary-button"
             style={{ alignSelf: 'flex-start', minWidth: 160 }}
-            disabled={!pillar || !term}
+            disabled={!pillar || (journeyStage === 'returning' ? !year : !term)}
             onClick={() => setOnboardStep('profile')}
           >
             Continue <ArrowRight size={15} />
@@ -3392,6 +3834,17 @@ function ProfileOnboarding({
   }
 
   // Student onboarding
+  const studentSetupTitle = journeyStage === 'returning'
+    ? 'Reconnect with your year, modules, and project circles.'
+    : journeyStage === 'exchange'
+      ? 'Make one term feel navigable fast.'
+      : 'Pick your classes. Find your people.';
+  const studentSetupCopy = journeyStage === 'returning'
+    ? 'Cohortly will prioritise current modules, pillar circles, project teams, events, and optional ways to help incoming students. No arrival checklist.'
+    : journeyStage === 'exchange'
+      ? 'Choose your classes, interests, and availability so Cohortly can surface classmates, local plans, campus routes, and admin guidance quickly.'
+      : 'Choose courses from any pillar, your interests, and first-week goals. Cohortly uses these to surface relevant class rooms, returning-student groups, and student circles — instead of one giant chat.';
+  const studentSetupPill = journeyMeta[journeyStage].setupLabel;
   return (
     <main className="setup-page">
       <section className="setup-intro">
@@ -3403,12 +3856,9 @@ function ProfileOnboarding({
           </span>
         </div>
         <div>
-          <span className="soft-pill"><Sparkles size={15} /> Incoming student setup</span>
-          <h1>Pick your classes. Find your people.</h1>
-          <p>
-            Choose courses from any pillar, your interests, and first-week goals. Cohortly uses these to surface relevant
-            class rooms, returning-student groups, and student circles — instead of one giant chat.
-          </p>
+          <span className="soft-pill"><Sparkles size={15} /> {studentSetupPill}</span>
+          <h1>{studentSetupTitle}</h1>
+          <p>{studentSetupCopy}</p>
         </div>
         <div className="setup-proof">
           <ShieldCheck size={18} />
@@ -3423,7 +3873,7 @@ function ProfileOnboarding({
         <div className="setup-card">
           <div className="setup-card-head">
             <span className="eyebrow">Build profile</span>
-            <h2>Almost there — pick your modules and introduce yourself</h2>
+            <h2>{journeyStage === 'returning' ? 'Pick current modules and what you want from this term' : journeyStage === 'exchange' ? 'Pick your classes and local context' : 'Almost there — pick your modules and introduce yourself'}</h2>
           </div>
 
           <div className="pfp-upload-row">
@@ -3439,7 +3889,11 @@ function ProfileOnboarding({
             <textarea
               value={intro}
               onChange={(event) => setIntro(event.target.value)}
-              placeholder="What are you excited about, what do you need help with, what do you want to find here?"
+              placeholder={journeyStage === 'returning'
+                ? 'Current year, modules, project interests, and what kinds of student circles you want this term.'
+                : journeyStage === 'exchange'
+                  ? 'Where you are coming from, your classes, and what local plans or support you want to find.'
+                  : 'What are you excited about, what do you need help with, what do you want to find here?'}
               rows={3}
             />
           </label>
@@ -3500,9 +3954,9 @@ function ProfileOnboarding({
           </div>
 
           <div className="setup-section">
-            <div className="setup-label"><CircleUserRound size={18} /><strong>First-week goals</strong></div>
+            <div className="setup-label"><CircleUserRound size={18} /><strong>{journeyStage === 'returning' ? 'Term goals' : journeyStage === 'exchange' ? 'Exchange goals' : 'First-week goals'}</strong></div>
             <div className="choice-grid wide">
-              {goalOptions.map((option) => (
+              {journeyGoalOptions[journeyStage].map((option) => (
                 <button
                   key={option}
                   className={goals.includes(option) ? 'choice selected' : 'choice'}
@@ -3531,7 +3985,7 @@ function ProfileOnboarding({
 
         <aside className="setup-preview">
           <span className="eyebrow">What opens next</span>
-          <h2>Your network is not random anymore</h2>
+          <h2>{journeyStage === 'returning' ? 'A workspace for where you are now' : journeyStage === 'exchange' ? 'A short-term campus command center' : 'Your network is not random anymore'}</h2>
           <div className="preview-list">
             <div>
               <BookOpen size={18} />
@@ -3547,12 +4001,12 @@ function ProfileOnboarding({
             </div>
             <div>
               <Globe2 size={18} />
-              <span>One verified network instead of 12 scattered Telegram chats</span>
+              <span>{journeyStage === 'returning' ? 'Returning students see year and project context first, not Freshmore onboarding' : 'One verified network instead of 12 scattered Telegram chats'}</span>
             </div>
           </div>
           <button className="primary-button wide" onClick={() => onComplete(studentProfile)} disabled={!canOpenStudent}>
             <ArrowRight size={18} />
-            Open network
+            {journeyStage === 'returning' ? 'Open Year Hub' : journeyStage === 'exchange' ? 'Open Exchange Guide' : 'Open network'}
           </button>
         </aside>
       </section>
@@ -3575,6 +4029,7 @@ function EditProfileSheet({
   const [availability, setAvailability] = useState(profile.availability);
   const [homeBase, setHomeBase] = useState(profile.homeBase);
   const [pfpDataUrl, setPfpDataUrl] = useState(profile.pfpDataUrl ?? '');
+  const journeyStage = journeyStageForProfile(profile);
 
   const toggle = (value: string, selected: string[], setSelected: (next: string[]) => void) =>
     setSelected(selected.includes(value) ? selected.filter((i) => i !== value) : [...selected, value]);
@@ -3625,9 +4080,9 @@ function EditProfileSheet({
             </div>
           </div>
           <div className="edit-profile-section">
-            <strong>First-week goals</strong>
+            <strong>{journeyStage === 'returning' ? 'Term goals' : journeyStage === 'exchange' ? 'Exchange goals' : 'First-week goals'}</strong>
             <div className="choice-grid wide">
-              {goalOptions.map((opt) => (
+              {journeyGoalOptions[journeyStage].map((opt) => (
                 <button
                   key={opt}
                   className={goals.includes(opt) ? 'choice selected' : 'choice'}
@@ -4215,7 +4670,7 @@ function NotificationPanel({
 
 // ─── Mobile Bottom Nav ────────────────────────────────────────────────────────
 
-function MobileBottomNav({ active, setActive, role = 'student' }: { active: View; setActive: (v: View) => void; role?: UserRole }) {
+function MobileBottomNav({ active, setActive, role = 'student', journeyStage = 'freshmore' }: { active: View; setActive: (v: View) => void; role?: UserRole; journeyStage?: StudentJourneyStage }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const primaryItems: Array<{ id: View; label: string; icon: LucideIcon }> = role === 'mentor'
     ? [
@@ -4237,7 +4692,7 @@ function MobileBottomNav({ active, setActive, role = 'student' }: { active: View
       ]
     : [
         { id: 'messages', label: 'Messages', icon: MessageCircle },
-        { id: 'launchpad', label: 'Launchpad', icon: Rocket },
+        { id: 'launchpad', label: journeyMeta[journeyStage].navHubLabel, icon: Rocket },
         { id: 'fifth-row', label: 'Fifth Row', icon: Trophy },
         { id: 'campus-life', label: 'Campus Life', icon: MapPinned },
         { id: 'kb', label: 'Resources', icon: BookMarked },
@@ -4308,9 +4763,11 @@ function StudentApp({
   onProfileUpdate: (p: StudentProfile) => void;
   onResetDemo: () => void;
 }) {
-  const isMentor = false;
-  const appNavItems = navItems;
-  const [activeView, setActiveView] = useState<View>('today');
+  const workspace = workspaceForProfile(profile);
+  const journeyStage = journeyStageForProfile(profile);
+  const isMentor = workspace === 'mentor';
+  const appNavItems = isMentor ? mentorNavItems : studentNavItemsFor(profile);
+  const [activeView, setActiveView] = useState<View>(isMentor ? 'mentor-home' : 'today');
   const [dmTarget, setDmTarget] = useState<string | null>(null);
   const openDm = (name: string) => { setDmTarget(name); setActiveView('messages'); };
   const [showSearch, setShowSearch] = useState(false);
@@ -4451,7 +4908,7 @@ function StudentApp({
     <>
     {showSearch && <GlobalSearch onClose={() => setShowSearch(false)} onNavigate={(v) => { setActiveView(v); setShowSearch(false); }} />}
     {showNotifPanel && <NotificationPanel notifs={notifs} onClose={() => setShowNotifPanel(false)} onMarkAll={markAllRead} onMarkRead={markRead} onNavigate={(v) => { setActiveView(v); setShowNotifPanel(false); }} />}
-    <MobileBottomNav active={activeView} setActive={setActiveView} role="student" />
+    <MobileBottomNav active={activeView} setActive={setActiveView} role={isMentor ? 'mentor' : 'student'} journeyStage={journeyStage} />
     {showPulse && <WeeklyPulseModal onClose={() => setShowPulse(false)} userEmail={user.email} />}
     {showEditProfile && (
       <EditProfileSheet
@@ -4479,8 +4936,8 @@ function StudentApp({
         <button className="brand-button" onClick={() => setActiveView('today')}>
           <span className="brand-mark">C</span>
           <span>
-            <strong>Cohortly</strong>
-            <small>{institution.shortName} · Student</small>
+          <strong>Cohortly</strong>
+            <small>{institution.shortName} · {isMentor ? 'Mentor' : journeyMeta[journeyStage].shortLabel}</small>
           </span>
         </button>
 
@@ -4532,7 +4989,7 @@ function StudentApp({
       <div className="student-main">
         <header className="app-topbar">
           <div>
-            <span className="eyebrow">Student-led campus network</span>
+            <span className="eyebrow">{isMentor ? 'Senior mentor workspace' : journeyMeta[journeyStage].label}</span>
             <h1>{activeView === 'privacy' ? 'Privacy & Data' : activeView === 'notifications' ? 'Notifications & Bots' : (appNavItems.find((item) => item.id === activeView)?.label ?? 'Cohortly')}</h1>
           </div>
           <div className="topbar-actions">
@@ -4630,6 +5087,7 @@ function StudentApp({
               <LaunchpadView
                 userEmail={user.email}
                 userName={user.name}
+                profile={profile}
                 setActiveView={setActiveView}
               />
             )}
@@ -4653,7 +5111,7 @@ function StudentApp({
                 addEvent={addEvent}
               />
             )}
-            {activeView === 'people' && <PeopleView userEmail={user.email} onMessage={openDm} />}
+            {activeView === 'people' && <PeopleView userEmail={user.email} onMessage={openDm} profile={profile} />}
             {activeView === 'classes' && <ClassesView enrolledClasses={profile.classes} onEnroll={(updated) => onProfileUpdate({ ...profile, classes: updated })} />}
             {activeView === 'messages' && <MessagesView isMentor={isMentor} openWith={dmTarget} onClearTarget={() => setDmTarget(null)} />}
             {activeView === 'campus-life' && !isMentor && <CampusLifeView profile={profile} onProfileUpdate={onProfileUpdate} userEmail={user.email} userName={user.name} />}
@@ -4685,14 +5143,80 @@ function TodayView({
   const topEvents = events.slice(0, 3);
   const hour = new Date().getHours();
   const greeting = hour < 12 ? 'Good morning' : hour < 18 ? 'Good afternoon' : 'Good evening';
+  const journeyStage = journeyStageForProfile(profile);
+  const meta = journeyMeta[journeyStage];
+  const todayConfig = {
+    pre_arrival: {
+      progress: 'Pre-arrival · essential setup',
+      progressWidth: '22%',
+      meta: ['812 verified students', '38 events', '14 days to Day 1'],
+      checklist: [
+        { label: 'Verify your SUTD identity', done: true, view: null as View | null },
+        { label: 'Complete your profile', done: true, view: null as View | null },
+        { label: 'Join your first module room', done: false, view: 'classes' as View | null },
+        { label: 'RSVP to one event', done: false, view: 'events' as View | null },
+        { label: 'Connect with 3 people', done: false, view: 'people' as View | null },
+      ],
+      cards: [
+        { title: '10.014 Computational Thinking', body: '4 returning students active now · 28 Q&As this week', view: 'classes' as View, icon: BookOpen, tone: 'indigo', cta: 'Open room' },
+        { title: 'First Friday food crawl', body: '42 going · Dover MRT → Ghim Moh · Fri 7:30 PM', view: 'events' as View, icon: CalendarCheck, tone: 'green', cta: 'RSVP' },
+        { title: 'Aarav Menon', body: 'Year 3 ISTD · 94% match · 10.014 guide', view: 'people' as View, icon: Users, tone: 'violet', cta: 'Connect' },
+      ],
+    },
+    freshmore: {
+      progress: 'Week 1 of 12 · first campus term',
+      progressWidth: '18%',
+      meta: ['812 verified students', '38 events', 'Freshmore launch active'],
+      checklist: [
+        { label: 'Verify your SUTD identity', done: true, view: null as View | null },
+        { label: 'Complete your profile', done: true, view: null as View | null },
+        { label: 'Join your first module room', done: false, view: 'classes' as View | null },
+        { label: 'RSVP to one event', done: false, view: 'events' as View | null },
+        { label: 'Connect with 3 people', done: false, view: 'people' as View | null },
+      ],
+      cards: [
+        { title: '10.014 Computational Thinking', body: '4 returning students active now · 28 Q&As this week', view: 'classes' as View, icon: BookOpen, tone: 'indigo', cta: 'Open room' },
+        { title: 'Freshmore campus walk', body: 'Housing → B5 → food loop · Today 6 PM', view: 'campus-life' as View, icon: MapPinned, tone: 'green', cta: 'View route' },
+        { title: 'Aarav Menon', body: 'Year 3 ISTD · 94% match · 10.014 guide', view: 'people' as View, icon: Users, tone: 'violet', cta: 'Connect' },
+      ],
+    },
+    returning: {
+      progress: `${profile.year ?? 'Returning'} · current term workspace`,
+      progressWidth: '64%',
+      meta: ['96 returning students active', '12 project groups', '18 junior questions answered'],
+      checklist: [
+        { label: 'Sync current module rooms', done: profile.classes.length > 0, view: 'classes' as View | null },
+        { label: 'Join your year/pillar circle', done: true, view: 'people' as View | null },
+        { label: 'Find project teammates', done: false, view: 'people' as View | null },
+        { label: 'Answer one shared module question', done: false, view: 'classes' as View | null },
+        { label: 'RSVP to a serious term event', done: false, view: 'events' as View | null },
+      ],
+      cards: [
+        { title: '50.007 Machine Learning', body: '38 students · 22 Q&As · 2 returning guides active', view: 'classes' as View, icon: BookOpen, tone: 'indigo', cta: 'Open room' },
+        { title: 'Project teammate search', body: 'ISTD + DAI students looking for systems builders', view: 'people' as View, icon: Users, tone: 'green', cta: 'Browse' },
+        { title: 'Senior help queue', body: '3 Freshmore questions fit your modules', view: 'classes' as View, icon: HeartHandshake, tone: 'violet', cta: 'Answer' },
+      ],
+    },
+    exchange: {
+      progress: 'Exchange term · campus context',
+      progressWidth: '38%',
+      meta: ['51 exchange/commuter students', '9 local plans', '6 admin guides'],
+      checklist: [
+        { label: 'Confirm exchange admin steps', done: true, view: 'kb' as View | null },
+        { label: 'Join module rooms', done: profile.classes.length > 0, view: 'classes' as View | null },
+        { label: 'Save campus route map', done: false, view: 'campus-life' as View | null },
+        { label: 'Connect with local classmates', done: false, view: 'people' as View | null },
+        { label: 'Join one weekend plan', done: false, view: 'events' as View | null },
+      ],
+      cards: [
+        { title: 'Campus wayfinding', body: 'Housing, B5, food, sports, and transport routes', view: 'campus-life' as View, icon: MapPinned, tone: 'indigo', cta: 'Open map' },
+        { title: 'Exchange coffee circle', body: '12 exchange students · Campus Bistro · Thu 4 PM', view: 'events' as View, icon: CalendarCheck, tone: 'green', cta: 'RSVP' },
+        { title: 'Noah Richter', body: 'Exchange EPD · FabLab · robotics · 87% match', view: 'people' as View, icon: Users, tone: 'violet', cta: 'Connect' },
+      ],
+    },
+  }[journeyStage];
 
-  const checklistItems = [
-    { label: 'Verify your SUTD identity', done: true, view: null as View | null },
-    { label: 'Complete your profile', done: true, view: null as View | null },
-    { label: 'Join your first module room', done: false, view: 'classes' as View | null },
-    { label: 'RSVP to one event', done: false, view: 'events' as View | null },
-    { label: 'Connect with 3 people', done: false, view: 'people' as View | null },
-  ];
+  const checklistItems = todayConfig.checklist;
   const doneCount = checklistItems.filter((t) => t.done).length;
   const nextTask = checklistItems.find((t) => !t.done);
   const history = useMemo(() => loadBelongingHistory(user.email), [user.email]);
@@ -4704,15 +5228,16 @@ function TodayView({
         <div>
           <h2>{greeting}, {user.name.split(' ')[0]}.</h2>
           <div className="week-tracker">
-            <div className="week-bar"><div className="week-bar-fill" style={{ width: '8%' }} /></div>
-            <span className="week-label">Week 1 of 12 — you're just getting started</span>
+            <div className="week-bar"><div className="week-bar-fill" style={{ width: todayConfig.progressWidth }} /></div>
+            <span className="week-label">{todayConfig.progress} — {meta.todayLine}</span>
           </div>
           <div className="greeting-meta-row">
-            <span><strong>812</strong> students</span>
-            <span className="gm-dot" />
-            <span><strong>38</strong> events</span>
-            <span className="gm-dot" />
-            <span><strong>14 days</strong> to Day 1</span>
+            {todayConfig.meta.map((item, index) => (
+              <React.Fragment key={item}>
+                {index > 0 && <span className="gm-dot" />}
+                <span>{item}</span>
+              </React.Fragment>
+            ))}
           </div>
         </div>
         <span className="soft-pill"><BadgeCheck size={15} /> {institution.shortName} verified</span>
@@ -4725,12 +5250,12 @@ function TodayView({
           {nextTask ? (
             <>
               <h2>{nextTask.label}</h2>
-              <p>The fastest way to feel settled before Day 1 — this takes most students under five minutes.</p>
+              <p>{meta.nextActionCopy}</p>
               <button
                 className="primary-button"
                 onClick={() => nextTask.view && setActiveView(nextTask.view)}
               >
-                {nextTask.label.startsWith('Join') ? 'Browse module rooms' : nextTask.label.startsWith('RSVP') ? 'See events' : 'Meet people'}
+                {nextTask.view === 'classes' ? 'Open classes' : nextTask.view === 'events' ? 'See events' : nextTask.view === 'campus-life' ? 'Open Campus Life' : 'Meet people'}
                 <ArrowRight size={15} />
               </button>
             </>
@@ -4756,24 +5281,17 @@ function TodayView({
 
       {/* For you row */}
       <div className="for-you-row">
-        <button className="for-you-card for-you-card--featured" onClick={() => setActiveView('classes')}>
-          <div className="for-you-icon indigo"><BookOpen size={18} /></div>
-          <h4>10.014 Computational Thinking</h4>
-          <p>4 returning students active now · 28 Q&amp;As this week</p>
-          <span className="for-you-cta">Open room <ArrowRight size={12} /></span>
-        </button>
-        <button className="for-you-card" onClick={() => setActiveView('events')}>
-          <div className="for-you-icon green"><CalendarCheck size={18} /></div>
-          <h4>First Friday food crawl</h4>
-          <p>42 going · Dover MRT → Ghim Moh · Fri 7:30 PM</p>
-          <span className="for-you-cta">RSVP <ArrowRight size={12} /></span>
-        </button>
-        <button className="for-you-card" onClick={() => setActiveView('people')}>
-          <div className="for-you-icon violet"><Users size={18} /></div>
-          <h4>Aarav Menon</h4>
-          <p>Year 3 ISTD · 94% match · 10.014 guide</p>
-          <span className="for-you-cta">Connect <ArrowRight size={12} /></span>
-        </button>
+        {todayConfig.cards.map((card, index) => {
+          const Icon = card.icon;
+          return (
+            <button key={card.title} className={`for-you-card${index === 0 ? ' for-you-card--featured' : ''}`} onClick={() => setActiveView(card.view)}>
+              <div className={`for-you-icon ${card.tone}`}><Icon size={18} /></div>
+              <h4>{card.title}</h4>
+              <p>{card.body}</p>
+              <span className="for-you-cta">{card.cta} <ArrowRight size={12} /></span>
+            </button>
+          );
+        })}
       </div>
 
       {/* Bottom two-col */}
@@ -4820,6 +5338,12 @@ const phaseDesc: Record<string, string> = {
   'fifth-row-phase': 'Find your co-curricular community.',
   'qa-phase': 'Get comfortable asking — returning students and classmates are here to answer.',
   'returning-phase': 'Use returning-student sessions grouped by year, pillar, and module.',
+  'returning-term-setup': 'Keep the current term accurate without repeating Freshmore onboarding.',
+  'returning-projects': 'Find project partners, answer shared questions, and organise serious study.',
+  'returning-opportunities': 'Surface leadership, research, internship, and support opportunities.',
+  'exchange-arrival': 'Practical setup for a short term at SUTD.',
+  'exchange-classes': 'Classmates, module rooms, and fast academic context.',
+  'exchange-local-life': 'Food, weekends, Fifth Row trials, and local support paths.',
 };
 
 function BelongingScoreBanner({ userEmail }: { userEmail: string }) {
@@ -4857,14 +5381,19 @@ function BelongingScoreBanner({ userEmail }: { userEmail: string }) {
 function LaunchpadView({
   userEmail,
   userName = 'Student',
+  profile,
   setActiveView,
 }: {
   userEmail: string;
   userName?: string;
+  profile: StudentProfile;
   setActiveView: (v: View) => void;
 }) {
+  const journeyStage = journeyStageForProfile(profile);
+  const plan = journeyPlans[journeyStage];
+  const phases = plan.phases;
   const [statuses, setStatuses] = useState<Record<string, TaskStatus>>(() => loadLaunchpadStatuses(userEmail));
-  const [activePhase, setActivePhase] = useState(launchpadPhases[0].id);
+  const [activePhase, setActivePhase] = useState(phases[0].id);
 
   const cycleStatus = (taskId: string) => {
     setStatuses((prev) => {
@@ -4889,13 +5418,14 @@ function LaunchpadView({
     addInterventionCase(userEmail, userName, `Needs help with: ${task.label}`, 'launchpad');
   };
 
-  const totalTasks = launchpadPhases.reduce((a, p) => a + p.tasks.length, 0);
-  const doneTasks = Object.values(statuses).filter((s) => s === 'done').length;
+  const totalTasks = phases.reduce((a, p) => a + p.tasks.length, 0);
+  const currentTaskIds = new Set(phases.flatMap((phase) => phase.tasks.map((task) => task.id)));
+  const doneTasks = Object.entries(statuses).filter(([taskId, status]) => currentTaskIds.has(taskId) && status === 'done').length;
   const overallPct = Math.round((doneTasks / totalTasks) * 100);
 
   // Next best action: first task across all phases that isn't done
   const nextAction = (() => {
-    for (const phase of launchpadPhases) {
+    for (const phase of phases) {
       for (const task of phase.tasks) {
         if ((statuses[task.id] ?? 'not-started') !== 'done') return { phase, task };
       }
@@ -4903,7 +5433,7 @@ function LaunchpadView({
     return null;
   })();
 
-  const currentPhase = launchpadPhases.find((p) => p.id === activePhase) ?? launchpadPhases[0];
+  const currentPhase = phases.find((p) => p.id === activePhase) ?? phases[0];
 
   const phasePct = (phase: LaunchpadPhase) => {
     const done = phase.tasks.filter((t) => statuses[t.id] === 'done').length;
@@ -4922,8 +5452,8 @@ function LaunchpadView({
     <div className="launchpad">
       <div className="launchpad-sidebar">
         <div className="launchpad-sidebar-head">
-          <strong>Freshmore Launchpad</strong>
-          <p>Your guided SUTD journey</p>
+          <strong>{plan.title}</strong>
+          <p>{plan.subtitle}</p>
           <div className="launchpad-overall-bar">
             <span>{overallPct}% complete · {doneTasks}/{totalTasks} tasks</span>
             <div className="launchpad-overall-track">
@@ -4931,7 +5461,7 @@ function LaunchpadView({
             </div>
           </div>
         </div>
-        {launchpadPhases.map((phase) => {
+        {phases.map((phase) => {
           const pct = phasePct(phase);
           return (
             <button
@@ -4958,7 +5488,7 @@ function LaunchpadView({
               <Sparkles size={13} /> Next best action
             </div>
             <strong>{nextAction.task.label}</strong>
-            <p>{nextAction.task.desc}</p>
+            <p>{journeyMeta[journeyStage].nextActionCopy} {nextAction.task.desc}</p>
             <div className="launchpad-next-action-cta">
               {nextAction.task.link && (
                 <button
@@ -4972,7 +5502,7 @@ function LaunchpadView({
                 className="launchpad-next-jump"
                 onClick={() => setActivePhase(nextAction.phase.id)}
               >
-                Go to step
+                Go to {plan.phaseNoun}
               </button>
             </div>
           </div>
@@ -5881,10 +6411,13 @@ const campusLifeRoutes: CampusLifeRoute[] = [
   },
 ];
 
-function PeopleView({ userEmail, onMessage }: { userEmail?: string; onMessage?: (name: string) => void }) {
+function PeopleView({ userEmail, onMessage, profile }: { userEmail?: string; onMessage?: (name: string) => void; profile?: StudentProfile }) {
   const [connected, setConnected] = useState<Set<string>>(new Set());
   const [searchQuery, setSearchQuery] = useState('');
-  const [activeTab, setActiveTab] = useState<'all' | 'y1' | 'y2' | 'y3plus' | 'modules'>('all');
+  const journeyStage = profile ? journeyStageForProfile(profile) : 'freshmore';
+  const [activeTab, setActiveTab] = useState<'all' | 'y1' | 'y2' | 'y3plus' | 'modules'>(
+    journeyStage === 'returning' ? 'y3plus' : journeyStage === 'exchange' ? 'y1' : 'all',
+  );
   const [selectedPerson, setSelectedPerson] = useState<Person | null>(null);
 
   // Firestore connections listener
@@ -5944,7 +6477,7 @@ function PeopleView({ userEmail, onMessage }: { userEmail?: string; onMessage?: 
         <div>
           <span className="eyebrow">Verified network</span>
           <h2 style={{ fontSize: '1.05rem', fontWeight: 700, marginTop: 4 }}>
-            {filtered.length} {filtered.length === 1 ? 'person' : 'people'} · sorted by compatibility
+            {filtered.length} {filtered.length === 1 ? 'person' : 'people'} · {journeyStage === 'returning' ? 'current-year and module context first' : journeyStage === 'exchange' ? 'exchange and local context first' : 'sorted by compatibility'}
           </h2>
         </div>
         <div className="people-search-bar">

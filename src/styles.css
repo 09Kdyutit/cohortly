@@ -903,6 +903,266 @@ textarea::placeholder { color: #718196; opacity: 1; }
 .auth-card h2 { margin: 8px 0 8px; font-size: 1.9rem; }
 .auth-card-sub { margin-bottom: 20px; }
 .auth-form { display: grid; gap: 14px; }
+.role-select-page,
+.setup-page {
+  min-height: 100dvh;
+  background:
+    radial-gradient(circle at 78% 16%, rgba(35, 70, 199, 0.12), transparent 32rem),
+    linear-gradient(180deg, #f7faff, #eef4ff);
+  color: var(--ink);
+}
+.role-select-header {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 22px 24px 0;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+}
+.auth-brand.compact {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.auth-brand.compact strong { display: block; }
+.auth-brand.compact small { color: var(--muted); font-weight: 700; }
+.setup-proof {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 11px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-pill);
+  background: #fff;
+  color: var(--ink-soft);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+.role-select-content,
+.major-step {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 46px 24px 72px;
+}
+.role-select-content h1,
+.major-step-head h1 {
+  max-width: 820px;
+  margin: 0;
+  font-size: 2.65rem;
+  line-height: 0.98;
+  letter-spacing: -0.03em;
+}
+.role-select-content > p,
+.major-step-head p {
+  max-width: 720px;
+  margin: 12px 0 0;
+  color: var(--muted);
+  line-height: 1.55;
+}
+.role-cards {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 24px;
+}
+.role-card {
+  min-height: 360px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+  display: grid;
+  align-content: start;
+  gap: 10px;
+  transition: border-color 170ms var(--ease-out), transform 170ms var(--ease-out), background 170ms var(--ease-out);
+}
+.role-card:hover {
+  border-color: var(--cobalt-200);
+  transform: translateY(-2px);
+  background: #fbfdff;
+}
+.role-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: grid;
+  place-items: center;
+  color: var(--cobalt-700);
+  background: var(--cobalt-50);
+}
+.role-card-icon.mentor { color: var(--success); background: var(--success-soft); }
+.role-card strong { font-size: 1.1rem; }
+.role-card em {
+  color: var(--muted-strong);
+  font-style: normal;
+  font-size: 0.84rem;
+  font-weight: 780;
+}
+.role-card ul {
+  display: grid;
+  gap: 8px;
+  margin: 6px 0 0;
+  padding: 0;
+  list-style: none;
+}
+.role-card li {
+  display: flex;
+  gap: 7px;
+  color: var(--muted);
+  line-height: 1.35;
+  font-size: 0.86rem;
+}
+.role-card li svg {
+  flex: 0 0 auto;
+  margin-top: 2px;
+  color: var(--success);
+}
+.role-card-cta {
+  align-self: end;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+  color: var(--cobalt-700);
+  font-size: 0.84rem;
+  font-weight: 850;
+}
+.major-step {
+  display: grid;
+  gap: 20px;
+}
+.major-step-head {
+  display: grid;
+  gap: 8px;
+}
+.setup-section {
+  display: grid;
+  gap: 10px;
+}
+.setup-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--ink);
+}
+.pillar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 10px;
+}
+.pillar-card {
+  min-height: 88px;
+  padding: 13px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fff;
+  color: var(--ink);
+  text-align: left;
+  cursor: pointer;
+}
+.pillar-card strong,
+.pillar-card small { display: block; }
+.pillar-card small {
+  margin-top: 4px;
+  color: var(--muted);
+  line-height: 1.35;
+}
+.pillar-card.selected {
+  border-color: var(--cobalt-600);
+  background: var(--cobalt-50);
+}
+.setup-intro {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 0.9fr) auto;
+  gap: 24px;
+  align-items: center;
+  padding: 28px 32px;
+  background: #102033;
+  color: #fff;
+}
+.setup-intro .auth-brand strong,
+.setup-intro h1 { color: #fff; }
+.setup-intro h1 {
+  margin: 12px 0 8px;
+  font-size: 2.2rem;
+  line-height: 1;
+  letter-spacing: -0.03em;
+}
+.setup-intro p {
+  margin: 0;
+  color: rgba(255,255,255,0.72);
+  line-height: 1.55;
+}
+.setup-workspace {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 24px;
+  display: grid;
+  grid-template-columns: minmax(0, 1.15fr) minmax(300px, 0.85fr);
+  gap: 16px;
+  align-items: start;
+}
+.setup-card,
+.setup-preview {
+  display: grid;
+  gap: 16px;
+  padding: 18px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: #fff;
+}
+.setup-preview { position: sticky; top: 18px; }
+.setup-card-head h2,
+.setup-preview h2 {
+  margin: 4px 0 0;
+  font-size: 1.35rem;
+}
+.pfp-upload-row,
+.preview-list > div {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.pfp-upload-row p {
+  margin: 4px 0 0;
+  color: var(--muted);
+}
+.preview-list {
+  display: grid;
+  gap: 11px;
+}
+.preview-list > div {
+  align-items: flex-start;
+  color: var(--muted);
+  line-height: 1.45;
+}
+.preview-list svg {
+  flex: 0 0 auto;
+  color: var(--cobalt-700);
+}
+.mentor-preview-card {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #f8fbff;
+}
+.timetable-import-box {
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: #fbfdff;
+}
+.timetable-detected {
+  display: flex;
+  gap: 8px;
+  color: var(--success);
+  font-size: 0.82rem;
+  font-weight: 780;
+}
 .auth-actions,
 .consent-actions,
 .detail-actions,
@@ -1081,7 +1341,12 @@ textarea::placeholder { color: #718196; opacity: 1; }
   font-size: 0.68rem;
   font-weight: 760;
 }
-.rail-nav button span { max-width: 76px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rail-nav button span {
+  max-width: 78px;
+  white-space: normal;
+  overflow-wrap: normal;
+  line-height: 1.1;
+}
 .rail-nav button:hover { color: var(--cobalt-700); background: var(--cobalt-50); }
 .rail-nav button.active { color: var(--cobalt-700); background: #fff; box-shadow: var(--shadow-sm); }
 .rail-completion,
@@ -4324,6 +4589,9 @@ th { color: var(--muted); font-size: 0.78rem; font-weight: 850; }
   .next-action-card,
   .for-you-row,
   .today-two-col,
+  .role-cards,
+  .setup-intro,
+  .setup-workspace,
   .mentor-hero,
   .priority-grid,
   .launchpad,
@@ -4374,6 +4642,10 @@ th { color: var(--muted); font-size: 0.78rem; font-weight: 850; }
     padding: 14px 16px;
   }
   .admin-topbar-right { display: none; }
+  .setup-intro { padding: 22px 18px; }
+  .setup-preview { position: static; }
+  .role-select-content h1,
+  .major-step-head h1 { font-size: 2.1rem; }
   .admin-health-card {
     grid-template-columns: 1fr;
     gap: 14px;
@@ -4413,6 +4685,16 @@ th { color: var(--muted); font-size: 0.78rem; font-weight: 850; }
   .preview-bento { margin-inline: -6px; border-radius: 20px; padding: 12px; }
   .product-preview-frame { margin-inline: -6px; border-radius: 20px; }
   .landing-demo-inline .demo-btn { flex: 1 1 96px; }
+  .role-select-header {
+    padding: 16px 16px 0;
+    align-items: flex-start;
+  }
+  .role-select-content,
+  .major-step,
+  .setup-workspace { padding: 20px 16px 92px; }
+  .role-card { min-height: auto; }
+  .setup-proof { max-width: 100%; }
+  .setup-intro h1 { font-size: 1.8rem; }
   .campus-life-hero,
   .campus-life-section { padding: 16px; }
   .campus-life-community-grid,

@@ -8,6 +8,7 @@ Run from the repo root:
 npm install
 npm audit --audit-level=high
 npx tsc -p tsconfig.app.json --noEmit
+npm run test:personas
 npm run build
 ```
 
@@ -25,16 +26,15 @@ npm run notifications:check -- --strict
 npm run notifications:smoke -- --base-url https://your-render-service.onrender.com --email you@mymail.sutd.edu.sg
 ```
 
-## Demo Path
+## Persona Demo Path
 
-1. Landing: show verified SUTD positioning and the Microsoft SSO/manual demo path.
-2. Today: show next-best action, belonging pulse, and student workspace.
-3. People: show freshmen and returning students grouped by year/module, then open a profile modal.
-4. Events: show first-week plans and approval-safe event creation.
-5. Classes: show module rooms and returning-student Q&A.
-6. Campus Life: show broad home base, first-week jios, move-in guidance, and the privacy card.
+1. Landing: show the four human paths: Freshman, Returning, Exchange, and Senior Mentor. The point is that Cohortly no longer treats all students the same.
+2. Freshman demo: open Today, Launchpad, People, Classes, Events, Campus Life, and Notifications. Emphasize Day 1 readiness and verified module/community support.
+3. Returning demo: open Today, Year Hub, People, Classes, Fifth Row, and Campus Life. Emphasize current-term groups by year, pillar, module, project needs, and interests.
+4. Exchange demo: open Today, Exchange Guide, People, Campus Life, Events, and Resources. Emphasize campus/admin context and local classmates without Freshmore onboarding.
+5. Mentor demo: open the Senior Mentor Dashboard and Help Requests. Emphasize that mentor work is a separate workspace, not the default returning-student experience.
+6. Admin demo: show readiness, support signals, event oversight, invite provisioning, and provider status.
 7. Notifications: show Telegram and WhatsApp setup states; only dispatch real messages when provider status is configured.
-8. Admin: show readiness, support signals, and operational view.
 
 ## Campus Life Talking Points
 
@@ -50,3 +50,9 @@ npm run notifications:smoke -- --base-url https://your-render-service.onrender.c
 4. Commit and push `gh-pages`.
 5. Open the GitHub Pages URL and hard refresh.
 6. Re-run visual QA against the live URL when possible.
+
+## Production-Readiness Evidence
+
+- `npm run test:personas` checks the required `StudentJourneyStage`, `AppWorkspace`, profile schema migration, journey-aware nav, persona demos, and visual-QA persona coverage.
+- `npm run visual:qa` captures desktop and mobile flows for Freshman, Returning, Exchange, Mentor, Admin, Campus Life, Notifications, People, Privacy, and the public landing page.
+- GitHub Pages is a static demo surface. Telegram and WhatsApp delivery require the Render backend and provider secrets; the frontend must show clear setup and unavailable-provider states when those secrets are absent.

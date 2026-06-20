@@ -75,7 +75,13 @@ async function capture(page, name) {
 }
 
 async function loginDemo(page, mode = 'freshman') {
-  const selector = mode === 'returning' ? '.demo-btn.returning-demo' : '.demo-btn.student-demo';
+  const selector = mode === 'returning'
+    ? '.demo-btn.returning-demo'
+    : mode === 'exchange'
+      ? '.demo-btn.exchange-demo'
+      : mode === 'mentor'
+        ? '.demo-btn.mentor-demo'
+        : '.demo-btn.student-demo';
   await page.locator(selector).first().scrollIntoViewIfNeeded();
   await page.locator(selector).first().click();
   await page.locator('.student-shell').first().waitFor({ timeout: 15000 });
@@ -87,10 +93,12 @@ async function openAdmin(page) {
   await page.locator('.admin-shell').first().waitFor({ timeout: 15000 });
 }
 
-async function navigateStudent(page, id, viewportName) {
-  const label = id === 'kb' && viewportName !== 'mobile' && viewportName !== 'tablet'
+async function navigateStudent(page, id, viewportName, labelOverride) {
+  const label = labelOverride ?? (id === 'mentor-help'
+    ? (viewportName === 'mobile' || viewportName === 'tablet' ? 'Help' : 'Help Requests')
+    : id === 'kb' && viewportName !== 'mobile' && viewportName !== 'tablet'
     ? 'Knowledge Base'
-    : studentLabels.get(id);
+    : studentLabels.get(id));
   if (!label) return;
   if (viewportName === 'mobile' || viewportName === 'tablet') {
     const direct = page.locator(`.mobile-nav-btn:has-text("${label}")`).first();
@@ -166,6 +174,24 @@ async function studentScreens(viewportName) {
   await page.close();
 }
 
+async function personaScreens(viewportName, mode) {
+  const page = await createPage(viewportName);
+  await loginDemo(page, mode);
+  if (mode === 'mentor') {
+    await capture(page, `mentor-home-${viewportName}`);
+    await navigateStudent(page, 'mentor-help', viewportName);
+    await capture(page, `mentor-help-${viewportName}`);
+  } else {
+    await capture(page, `student-${mode}-today-${viewportName}`);
+    const hubLabel = mode === 'returning' ? 'Year Hub' : mode === 'exchange' ? 'Exchange Guide' : 'Launchpad';
+    await navigateStudent(page, 'launchpad', viewportName, hubLabel);
+    await capture(page, `student-${mode}-hub-${viewportName}`);
+    await navigateStudent(page, 'people', viewportName);
+    await capture(page, `student-${mode}-people-${viewportName}`);
+  }
+  await page.close();
+}
+
 async function adminScreens(viewportName) {
   const page = await createPage(viewportName);
   await openAdmin(page);
@@ -187,6 +213,12 @@ try {
 
   for (const viewportName of ['desktop1440', 'desktop1280', 'desktop1024', 'tablet', 'mobile']) {
     await studentScreens(viewportName).catch((error) => issue(`student-${viewportName}`, error));
+  }
+
+  for (const viewportName of ['desktop1440', 'mobile']) {
+    for (const mode of ['returning', 'exchange', 'mentor']) {
+      await personaScreens(viewportName, mode).catch((error) => issue(`${mode}-${viewportName}`, error));
+    }
   }
 
   for (const viewportName of ['tablet', 'mobile']) {

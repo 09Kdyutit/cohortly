@@ -2,7 +2,35 @@
 
 ## Final Demo Position
 
-Cohortly is a verified SUTD student community product for freshmen, returning students, and student-life staff. The demo should communicate one promise: students can find people, plans, module help, and support before Day 1 without making private student location data public.
+Cohortly is a verified SUTD campus platform for incoming Freshmores, exchange students, returning students, senior mentors, and student-life staff. The demo should communicate one promise: the product understands where each student is in their university journey and gives them the right workspace without making private student location data public.
+
+## Persona Architecture
+
+Decision: Cohortly no longer treats `student` as one universal experience.
+
+Schema contract:
+
+```ts
+type StudentJourneyStage =
+  | 'pre_arrival'
+  | 'freshmore'
+  | 'returning'
+  | 'exchange';
+
+type AppWorkspace =
+  | 'student'
+  | 'mentor'
+  | 'admin';
+```
+
+Implementation contract:
+- `profileVersion: 2` is written to saved profiles.
+- `normalizeProfile()` migrates older localStorage and Firestore profiles into schema v2.
+- Freshmore and pre-arrival students see Launchpad-style readiness.
+- Returning Year 2/3/4 students see a Year Hub focused on current modules, project groups, opportunities, and optional junior support.
+- Exchange students see an Exchange Guide focused on fast campus/admin/local context.
+- Senior mentors are returning students using a separate mentor workspace for help requests and module support.
+- Admin remains a separate workspace with institutional operational visibility.
 
 ## Campus Life Replaces Hostel Directory
 
@@ -34,9 +62,11 @@ Secondary destinations live behind More:
 - Campus Life
 - Resources
 
-## Returning Students
+## Returning Students And Mentors
 
-Cohortly does not present a separate mentor concept in the student experience. Returning students are grouped by year, pillar, module, activity, and availability. Copy should say returning students, not mentors, unless referring to staff/admin legacy labels.
+Returning students are not Freshmores and must never be pushed through Freshmore onboarding copy. They are grouped by year, pillar, current modules, project/team needs, activities, and availability.
+
+Senior mentors are a separate workspace, not the default returning-student experience. Use "returning student" for normal Year 2/3/4 browsing and "senior mentor" only for the help-request/module-support workspace.
 
 ## Notifications
 
