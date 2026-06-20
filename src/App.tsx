@@ -7214,7 +7214,14 @@ function AdminApp({ onClose, onResetDemo }: { onClose: () => void; onResetDemo: 
   const [view, setView] = useState<AdminView>('overview');
 
   useEffect(() => {
-    window.scrollTo({ top: 0, left: 0 });
+    const resetScroll = () => {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+      document.documentElement.scrollTop = 0;
+      document.body.scrollTop = 0;
+    };
+    resetScroll();
+    const frame = window.requestAnimationFrame(resetScroll);
+    return () => window.cancelAnimationFrame(frame);
   }, []);
 
   const adminNav: Array<{ id: AdminView; label: string; icon: LucideIcon; badge?: number }> = [
@@ -7248,12 +7255,14 @@ function AdminApp({ onClose, onResetDemo }: { onClose: () => void; onResetDemo: 
             </button>
           ))}
         </nav>
-        <button className="admin-exit" onClick={onClose}>
-          <ChevronLeft size={16} /> Exit preview
-        </button>
-        <button className="admin-exit demo-reset-btn" onClick={onResetDemo} style={{ marginTop: 6, color: '#d97706', borderColor: 'rgba(217,119,6,0.3)' }}>
-          <RotateCcw size={14} /> Reset demo
-        </button>
+        <div className="admin-rail-actions">
+          <button className="admin-rail-action" onClick={onClose}>
+            <ChevronLeft size={16} /> Exit preview
+          </button>
+          <button className="admin-rail-action danger" onClick={onResetDemo}>
+            <RotateCcw size={15} /> Reset demo
+          </button>
+        </div>
       </aside>
 
       <div className="admin-main">
